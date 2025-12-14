@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# ✅ Redirects all routes to index.html (for single-page apps)
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -13,6 +14,7 @@
 [functions]
   node_bundler = "esbuild"
 
+# ✅ Global security headers
 [[headers]]
   for = "/*"
   [headers.values]
@@ -23,6 +25,7 @@
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# ✅ Allow CORS for Netlify functions
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
@@ -30,6 +33,7 @@
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
 
+# ✅ Long-term caching for assets
 [[headers]]
   for = "/assets/*"
   [headers.values]
@@ -44,3 +48,16 @@
   for = "/*.css"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# ✅ Force correct MIME type for sitemap.xml
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=UTF-8"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ✅ Correct MIME type for robots.txt
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=UTF-8"
