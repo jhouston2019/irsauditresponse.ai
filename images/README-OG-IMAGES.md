@@ -24,7 +24,7 @@ The following OG images need to be created (1200x630px) with the design specs:
    - Subtitle: "Create Your IRS Response Letter Instantly"
 
 4. **pricing-og.jpg** (Need to create)
-   - Title: "Simple $97 Flat Fee"
+   - Title: "Simple $149 Flat Fee"
    - Subtitle: "No Subscriptions, No Hidden Costs"
 
 5. **contact-og.jpg** (Need to create)
