@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IRS Audit Response Preparation | Procedural Response System</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="description" content="Procedural response preparation designed to help you respond to IRS audits without expanding scope or increasing risk. Not a chatbot.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f172a;
+      color: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    }
+    nav {
+      background: #1e293b;
+      padding: 1rem 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 2px solid #334155;
+      align-items: center;
+    }
+    nav .logo { color: #f5f5f5; font-weight: 700; font-size: 1.2rem; }
+    nav a {
+      color: #f5f5f5;
+      text-decoration: none;
+      margin: 0 10px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    nav a:hover { background: #334155; }
+    .container {
+      width: min(1120px, 92%);
+      margin: 0 auto;
+      padding: 4rem 0;
+    }
+    .hero {
+      text-align: center;
+      padding: 4rem 0;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      margin-bottom: 1rem;
+      color: #ffffff;
+      font-weight: 800;
+    }
+    .subheading {
+      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-button {
+      display: inline-block;
+      background: #dc2626;
+      color: #fff;
+      padding: 18px 40px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+    .cta-button:hover {
+      background: #b91c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(220, 38, 38, 0.5);
+    }
+    .price {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 2rem 0 1rem;
+    }
+    .price-note {
+      color: #94a3b8;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+    .section {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+    }
+    .section h2 {
+      color: #93c5fd;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h3 {
+      color: #e2e8f0;
+      font-size: 1.3rem;
+      margin: 2rem 0 1rem;
+    }
+    .section p, .section li {
+      color: #cbd5e1;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .section ul {
+      padding-left: 1.5rem;
+    }
+    .warning-box {
+      background: #7f1d1d;
+      border: 2px solid #dc2626;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .warning-box h3 {
+      color: #fca5a5;
+      margin-top: 0;
+    }
+    .info-box {
+      background: #1e3a5f;
+      border: 2px solid #3b82f6;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .info-box h3 {
+      color: #93c5fd;
+      margin-top: 0;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    .feature {
+      background: #0f172a;
+      padding: 2rem;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .feature h3 {
+      color: #93c5fd;
+      margin-bottom: 1rem;
+    }
+    footer {
+      padding: 2rem 0;
+      background: #0b1220;
+      color: #cbd5e1;
+      text-align: center;
+      margin-top: 4rem;
+    }
+    footer a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+    .disclaimer {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #1e293b;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">IRS Audit Response</div>
+    <div>
+      <a href="/index.html">Tax Letter Help</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="container">
+      <h1>IRS Audit Response Preparation</h1>
+      <p class="subheading">Procedural response preparation designed to help you respond to IRS audits without expanding scope or increasing risk.</p>
+      
+      <div class="price">$149</div>
+      <p class="price-note">One-time payment • No subscription • Audit-only</p>
+      
+      <a href="/audit-payment.html" class="cta-button">Prepare My Audit Response</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="section">
+      <h2>Why This Is Not a Chatbot</h2>
+      <p>This is an audit response preparation system, not a conversational AI.</p>
+      
+      <div class="feature-grid">
+        <div class="feature">
+          <h3>✓ Audit Classification First</h3>
+          <p>Audit type and scope are classified before any response is prepared</p>
+        </div>
+        <div class="feature">
+          <h3>✓ Scope Limitation</h3>
+          <p>The system limits what you provide — it does not encourage explanation</p>
+        </div>
+        <div class="feature">
+          <h3>✓ Disclosure Protection</h3>
+          <p>Unsafe disclosures are blocked</p>
+        </div>
+        <div class="feature">
+          <h3>✓ Escalation Points</h3>
+          <p>Escalation points are explicitly identified</p>
+        </div>
+        <div class="feature">
+          <h3>✓ Preparation Only</h3>
+          <p>This tool helps you prepare — it does not replace professional representation</p>
+        </div>
+        <div class="feature">
+          <h3>✓ No Chat History</h3>
+          <p>Single purpose: Prepare → Respond → Escalate → Exit</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>What This System Does</h2>
+      
+      <h3>1. Audit Type & Scope Identification</h3>
+      <p>Determines whether your notice is a correspondence audit, office audit, field audit, or document request. Identifies tax years and items under examination.</p>
+      
+      <h3>2. What the IRS Is Requesting</h3>
+      <p>Extracts specific items requested and establishes scope limits to prevent over-disclosure.</p>
+      
+      <h3>3. What You Should and Should NOT Provide</h3>
+      <p>Explicit guidance on document handling with default to SUMMARIZE, not ATTACH. Strong warnings against bulk uploads.</p>
+      
+      <h3>4. Response Preparation Strategy</h3>
+      <p>Allowed and prohibited actions with scope limits enforced.</p>
+      
+      <h3>5. Escalation Risk & When to Stop</h3>
+      <p>Hard stop conditions where professional representation is required.</p>
+      
+      <h3>6. Audit-Appropriate Response Outline</h3>
+      <p>Structured outline (not complete response) with minimal narrative.</p>
+      
+      <h3>7. Professional Representation Advisory</h3>
+      <p>Clear guidance on when to seek professional help.</p>
+    </div>
+
+    <div class="warning-box">
+      <h3>⚠️ This System Will STOP You If:</h3>
+      <ul>
+        <li>Field audit detected (requires immediate professional representation)</li>
+        <li>Multi-year audit (2+ years under examination)</li>
+        <li>Dollar exposure exceeds $25,000</li>
+        <li>IRS requests in-person or phone interview</li>
+        <li>Audit scope is expanding beyond original notice</li>
+        <li>Notice contains criminal investigation language</li>
+        <li>30-day or 90-day letter (formal examination notice)</li>
+      </ul>
+      <p><strong>Message you'll see:</strong> "This is the point at which professional representation is strongly recommended."</p>
+    </div>
+
+    <div class="section">
+      <h2>What This System Does NOT Do</h2>
+      <ul>
+        <li>❌ Does not respond to non-audit IRS notices (CP2000, balance due, etc.)</li>
+        <li>❌ Does not provide free-form advice or chat</li>
+        <li>❌ Does not generate dispute strategies</li>
+        <li>❌ Does not encourage explanations beyond what is requested</li>
+        <li>❌ Does not track ongoing audits or provide case management</li>
+        <li>❌ Does not replace professional representation</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <h3>Audit-Only Processing</h3>
+      <p>If your notice is NOT an audit (CP2000, balance due, identity verification, etc.), this system will reject it and redirect you to our Tax Letter Help product.</p>
+      <p><strong>Accepted audit types:</strong></p>
+      <ul>
+        <li>Correspondence audits</li>
+        <li>Office audits</li>
+        <li>Field audits</li>
+        <li>Information Document Requests (IDR)</li>
+        <li>Follow-up audit notices (30-day, 90-day letters)</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Pricing: $149 One-Time</h2>
+      <p><strong>Why $149 vs. $79 for Tax Letter Help?</strong></p>
+      <ul>
+        <li>Higher risk assessment and containment</li>
+        <li>Audit-specific playbooks and guardrails</li>
+        <li>Earlier escalation to professionals</li>
+        <li>More restrictive scope control</li>
+        <li>Evidence mapping with over-disclosure protection</li>
+      </ul>
+      <p style="margin-top: 2rem;"><strong>No subscription. No recurring fees. One audit notice, one payment.</strong></p>
+    </div>
+
+    <div class="section">
+      <h2>How It Works</h2>
+      <ol style="padding-left: 2rem;">
+        <li><strong>Upload Your Audit Notice</strong> - PDF, image, or paste text</li>
+        <li><strong>Automatic Classification</strong> - System determines if it's an audit (rejects if not)</li>
+        <li><strong>Risk Assessment</strong> - Evaluates scope, dollar exposure, and escalation triggers</li>
+        <li><strong>Preparation Outline</strong> - Generates restrictive response outline (if appropriate)</li>
+        <li><strong>Escalation Guidance</strong> - Tells you when to stop and seek professional help</li>
+      </ol>
+    </div>
+
+    <div style="text-align: center; margin: 4rem 0;">
+      <a href="/audit-payment.html" class="cta-button">Prepare My Audit Response</a>
+    </div>
+
+    <div class="disclaimer">
+      <strong>DISCLAIMER:</strong> This is procedural preparation guidance only. Not legal advice. Not tax advice. Not a substitute for professional representation. This system is designed to help you prepare responses while limiting risk, but it does not replace the judgment of a qualified tax professional, enrolled agent, or attorney.
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 IRS Audit Response. <a href="/privacy.html">Privacy Policy</a> | <a href="/terms.html">Terms</a> | <a href="/disclaimer.html">Disclaimer</a> | <a href="#" id="adminLink" style="color: #64748b;">Admin</a></p>
+      <p style="margin-top: 1rem; font-size: 0.9rem;">This is an audit response preparation system, not a conversational AI.</p>
+    </div>
+  </footer>
+
+  <!-- Admin Login Modal -->
+  <div id="adminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2rem; width: min(400px, 90%); position: relative;">
+      <button id="closeModal" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      <h2 style="color: #93c5fd; margin-bottom: 1.5rem; text-align: center;">Admin Access</h2>
+      <form id="adminLoginForm">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; color: #cbd5e1; margin-bottom: 0.5rem;">Username</label>
+          <input type="text" id="adminUsername" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #ffffff;" />
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; color: #cbd5e1; margin-bottom: 0.5rem;">Password</label>
+          <input type="password" id="adminPassword" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #ffffff;" />
+        </div>
+        <div id="loginError" style="display: none; background: #7f1d1d; border: 1px solid #dc2626; color: #fca5a5; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
+        <button type="submit" style="width: 100%; background: #dc2626; color: #fff; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Admin login functionality
+    const adminLink = document.getElementById('adminLink');
+    const adminModal = document.getElementById('adminModal');
+    const closeModal = document.getElementById('closeModal');
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    const loginError = document.getElementById('loginError');
+
+    adminLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      adminModal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+      adminModal.style.display = 'none';
+      loginError.style.display = 'none';
+      adminLoginForm.reset();
+    });
+
+    adminModal.addEventListener('click', (e) => {
+      if (e.target === adminModal) {
+        adminModal.style.display = 'none';
+        loginError.style.display = 'none';
+        adminLoginForm.reset();
+      }
+    });
+
+    adminLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('adminUsername').value;
+      const password = document.getElementById('adminPassword').value;
+      
+      // Credentials: admin / IRS2025$
+      if (username === 'admin' && password === 'IRS2025$') {
+        // Store admin session
+        sessionStorage.setItem('adminAuth', 'true');
+        // Redirect to admin dashboard
+        window.location.href = '/admin-dashboard.html';
+      } else {
+        loginError.textContent = 'Invalid username or password';
+        loginError.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
+

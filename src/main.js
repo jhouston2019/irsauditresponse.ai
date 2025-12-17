@@ -66,10 +66,19 @@ window.startCheckout = async function(plan) {
     button.textContent = 'Processing...';
     button.disabled = true;
 
+    // Get current user's email if logged in
+    let userEmail = null;
+    if (user && user.email) {
+      userEmail = user.email;
+    }
+    
     const response = await fetch('/.netlify/functions/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: plan })
+      body: JSON.stringify({ 
+        plan: plan,
+        customerEmail: userEmail
+      })
     });
     
     // Check if response is ok before parsing

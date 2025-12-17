@@ -9,7 +9,7 @@ export async function handler(event) {
     console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'Set' : 'Missing');
     console.log('STRIPE_PRICE_RESPONSE:', process.env.STRIPE_PRICE_RESPONSE);
     
-    const { recordId = null } = JSON.parse(event.body || "{}"); // send from client if available
+    const { recordId = null, customerEmail = null } = JSON.parse(event.body || "{}"); // send from client if available
     const priceId = process.env.STRIPE_PRICE_RESPONSE || process.env.STRIPE_PRICE_ID || "price_49USD_single";
     
     // Validate required environment variables
@@ -25,7 +25,7 @@ export async function handler(event) {
 
     let session;
     try {
-      session = await stripe.checkout.sessions.create({
+      const sessionParams = {
         payment_method_types: ['card'],
         line_items: [{ 
           price: priceId, 
@@ -35,7 +35,17 @@ export async function handler(event) {
         success_url: `${process.env.SITE_URL}/thank-you.html`,
         cancel_url: `${process.env.SITE_URL}/pricing.html`,
         metadata: recordId ? { recordId } : { plan: 'single' }
-      });
+      };
+      
+      // Pre-fill customer email if provided, or use default business email
+      if (customerEmail) {
+        sessionParams.customer_email = customerEmail;
+      } else if (process.env.DEFAULT_CHECKOUT_EMAIL) {
+        // Use default business email if no user email provided
+        sessionParams.customer_email = process.env.DEFAULT_CHECKOUT_EMAIL;
+      }
+      
+      session = await stripe.checkout.sessions.create(sessionParams);
     } catch (stripeError) {
       // Provide more helpful error messages
       if (stripeError.type === 'StripeInvalidRequestError') {
