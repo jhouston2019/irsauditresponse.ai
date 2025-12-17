@@ -53,13 +53,19 @@ Admin access has been added to both the main landing page and the IRS Audit Resp
 
 ### Current Features (Mock Data)
 
-1. **Statistics Overview**
+1. **Quick Actions Panel**
+   - 📤 Upload Audit Notice - Direct link to `/audit-upload.html`
+   - 🏠 Product Landing Page - Link to `/audit-response.html`
+   - 💳 Payment Page - Link to `/audit-payment.html`
+   - 🏡 Main Site - Link to `/index.html`
+
+2. **Statistics Overview**
    - Total Analyses
    - Total Revenue
    - Total Rejections (non-audit notices)
    - Total Hard Stops (escalations)
 
-2. **Recent Audit Responses Table**
+3. **Recent Audit Responses Table**
    - Date
    - User email
    - Audit type
@@ -67,13 +73,17 @@ Admin access has been added to both the main landing page and the IRS Audit Resp
    - Status
    - Actions (View/Delete)
 
-3. **System Metrics**
+4. **System Metrics**
    - Rejection Rate
    - Hard Stop Rate
    - Average Response Time
    - Payment Success Rate
 
-4. **Auto-Refresh**
+5. **Navigation**
+   - "Go to Upload Page" button in navbar
+   - Quick action buttons for all key pages
+
+6. **Auto-Refresh**
    - Dashboard refreshes every 30 seconds
 
 ### Future Enhancements (TODO)

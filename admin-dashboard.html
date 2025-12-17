@@ -32,6 +32,12 @@
       cursor: pointer;
       font-weight: 600;
     }
+    nav a:hover {
+      background: #2563eb;
+    }
+    nav button:hover {
+      background: #b91c1c;
+    }
     .container {
       width: min(1200px, 92%);
       margin: 2rem auto;
@@ -128,16 +134,51 @@
       padding: 2rem;
       color: #94a3b8;
     }
+    .quick-action-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      color: #fff;
+    }
+    .quick-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
   </style>
 </head>
 <body>
   <nav>
     <div class="logo">IRS Audit Response - Admin Dashboard</div>
-    <button id="logoutBtn">Logout</button>
+    <div>
+      <a href="/audit-upload.html" style="background: #3b82f6; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-right: 1rem;">Go to Upload Page</a>
+      <button id="logoutBtn">Logout</button>
+    </div>
   </nav>
 
   <div class="container">
     <h1>Admin Dashboard</h1>
+
+    <!-- Quick Actions -->
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+      <h2 style="color: #93c5fd; font-size: 1.2rem; margin-bottom: 1rem;">Quick Actions</h2>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="/audit-upload.html" class="quick-action-btn" style="background: #3b82f6;">
+          📤 Upload Audit Notice
+        </a>
+        <a href="/audit-response.html" class="quick-action-btn" style="background: #8b5cf6;">
+          🏠 Product Landing Page
+        </a>
+        <a href="/audit-payment.html" class="quick-action-btn" style="background: #10b981;">
+          💳 Payment Page
+        </a>
+        <a href="/index.html" class="quick-action-btn" style="background: #f59e0b;">
+          🏡 Main Site
+        </a>
+      </div>
+    </div>
 
     <!-- Statistics -->
     <div class="stats-grid">
