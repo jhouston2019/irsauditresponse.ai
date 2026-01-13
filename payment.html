@@ -77,9 +77,7 @@
         </div>
     </footer>
 
-    <script type="module">
-        import { getCurrentUser } from '/src/components/Auth.js';
-        
+    <script>
         document.getElementById('payButton').addEventListener('click', async function() {
             const button = this;
             const loading = document.getElementById('loading');
@@ -90,18 +88,6 @@
             loading.style.display = 'block';
             
             try {
-                // Get current user's email if logged in
-                let userEmail = null;
-                try {
-                    const user = await getCurrentUser();
-                    if (user && user.email) {
-                        userEmail = user.email;
-                    }
-                } catch (authError) {
-                    console.log('User not logged in or auth error:', authError);
-                    // Continue without email - Stripe will ask for it
-                }
-                
                 // Call Netlify function to create checkout session
                 const response = await fetch('/.netlify/functions/create-checkout-session', {
                     method: 'POST',
@@ -109,7 +95,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        customerEmail: userEmail
+                        customerEmail: null
                     })
                 });
                 
