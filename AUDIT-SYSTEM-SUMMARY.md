@@ -9,7 +9,7 @@ All phases of the IRS Audit Response system have been successfully implemented a
 ## 📋 Executive Summary
 
 **Product Name:** IRS Audit Response Preparation  
-**Price:** $149 (one-time)  
+**Price:** $197 (one-time)  
 **Architecture:** Constrained procedural system (NOT a chatbot)  
 **Scope:** Audit-only (rejects all non-audit notices)  
 **Positioning:** More restrictive, more conservative, more protective than Tax Letter Help
@@ -122,7 +122,7 @@ The system STOPS and requires professional representation when:
    - Validates against playbook rules
 
 3. **create-audit-checkout-session.js** ✅
-   - Stripe checkout for $149
+   - Stripe checkout for $197
    - Product metadata correctly configured
    - Success/cancel redirects
 
@@ -140,7 +140,7 @@ The system STOPS and requires professional representation when:
 
 2. **audit-payment.html** ✅
    - Payment page with Stripe integration
-   - $149 pricing display
+   - $197 pricing display
    - Secure checkout flow
 
 3. **audit-upload.html** ✅
@@ -170,7 +170,7 @@ The system STOPS and requires professional representation when:
 **Columns:**
 - `id`, `created_at`, `updated_at`
 - `user_email`, `stripe_session_id`, `stripe_payment_status`
-- `price_id`, `amount_paid` (14900 cents = $149)
+- `price_id`, `amount_paid` (19700 cents = $197)
 - `letter_text`, `notice_date`
 - `analysis` (JSONB), `audit_type`, `risk_level`, `escalation_required`
 - `response_outline`, `validation_result`
@@ -244,7 +244,7 @@ The system STOPS and requires professional representation when:
 - ✅ No empathy or reassurance
 
 ### Technical
-- ✅ Stripe integration ($149)
+- ✅ Stripe integration ($197)
 - ✅ Database schema
 - ✅ Netlify functions
 - ✅ Landing pages
@@ -279,7 +279,7 @@ All core files marked with:
 
 | Feature | Tax Letter Help | IRS Audit Response |
 |---------|----------------|-------------------|
-| **Price** | $79 | $149 |
+| **Price** | $79 | $197 |
 | **Scope** | All IRS notices | Audits only |
 | **Risk Level** | Low-Medium | High-Critical |
 | **Escalation** | Moderate | Early/Aggressive |
@@ -288,7 +288,7 @@ All core files marked with:
 | **Narrative** | Flexible | Minimal (3-5 lines) |
 | **Professional Escalation** | Suggested | Required for many |
 
-### Why $149?
+### Why $197?
 - Higher risk assessment
 - Audit-specific playbooks
 - Earlier professional escalation
@@ -307,7 +307,7 @@ All core files marked with:
 
 ### 2. Stripe Product
 - Create product: "IRS Audit Response Preparation"
-- Price: $149.00 (one-time)
+- Price: $197.00 (one-time)
 - Add metadata (see AUDIT-DEPLOYMENT.md)
 - Copy Price ID to environment variables
 
@@ -326,7 +326,7 @@ SITE_URL=https://auditresponse.ai
 ### 5. Verify
 - ✅ Non-audit rejection works
 - ✅ Hard stops trigger correctly
-- ✅ Payment flow works ($149)
+- ✅ Payment flow works ($197)
 - ✅ Database records created
 - ✅ Response outlines generated
 

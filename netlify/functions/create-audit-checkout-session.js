@@ -1,5 +1,5 @@
 // AUDIT CORE — HIGH RISK — DO NOT MODIFY WITHOUT FULL TEST SUITE
-// Stripe Checkout for IRS Audit Response ($149 one-time)
+// Stripe Checkout for IRS Audit Response ($197 one-time)
 // Purpose: Create checkout session for audit response product
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -33,7 +33,7 @@ exports.handler = async (event) => {
     }
 
     // IRS Audit Response Product Configuration
-    // $149.00 USD - One-time payment
+    // $197.00 USD - One-time payment
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -52,7 +52,7 @@ exports.handler = async (event) => {
                 not_chat_based: 'true'
               }
             },
-            unit_amount: 14900, // $149.00 in cents
+            unit_amount: 19700, // $197.00 in cents
           },
           quantity: 1,
         },
@@ -66,7 +66,7 @@ exports.handler = async (event) => {
         audit_type: auditType,
         user_email: userEmail,
         pricing_model: 'one_time',
-        price_amount: '149.00'
+        price_amount: '197.00'
       }
     });
 

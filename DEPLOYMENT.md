@@ -66,10 +66,10 @@
 1. **Create Products**
    - Go to Stripe Dashboard > Products
    - Create products for each plan:
-     - Standard Letter Response ($149)
+     - Standard Letter Response ($197)
      - Complex Letter Response ($99)
      - Starter Plan ($19/month)
-     - Pro Plan ($149/month)
+     - Pro Plan ($197/month)
      - Pro+ Plan ($99/month)
 
 2. **Configure Webhooks**
