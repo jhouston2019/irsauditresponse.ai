@@ -1,11 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://irsauditresponseai.netlify.app/</loc></url>
-  <url><loc>https://irsauditresponseai.netlify.app/upload.html</loc></url>
-  <url><loc>https://irsauditresponseai.netlify.app/pricing.html</loc></url>
-  <url><loc>https://irsauditresponseai.netlify.app/login.html</loc></url>
-  <url><loc>https://irsauditresponseai.netlify.app/signup.html</loc></url>
-  <url><loc>https://irsauditresponseai.netlify.app/dashboard.html</loc></url>
-  <url><loc>https://irsauditresponseai.netlify.app/privacy.html</loc></url>
-  <url><loc>https://irsauditresponseai.netlify.app/terms.html</loc></url>
+  <!-- Core Pages -->
+  <url><loc>https://irsauditresponseai.netlify.app/</loc><priority>1.0</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/upload.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/pricing.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/login.html</loc><priority>0.7</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/signup.html</loc><priority>0.7</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/dashboard.html</loc><priority>0.6</priority></url>
+  
+  <!-- SEO Landing Pages - Core -->
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-response-help.html</loc><priority>1.0</priority></url>
+  
+  <!-- SEO Landing Pages - Audit Types -->
+  <url><loc>https://irsauditresponseai.netlify.app/irs-cp2000-audit-response.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-correspondence-audit-response.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-office-audit-response.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-field-audit-response.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-random-audit-response.html</loc><priority>0.8</priority></url>
+  
+  <!-- SEO Landing Pages - Panic/Situation -->
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-letter-what-to-do.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-deadline-missed.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-notice-confusing.html</loc><priority>0.8</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-document-request.html</loc><priority>0.8</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-additional-information-requested.html</loc><priority>0.8</priority></url>
+  
+  <!-- SEO Landing Pages - Response/Strategy -->
+  <url><loc>https://irsauditresponseai.netlify.app/how-to-respond-to-irs-audit.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-written-response.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-explanation-letter.html</loc><priority>0.8</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-supporting-documents.html</loc><priority>0.8</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-certified-mail-response.html</loc><priority>0.8</priority></url>
+  
+  <!-- SEO Landing Pages - Escalation/Consequence -->
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-penalties-help.html</loc><priority>0.9</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-adjustment-dispute.html</loc><priority>0.8</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/irs-audit-appeal-response.html</loc><priority>0.8</priority></url>
+  
+  <!-- Legal Pages -->
+  <url><loc>https://irsauditresponseai.netlify.app/privacy.html</loc><priority>0.5</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/terms.html</loc><priority>0.5</priority></url>
+  <url><loc>https://irsauditresponseai.netlify.app/disclaimer.html</loc><priority>0.5</priority></url>
 </urlset>
