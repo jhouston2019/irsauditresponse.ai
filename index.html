@@ -36,6 +36,15 @@
     "description": "AI-powered tool to understand and respond to any IRS letter instantly. Secure, fast, and easy to use."
   }
   </script>
+  
+  <!-- Ad Styles -->
+  <link rel="stylesheet" href="/src/ads-styles.css">
+  
+  <!-- AdSense Script -->
+  <script async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+    crossorigin="anonymous">
+  </script>
 </head>
 
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
@@ -329,6 +338,12 @@
             </div>
         </section>
 
+    <!-- POST-CONTENT AD (PRIMARY) -->
+        <section class="native-ad post-content-ad">
+          <p class="ad-label">Sponsored Resources</p>
+          <div id="ad-post-content"></div>
+        </section>
+
     <!-- RECENTLY SEARCHED -->
         <section style="padding:60px 20px; background:#f8fafc; color:#2d3748;">
             <div style="width:min(1120px, 92%); margin-inline:auto;">
@@ -351,6 +366,12 @@
                 <p style="color:#64748b; margin:8px 0 22px; font-size:1.2rem;">Whether you're in New York City or rural Wyoming, most IRS letters require response within 30 days. Every day you wait adds stress, penalties, and risk. Get your professional response letter in minutes, not weeks.</p>
                 <a href="payment.html" style="display:inline-block; padding:14px 22px; font-weight:600; text-decoration:none; border-radius:10px; background:linear-gradient(180deg, #22c55e, #16a34a); color:#ffffff; box-shadow:0 6px 18px rgba(34, 197, 94, 0.35); transition:transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;" aria-label="Join 10,000+ Americans who've resolved their IRS letters">Join 10,000+ Americans Who've Resolved Their IRS Letters</a>
             </div>
+        </section>
+
+    <!-- EXIT / SCROLL-END AD (DESKTOP ONLY) -->
+        <section class="native-ad exit-grid-ad desktop-only">
+          <p class="ad-label">Additional Support Options</p>
+          <div id="ad-exit-grid"></div>
         </section>
     </main>
 
@@ -443,6 +464,12 @@
         });
     </script>
 
+    <!-- MOBILE FOOTER STICKY AD -->
+    <div class="native-ad mobile-footer-ad mobile-only" id="ad-mobile-footer"></div>
+
+    <!-- Ad Manager Script -->
+    <script type="module" src="/src/ads-manager.js"></script>
+    
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>
