@@ -1,0 +1,142 @@
+<!-- 
+  AD INTEGRATION TEMPLATE
+  Use this template to add ads to SEO/informational pages
+  
+  INSTRUCTIONS:
+  1. Copy the <head> additions to your page's <head> section
+  2. Copy the post-content ad after main content, before CTAs
+  3. Copy the exit ad near bottom of content (before related resources)
+  4. Copy the footer additions before </body>
+-->
+
+<!-- ========================================
+     STEP 1: ADD TO <head> SECTION
+     ======================================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Page Title</title>
+  
+  <!-- 👇 ADD THESE TWO LINES TO <head> -->
+  <link rel="stylesheet" href="/src/ads-styles.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  <!-- 👆 END OF <head> ADDITIONS -->
+</head>
+
+<body>
+  <nav><!-- Your navigation --></nav>
+
+  <main>
+    <section>
+      <div>
+        <h1>Your Page Title</h1>
+        
+        <!-- Your main content here -->
+        <div>
+          <h2>Section 1</h2>
+          <p>Content...</p>
+        </div>
+
+        <div>
+          <h2>Section 2</h2>
+          <p>Content...</p>
+        </div>
+
+        <div>
+          <h2>Section 3</h2>
+          <p>Content...</p>
+        </div>
+
+        <!-- ========================================
+             STEP 2: ADD POST-CONTENT AD HERE
+             (After main content, before CTAs)
+             ======================================== -->
+        <!-- 👇 POST-CONTENT AD (PRIMARY) -->
+        <section class="native-ad post-content-ad">
+          <p class="ad-label">Sponsored Resources</p>
+          <div id="ad-post-content"></div>
+        </section>
+        <!-- 👆 END OF POST-CONTENT AD -->
+
+        <!-- Your CTA button -->
+        <div style="text-align:center; margin-top:40px;">
+          <a href="index.html">Get My Audit Response</a>
+        </div>
+
+        <!-- ========================================
+             STEP 3: ADD EXIT AD HERE
+             (Near bottom, after CTA, before related resources)
+             ======================================== -->
+        <!-- 👇 EXIT / SCROLL-END AD (DESKTOP ONLY) -->
+        <section class="native-ad exit-grid-ad desktop-only">
+          <p class="ad-label">Additional Support Options</p>
+          <div id="ad-exit-grid"></div>
+        </section>
+        <!-- 👆 END OF EXIT AD -->
+
+        <!-- Related resources or additional content -->
+        <div>
+          <h3>Related Resources</h3>
+          <!-- Links, etc. -->
+        </div>
+
+        <p>Disclaimer text...</p>
+      </div>
+    </section>
+  </main>
+
+  <footer><!-- Your footer --></footer>
+
+  <!-- ========================================
+       STEP 4: ADD BEFORE </body>
+       ======================================== -->
+  <!-- 👇 MOBILE FOOTER STICKY AD + SCRIPT -->
+  <div class="native-ad mobile-footer-ad mobile-only" id="ad-mobile-footer"></div>
+  <script type="module" src="/src/ads-manager.js"></script>
+  <!-- 👆 END OF FOOTER ADDITIONS -->
+</body>
+</html>
+
+<!-- 
+  PLACEMENT RULES:
+  
+  ✅ POST-CONTENT AD:
+     - After all main educational content
+     - Before primary CTA button
+     - Never above the fold
+     - Never inside instructions
+  
+  ✅ EXIT AD:
+     - Near bottom of page
+     - After CTA button
+     - Before related resources/links
+     - Desktop only (automatically hidden on mobile)
+  
+  ✅ MOBILE FOOTER:
+     - Always before </body>
+     - Mobile only (automatically hidden on desktop)
+     - User can dismiss with X button
+  
+  ❌ DO NOT ADD ADS TO:
+     - payment.html
+     - audit-payment.html
+     - checkout.html
+     - login.html
+     - signup.html
+     - dashboard.html
+     - audit-upload.html
+     - audit-response.html
+     - upload.html
+     - Any authenticated pages
+  
+  ALLOWED LABELS:
+     - "Sponsored Resources"
+     - "Additional Support Options"
+     - "Related Services"
+  
+  FORBIDDEN LABELS:
+     - "Deals" / "Offers" / "Recommended"
+     - Anything implying IRS endorsement
+-->

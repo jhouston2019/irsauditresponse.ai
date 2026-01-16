@@ -1,0 +1,167 @@
+/**
+ * NATIVE AD STYLES
+ * Cloned from Tax Letter Help - DO NOT MODIFY STRUCTURE
+ * 
+ * These styles ensure ads:
+ * - Never appear above the fold
+ * - Never interfere with CTAs
+ * - Maintain trust and professionalism
+ * - Are clearly labeled as sponsored
+ */
+
+/* Base ad container styles */
+.native-ad {
+  margin: 40px auto;
+  padding: 20px;
+  max-width: 800px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  clear: both;
+}
+
+/* Ad label - required for compliance */
+.ad-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+}
+
+/* Post-content ad - primary placement */
+.post-content-ad {
+  margin-top: 60px;
+  margin-bottom: 40px;
+}
+
+/* Exit/scroll-end ad - desktop only */
+.exit-grid-ad {
+  margin-top: 40px;
+  margin-bottom: 60px;
+}
+
+/* Mobile footer sticky ad */
+.mobile-footer-ad {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  margin: 0;
+  padding: 12px;
+  background: #ffffff;
+  border-top: 2px solid #e2e8f0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  border-radius: 0;
+}
+
+/* Close button for mobile footer ad */
+.ad-close-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #64748b;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 0;
+}
+
+.ad-close-btn:hover {
+  background: #475569;
+}
+
+/* Device-specific visibility */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+  
+  .mobile-only {
+    display: block;
+  }
+  
+  /* Adjust spacing on mobile */
+  .native-ad {
+    margin: 30px auto;
+    padding: 16px;
+  }
+  
+  .post-content-ad {
+    margin-top: 40px;
+    margin-bottom: 30px;
+  }
+  
+  /* Add padding to body when mobile footer ad is visible */
+  body.mobile-ad-visible {
+    padding-bottom: 120px;
+  }
+}
+
+/* Hidden state */
+.native-ad.ad-hidden {
+  display: none !important;
+}
+
+/* Loading state */
+.native-ad.ad-loading {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.native-ad.ad-loading::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: ad-spinner 0.8s linear infinite;
+}
+
+@keyframes ad-spinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Ensure ads don't interfere with main CTAs */
+.native-ad + a[href*="payment"],
+.native-ad + a[href*="checkout"],
+.native-ad + div > a[href*="payment"],
+.native-ad + div > a[href*="checkout"] {
+  margin-top: 40px;
+}
+
+/* Dark mode support for IRS Audit Response theme */
+@media (prefers-color-scheme: dark) {
+  .native-ad {
+    background: #1e293b;
+    border-color: #334155;
+  }
+  
+  .mobile-footer-ad {
+    background: #1e293b;
+    border-top-color: #334155;
+  }
+}
