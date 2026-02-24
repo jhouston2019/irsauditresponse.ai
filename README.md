@@ -12,7 +12,7 @@ AuditResponseAI is a specialized AI tool designed to help taxpayers respond to I
 - 📄 **Document Upload** - Upload IRS letters in PDF/image format
 - 🤖 **AI Analysis** - Get instant explanations of audit notices
 - ✍️ **Response Generation** - AI drafts professional audit response letters
-- 💳 **One-Time Payment** - Simple $197 one-time fee
+- 💳 **One-Time Payment** - Simple $19 one-time fee
 - 📥 **Download Options** - Export responses as PDF or DOCX
 - 🖥️ **Dashboard** - Manage your letters and account
 - 📚 **Resources** - Helpful guides and examples
@@ -62,7 +62,7 @@ Required environment variables:
 ### 3. Stripe Setup
 
 1. Create a Stripe account
-2. Create a product: "Audit Response Letter" for $197
+2. Create a product: "Audit Response Letter" for $19
 3. Add the price ID to your environment variables
 
 ### 4. OpenAI Setup

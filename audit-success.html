@@ -4,6 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Successful - IRS Audit Response</title>
+  
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+    gtag('event', 'purchase', {
+      transaction_id: new URLSearchParams(window.location.search).get('session_id'),
+      value: 19.00,
+      currency: 'USD',
+      items: [{
+        item_id: 'audit_response',
+        item_name: 'IRS Audit Response Preparation'
+      }]
+    });
+  </script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -65,7 +83,7 @@
     <div class="success-box">
       <div class="checkmark">✓</div>
       <h1>Payment Successful</h1>
-      <p>Your payment of $197 has been processed successfully.</p>
+      <p>Your payment of $19 has been processed successfully.</p>
       <p>You now have access to the IRS Audit Response Preparation system.</p>
       <p><strong>Next Step:</strong> Upload your IRS audit notice to begin the analysis.</p>
       

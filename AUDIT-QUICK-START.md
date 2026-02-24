@@ -32,7 +32,7 @@ SELECT * FROM audit_responses LIMIT 1;
 3. Fill in:
    - **Name:** IRS Audit Response Preparation
    - **Description:** One-time preparation guidance for IRS audits using a constrained, risk-aware system designed to help limit scope and reduce over-disclosure during examinations.
-   - **Pricing:** $197.00 USD (one-time)
+   - **Pricing:** $19.00 USD (one-time)
 
 ### Add Metadata
 
@@ -164,7 +164,7 @@ After deployment, verify:
 - [ ] Non-audit notices are rejected
 - [ ] Hard stops trigger for field audits
 - [ ] Database records are created
-- [ ] Stripe checkout works ($197)
+- [ ] Stripe checkout works ($19)
 - [ ] Test suite passes
 
 ---

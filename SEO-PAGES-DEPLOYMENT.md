@@ -228,7 +228,7 @@ CTA Button
     ↓
 /audit-payment.html
     ↓
-Payment ($197)
+Payment ($19)
     ↓
 /audit-upload.html
     ↓

@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Your IRS Letter – Get Instant AI Analysis | TaxLetterHelp</title>
+    <title>Upload Your IRS Letter – Get Instant AI Analysis | IRSAuditResponseAI</title>
     <meta name="description" content="Upload your IRS or state tax letter (PDF, image, or text) and get a fast, clear AI-generated explanation in plain English.">
-    <link rel="canonical" href="https://taxletterhelp.com/upload.html">
+    <link rel="canonical" href="https://irsauditresponseai.netlify.app/upload.html">
     <meta property="og:title" content="Upload Your IRS Letter – Get Instant AI Analysis">
     <meta property="og:description" content="AI explains your IRS or tax letter instantly. Understand what it means and what to do next.">
-    <meta property="og:image" content="https://taxletterhelp.com/images/upload-og.jpg">
-    <meta property="og:url" content="https://taxletterhelp.com/upload.html">
+    <meta property="og:image" content="https://irsauditresponseai.netlify.app/images/upload-og.jpg">
+    <meta property="og:url" content="https://irsauditresponseai.netlify.app/upload.html">
     <meta property="og:type" content="article">
 </head>
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
     <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155;">
-        <div style="color: #f5f5f5;"><strong>TaxLetterHelp</strong></div>
+        <div style="color: #f5f5f5;"><strong>IRSAuditResponseAI</strong></div>
         <div>
             <a href="/upload.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Upload</a> |
             <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Dashboard</a> |
@@ -71,20 +71,32 @@
         
         // Check payment status and user authentication
         document.addEventListener('DOMContentLoaded', async () => {
-            // Temporarily disabled for testing
-            // const hasPaid = localStorage.getItem('paid') === 'true';
-            // if (!hasPaid) {
-            //     alert('Payment required to access AI analysis features. Redirecting to payment page...');
-            //     window.location.href = '/payment.html';
-            //     return;
-            // }
-            
             // Check if user is logged in
             currentUser = await getCurrentUser();
             if (!currentUser) {
-                // Create a mock user for testing
-                currentUser = { id: 'test-user-123', email: 'test@example.com' };
-                console.log('Using mock user for testing');
+                alert('Please login first to access this feature.');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Verify payment status via API
+            try {
+                const paymentCheck = await fetch('/.netlify/functions/verify-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentUser.email })
+                });
+                
+                const paymentData = await paymentCheck.json();
+                
+                if (!paymentData.hasPaid) {
+                    alert('Payment required to access AI analysis features. Redirecting to payment page...');
+                    window.location.href = '/payment.html';
+                    return;
+                }
+            } catch (error) {
+                alert('Unable to verify payment status. Please contact support.');
+                return;
             }
             
             // Verify all required elements exist

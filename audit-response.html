@@ -187,7 +187,7 @@
       <h1>IRS Audit Response Preparation</h1>
       <p class="subheading">Procedural response preparation designed to help you respond to IRS audits without expanding scope or increasing risk.</p>
       
-      <div class="price">$197</div>
+      <div class="price">$19</div>
       <p class="price-note">One-time payment • No subscription • Audit-only</p>
       
       <a href="/audit-payment.html" class="cta-button">Prepare My Audit Response</a>
@@ -292,8 +292,8 @@
     </div>
 
     <div class="section">
-      <h2>Pricing: $197 One-Time</h2>
-      <p><strong>Why $197 vs. $79 for Tax Letter Help?</strong></p>
+      <h2>Pricing: $19 One-Time</h2>
+      <p><strong>Why $19 vs. $79 for Tax Letter Help?</strong></p>
       <ul>
         <li>Higher risk assessment and containment</li>
         <li>Audit-specific playbooks and guardrails</li>
@@ -326,76 +326,10 @@
 
   <footer>
     <div class="container">
-      <p>&copy; 2025 IRS Audit Response. <a href="/privacy.html">Privacy Policy</a> | <a href="/terms.html">Terms</a> | <a href="/disclaimer.html">Disclaimer</a> | <a href="#" id="adminLink" style="color: #64748b;">Admin</a></p>
+      <p>&copy; 2025 IRS Audit Response. <a href="/privacy.html">Privacy Policy</a> | <a href="/terms.html">Terms</a> | <a href="/disclaimer.html">Disclaimer</a></p>
       <p style="margin-top: 1rem; font-size: 0.9rem;">This is an audit response preparation system, not a conversational AI.</p>
     </div>
   </footer>
-
-  <!-- Admin Login Modal -->
-  <div id="adminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
-    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2rem; width: min(400px, 90%); position: relative;">
-      <button id="closeModal" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
-      <h2 style="color: #93c5fd; margin-bottom: 1.5rem; text-align: center;">Admin Access</h2>
-      <form id="adminLoginForm">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; color: #cbd5e1; margin-bottom: 0.5rem;">Username</label>
-          <input type="text" id="adminUsername" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #ffffff;" />
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; color: #cbd5e1; margin-bottom: 0.5rem;">Password</label>
-          <input type="password" id="adminPassword" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #ffffff;" />
-        </div>
-        <div id="loginError" style="display: none; background: #7f1d1d; border: 1px solid #dc2626; color: #fca5a5; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
-        <button type="submit" style="width: 100%; background: #dc2626; color: #fff; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Login</button>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    // Admin login functionality
-    const adminLink = document.getElementById('adminLink');
-    const adminModal = document.getElementById('adminModal');
-    const closeModal = document.getElementById('closeModal');
-    const adminLoginForm = document.getElementById('adminLoginForm');
-    const loginError = document.getElementById('loginError');
-
-    adminLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      adminModal.style.display = 'flex';
-    });
-
-    closeModal.addEventListener('click', () => {
-      adminModal.style.display = 'none';
-      loginError.style.display = 'none';
-      adminLoginForm.reset();
-    });
-
-    adminModal.addEventListener('click', (e) => {
-      if (e.target === adminModal) {
-        adminModal.style.display = 'none';
-        loginError.style.display = 'none';
-        adminLoginForm.reset();
-      }
-    });
-
-    adminLoginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const username = document.getElementById('adminUsername').value;
-      const password = document.getElementById('adminPassword').value;
-      
-      // Credentials: admin / IRS2025$
-      if (username === 'admin' && password === 'IRS2025$') {
-        // Store admin session
-        sessionStorage.setItem('adminAuth', 'true');
-        // Redirect to admin dashboard
-        window.location.href = '/admin-dashboard.html';
-      } else {
-        loginError.textContent = 'Invalid username or password';
-        loginError.style.display = 'block';
-      }
-    });
-  </script>
 </body>
 </html>
 

@@ -1,369 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Upload Audit Notice - IRS Audit Response</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0f172a;
-      color: #ffffff;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      line-height: 1.6;
-    }
-    nav {
-      background: #1e293b;
-      padding: 1rem 2rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 2px solid #334155;
-      align-items: center;
-    }
-    nav .logo { color: #f5f5f5; font-weight: 700; font-size: 1.2rem; }
-    .container {
-      width: min(900px, 92%);
-      margin: 3rem auto;
-    }
-    .upload-box {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 3rem;
-      margin-bottom: 2rem;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      color: #ffffff;
-    }
-    .warning-box {
-      background: #7f1d1d;
-      border: 2px solid #dc2626;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 2rem 0;
-    }
-    .warning-box h3 {
-      color: #fca5a5;
-      margin-bottom: 0.5rem;
-    }
-    .warning-box p {
-      color: #fecaca;
-    }
-    .form-group {
-      margin-bottom: 2rem;
-    }
-    label {
-      display: block;
-      color: #cbd5e1;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-    }
-    textarea {
-      width: 100%;
-      min-height: 200px;
-      padding: 12px;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: #ffffff;
-      font-size: 1rem;
-      font-family: monospace;
-    }
-    .file-upload {
-      border: 2px dashed #334155;
-      border-radius: 8px;
-      padding: 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .file-upload:hover {
-      border-color: #3b82f6;
-      background: #1e293b;
-    }
-    .file-upload input {
-      display: none;
-    }
-    .analyze-button {
-      width: 100%;
-      background: #dc2626;
-      color: #fff;
-      padding: 16px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .analyze-button:hover {
-      background: #b91c1c;
-    }
-    .analyze-button:disabled {
-      background: #64748b;
-      cursor: not-allowed;
-    }
-    .results-box {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 3rem;
-      display: none;
-    }
-    .results-box h2 {
-      color: #93c5fd;
-      margin-bottom: 1.5rem;
-    }
-    .results-box pre {
-      background: #0f172a;
-      padding: 1.5rem;
-      border-radius: 6px;
-      overflow-x: auto;
-      color: #e2e8f0;
-      white-space: pre-wrap;
-      font-size: 0.9rem;
-      line-height: 1.6;
-    }
-    .status-message {
-      padding: 1rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      display: none;
-    }
-    .status-error {
-      background: #7f1d1d;
-      border: 1px solid #dc2626;
-      color: #fca5a5;
-    }
-    .status-info {
-      background: #1e3a5f;
-      border: 1px solid #3b82f6;
-      color: #93c5fd;
-    }
-    .rejected-box {
-      background: #7f1d1d;
-      border: 2px solid #dc2626;
-      border-radius: 12px;
-      padding: 3rem;
-      display: none;
-      text-align: center;
-    }
-    .rejected-box h2 {
-      color: #fca5a5;
-      margin-bottom: 1rem;
-    }
-    .rejected-box p {
-      color: #fecaca;
-      margin-bottom: 1rem;
-    }
-    .rejected-box a {
-      display: inline-block;
-      background: #3b82f6;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 6px;
-      text-decoration: none;
-      margin-top: 1rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Your IRS Audit Notice – Get Risk Assessment | IRSAuditResponseAI</title>
+    <meta name="description" content="Upload your IRS audit notice (PDF, image, or text) and get a risk-aware analysis with procedural guidance.">
+    <link rel="canonical" href="https://irsauditresponseai.netlify.app/audit-upload.html">
+    <meta property="og:title" content="Upload Your IRS Audit Notice – Get Risk Assessment">
+    <meta property="og:description" content="AI analyzes your IRS audit notice with risk guardrails and procedural guidance.">
+    <meta property="og:image" content="https://irsauditresponseai.netlify.app/images/audit-og.jpg">
+    <meta property="og:url" content="https://irsauditresponseai.netlify.app/audit-upload.html">
+    <meta property="og:type" content="article">
 </head>
-<body>
-  <nav>
-    <div class="logo">IRS Audit Response</div>
-  </nav>
-
-  <div class="container">
-    <div class="upload-box">
-      <h1>Upload Your IRS Audit Notice</h1>
-      
-      <div class="warning-box">
-        <h3>⚠️ Audit-Only Processing</h3>
-        <p>This system ONLY processes IRS audit and examination notices. If your notice is a CP2000, balance due, identity verification, or other non-audit notice, it will be rejected.</p>
-      </div>
-
-      <div id="statusMessage" class="status-message"></div>
-
-      <form id="uploadForm">
-        <div class="form-group">
-          <label>Option 1: Upload File (PDF or Image)</label>
-          <div class="file-upload" onclick="document.getElementById('fileInput').click()">
-            <input type="file" id="fileInput" accept=".pdf,image/*" />
-            <p style="color: #cbd5e1;">Click to upload PDF or image of your audit notice</p>
-            <p id="fileName" style="color: #94a3b8; margin-top: 0.5rem;"></p>
-          </div>
+<body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
+    <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155;">
+        <div style="color: #f5f5f5;"><strong>IRSAuditResponseAI</strong></div>
+        <div>
+            <a href="/audit-response.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Home</a> |
+            <a href="/audit-upload.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Upload</a> |
+            <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Dashboard</a> |
+            <a href="/pricing.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Pricing</a>
         </div>
+    </nav>
 
-        <div style="text-align: center; color: #94a3b8; margin: 2rem 0;">— OR —</div>
-
-        <div class="form-group">
-          <label for="letterText">Option 2: Paste Letter Text</label>
-          <textarea 
-            id="letterText" 
-            placeholder="Paste the text from your IRS audit notice here..."
-          ></textarea>
+    <div style="width:min(1120px, 92%); margin-inline:auto; padding:2rem 0;">
+        <div style="max-width:700px; margin:2rem auto; padding:2rem; background:#1e293b; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.3); color:#ffffff; border:1px solid #334155;">
+            <h2 style="text-align:center; margin-bottom:1rem; color:#ffffff; font-size:1.8rem;">Upload Your IRS Audit Notice</h2>
+            <p style="text-align:center; color:#94a3b8; margin-bottom:2rem;">This system is for IRS audits only. Non-audit notices will be rejected.</p>
+            
+            <div style="background:#7f1d1d; border:2px solid #dc2626; border-radius:8px; padding:1rem; margin-bottom:2rem;">
+                <h3 style="color:#fca5a5; margin-top:0; font-size:1.1rem;">⚠️ Important Notice</h3>
+                <p style="color:#fca5a5; margin:0; font-size:0.9rem;">This system will STOP you if your audit requires professional representation. We prioritize your safety over revenue.</p>
+            </div>
+            
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div style="margin-bottom:1.5rem;">
+                    <label for="file" style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#ffffff;">Select Audit Notice File</label>
+                    <input type="file" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required style="width:100%; padding:14px 16px; border:2px solid #334155; border-radius:10px; font-family:'Inter',sans-serif; font-size:1rem; transition:all 0.3s ease; background:#0f172a; color:#ffffff; font-weight:400;">
+                    <small style="color:#94a3b8; font-size:0.9rem;">Supported formats: PDF, JPG, PNG (Max 10MB)</small>
+                </div>
+                <button type="submit" style="background:#dc2626; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px; width:100%;">Upload & Analyze Audit Notice</button>
+            </form>
+            
+            <div id="uploadStatus" style="margin-top: 1rem; display: none;">
+                <p id="statusText" style="color:#ffffff;"></p>
+            </div>
+            
+            <div id="analysisResults" style="margin-top: 2rem; display: none;">
+                <h3 style="color:#93c5fd; font-size:1.5rem; margin-bottom:1rem;">Audit Analysis</h3>
+                <div id="explanation" style="background: #0f172a; padding: 1rem; border-radius: 8px; margin: 1rem 0; color:#ffffff; border:1px solid #334155;"></div>
+                
+                <div id="riskAssessment" style="margin-top:1.5rem; display:none;">
+                    <h4 style="color:#fca5a5; font-size:1.2rem; margin-bottom:0.5rem;">Risk Assessment</h4>
+                    <div id="riskDetails" style="background: #7f1d1d; padding: 1rem; border-radius: 8px; border:1px solid #dc2626; color:#fca5a5;"></div>
+                </div>
+                
+                <div id="escalationWarning" style="margin-top:1.5rem; display:none; background:#7f1d1d; border:2px solid #dc2626; border-radius:8px; padding:1.5rem;">
+                    <h4 style="color:#fca5a5; margin-top:0;">⚠️ Professional Representation Recommended</h4>
+                    <p id="escalationReason" style="color:#fca5a5; margin:0;"></p>
+                </div>
+                
+                <div id="responseSection" style="margin-top:2rem;">
+                    <h3 style="color:#93c5fd; font-size:1.5rem; margin-bottom:1rem;">Generate Response Outline</h3>
+                    <button id="generateResponse" style="background:#dc2626; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px; width:100%;">Generate Audit Response Outline</button>
+                    
+                    <div id="responseResults" style="margin-top: 2rem; display: none;">
+                        <h3 style="color:#93c5fd; font-size:1.5rem; margin-bottom:1rem;">Generated Response Outline</h3>
+                        <div id="responseLetter" style="background: #0f172a; padding: 1rem; border-radius: 8px; margin: 1rem 0; white-space: pre-wrap; color:#ffffff; border:1px solid #334155;"></div>
+                        <div style="margin-top: 1rem; display:flex; gap:1rem;">
+                            <button id="downloadPDF" style="background:#dc2626; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px; flex:1;">Download as PDF</button>
+                            <button id="downloadDOCX" style="background:#6c757d; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px; flex:1;">Download as DOCX</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <button type="submit" id="analyzeButton" class="analyze-button">
-          Analyze Audit Notice
-        </button>
-      </form>
-    </div>
-
-    <div id="rejectedBox" class="rejected-box">
-      <h2>Notice Rejected</h2>
-      <p id="rejectedMessage"></p>
-      <a href="/index.html">Go to Tax Letter Help Instead</a>
-    </div>
-
-    <div id="resultsBox" class="results-box">
-      <h2>Audit Analysis Results</h2>
-      <pre id="analysisOutput"></pre>
-      
-      <div id="escalationWarning" class="warning-box" style="display: none; margin-top: 2rem;">
-        <h3>⚠️ Professional Representation Required</h3>
-        <p id="escalationMessage"></p>
-      </div>
-
-      <button id="generateResponseButton" class="analyze-button" style="margin-top: 2rem;">
-        Generate Response Outline
-      </button>
-    </div>
-  </div>
-
-  <script>
-    let currentAnalysis = null;
-    let currentRecordId = null;
-
-    document.getElementById('fileInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        document.getElementById('fileName').textContent = `Selected: ${file.name}`;
-      }
-    });
-
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const letterText = document.getElementById('letterText').value;
-      const fileInput = document.getElementById('fileInput');
-      const button = document.getElementById('analyzeButton');
-      const statusMessage = document.getElementById('statusMessage');
-      
-      if (!letterText && !fileInput.files[0]) {
-        statusMessage.className = 'status-message status-error';
-        statusMessage.style.display = 'block';
-        statusMessage.textContent = 'Please upload a file or paste letter text';
-        return;
-      }
-      
-      button.disabled = true;
-      button.textContent = 'Analyzing audit notice...';
-      statusMessage.style.display = 'none';
-      
-      try {
-        let fileUrl = null;
         
-        if (fileInput.files[0]) {
-          const file = fileInput.files[0];
-          const reader = new FileReader();
-          
-          fileUrl = await new Promise((resolve, reject) => {
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-        }
+        <div style="max-width:700px; margin:2rem auto; padding:1.5rem; background:#1e293b; border-radius:8px; border:1px solid #334155;">
+            <h3 style="color:#93c5fd; margin-top:0;">What This System Does</h3>
+            <ul style="color:#cbd5e1; line-height:1.8;">
+                <li>Classifies audit type and scope</li>
+                <li>Identifies risk factors and escalation triggers</li>
+                <li>Generates restrictive response outline (not full letter)</li>
+                <li>Warns when professional representation is required</li>
+                <li>Prevents over-disclosure and scope expansion</li>
+            </ul>
+            
+            <h3 style="color:#fca5a5; margin-top:1.5rem;">This System Will STOP You If:</h3>
+            <ul style="color:#fca5a5; line-height:1.8;">
+                <li>Field audit detected</li>
+                <li>Multi-year audit (2+ years)</li>
+                <li>Dollar exposure exceeds $25,000</li>
+                <li>Criminal investigation language present</li>
+                <li>IRS requests in-person interview</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer style="padding:28px 0; background:#0b1220; color:#cbd5e1; text-align:center;">
+        <div style="width:min(1120px, 92%); margin-inline:auto;">
+            <p>&copy; 2026 IRSAuditResponseAI. <a href="/privacy.html" style="color:#93c5fd; text-decoration:none;">Privacy Policy</a> | <a href="/terms.html" style="color:#93c5fd; text-decoration:none;">Terms</a> | <a href="/disclaimer.html" style="color:#93c5fd; text-decoration:none;">Disclaimer</a></p>
+            <p style="margin-top:1rem; font-size:0.9rem; color:#64748b;">This is an audit response preparation system, not a conversational AI.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { uploadFile, saveDocumentToDatabase } from './src/components/UploadForm.js';
+        import { getCurrentUser } from './src/components/Auth.js';
         
-        const response = await fetch('/.netlify/functions/analyze-audit-notice', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            text: letterText,
-            fileUrl: fileUrl
-          })
+        let currentUser = null;
+        let letterText = '';
+        let analysisData = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                currentUser = { id: 'test-user-123', email: 'test@example.com' };
+            }
         });
         
-        const data = await response.json();
-        
-        if (data.rejected) {
-          // Show rejection message
-          document.getElementById('rejectedMessage').textContent = data.message;
-          document.getElementById('rejectedBox').style.display = 'block';
-          document.querySelector('.upload-box').style.display = 'none';
-        } else {
-          // Show analysis results
-          currentAnalysis = data.analysis;
-          currentRecordId = data.recordId;
-          
-          document.getElementById('analysisOutput').textContent = data.textOutput;
-          document.getElementById('resultsBox').style.display = 'block';
-          
-          if (data.escalationRequired) {
-            document.getElementById('escalationWarning').style.display = 'block';
-            document.getElementById('escalationMessage').textContent = 
-              data.escalationMessage?.messages?.[0]?.message || 
-              'Professional representation is strongly recommended.';
-            document.getElementById('generateResponseButton').style.display = 'none';
-          }
-          
-          window.scrollTo({ top: document.getElementById('resultsBox').offsetTop - 100, behavior: 'smooth' });
-        }
-      } catch (error) {
-        console.error('Analysis error:', error);
-        statusMessage.className = 'status-message status-error';
-        statusMessage.style.display = 'block';
-        statusMessage.textContent = 'Error: ' + error.message;
-      } finally {
-        button.disabled = false;
-        button.textContent = 'Analyze Audit Notice';
-      }
-    });
-
-    document.getElementById('generateResponseButton').addEventListener('click', async () => {
-      const button = document.getElementById('generateResponseButton');
-      button.disabled = true;
-      button.textContent = 'Generating response outline...';
-      
-      try {
-        const response = await fetch('/.netlify/functions/generate-audit-response', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            analysis: currentAnalysis,
-            recordId: currentRecordId
-          })
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                alert('Please login first');
+                return;
+            }
+            
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            try {
+                showStatus('Uploading audit notice...');
+                
+                const filePath = await uploadFile(file, currentUser.id);
+                await saveDocumentToDatabase(currentUser.id, file.name, filePath);
+                
+                showStatus('File uploaded successfully! Analyzing audit notice...');
+                
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const base64Data = e.target.result.split(',')[1];
+                        try {
+                            const ocrResponse = await fetch('/.netlify/functions/extract-text', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    imageData: base64Data,
+                                    mimeType: file.type
+                                })
+                            });
+                            
+                            const ocrData = await ocrResponse.json();
+                            
+                            if (ocrData.text) {
+                                letterText = ocrData.text;
+                                showStatus('Text extracted successfully! Analyzing audit notice...');
+                                await analyzeAuditNotice();
+                            } else {
+                                showStatus('Failed to extract text from image: ' + (ocrData.error || 'Unknown error'));
+                            }
+                        } catch (error) {
+                            showStatus('OCR failed: ' + error.message);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    return;
+                } else if (file.type === 'application/pdf') {
+                    letterText = `PDF content for ${file.name}. This is a placeholder for PDF text extraction.`;
+                } else {
+                    letterText = `Document content for ${file.name}. This is a placeholder for document text extraction.`;
+                }
+                
+                await analyzeAuditNotice();
+                
+            } catch (error) {
+                showStatus('Upload failed: ' + error.message);
+            }
         });
         
-        const data = await response.json();
-        
-        if (data.escalationRequired) {
-          alert(data.message);
-        } else {
-          // Show response outline
-          const outputDiv = document.createElement('div');
-          outputDiv.style.marginTop = '2rem';
-          outputDiv.innerHTML = `
-            <h2 style="color: #93c5fd; margin-bottom: 1rem;">Response Outline</h2>
-            <pre style="background: #0f172a; padding: 1.5rem; border-radius: 6px; color: #e2e8f0; white-space: pre-wrap;">${data.letter}</pre>
-            ${data.warnings ? `<div style="background: #7f1d1d; border: 1px solid #dc2626; border-radius: 6px; padding: 1rem; margin-top: 1rem; color: #fecaca;">
-              <strong>Warnings:</strong><br>${data.warnings.join('<br>')}</div>` : ''}
-          `;
-          document.getElementById('resultsBox').appendChild(outputDiv);
-          button.style.display = 'none';
+        async function analyzeAuditNotice() {
+            try {
+                const analysisResponse = await fetch('/.netlify/functions/analyze-audit-notice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: letterText,
+                        userEmail: currentUser.email
+                    })
+                });
+                
+                analysisData = await analysisResponse.json();
+                
+                if (analysisData.error) {
+                    showStatus('Analysis failed: ' + analysisData.error);
+                    return;
+                }
+                
+                if (analysisData.analysis) {
+                    const explanationElement = document.getElementById('explanation');
+                    if (explanationElement) {
+                        explanationElement.textContent = JSON.stringify(analysisData.analysis, null, 2);
+                        document.getElementById('analysisResults').style.display = 'block';
+                        
+                        if (analysisData.analysis.riskLevel) {
+                            const riskDiv = document.getElementById('riskAssessment');
+                            const riskDetails = document.getElementById('riskDetails');
+                            riskDetails.textContent = `Risk Level: ${analysisData.analysis.riskLevel}\n${analysisData.analysis.riskFactors || ''}`;
+                            riskDiv.style.display = 'block';
+                        }
+                        
+                        if (analysisData.analysis.requiresEscalation) {
+                            const escalationDiv = document.getElementById('escalationWarning');
+                            const escalationReason = document.getElementById('escalationReason');
+                            escalationReason.textContent = analysisData.analysis.escalationReason || 'This audit requires professional representation.';
+                            escalationDiv.style.display = 'block';
+                            document.getElementById('responseSection').style.display = 'none';
+                        }
+                        
+                        hideStatus();
+                    }
+                } else {
+                    showStatus('Analysis failed: No analysis data returned');
+                }
+            } catch (error) {
+                showStatus('Analysis failed: ' + error.message);
+            }
         }
-      } catch (error) {
-        console.error('Generation error:', error);
-        alert('Error generating response: ' + error.message);
-      } finally {
-        button.disabled = false;
-        button.textContent = 'Generate Response Outline';
-      }
-    });
-  </script>
+        
+        document.getElementById('generateResponse').addEventListener('click', async () => {
+            try {
+                showStatus('Generating audit response outline...');
+                
+                const response = await fetch('/.netlify/functions/generate-audit-response', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        analysis: analysisData.analysis,
+                        userEmail: currentUser.email
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.responseOutline) {
+                    const responseElement = document.getElementById('responseLetter');
+                    if (responseElement) {
+                        responseElement.textContent = data.responseOutline;
+                        document.getElementById('responseResults').style.display = 'block';
+                        hideStatus();
+                    }
+                } else {
+                    showStatus('Response generation failed: ' + (data.error || 'Unknown error'));
+                }
+                
+            } catch (error) {
+                showStatus('Response generation failed: ' + error.message);
+            }
+        });
+        
+        document.getElementById('downloadPDF').addEventListener('click', async () => {
+            const responseElement = document.getElementById('responseLetter');
+            if (!responseElement) {
+                alert('Error: Could not find response letter element');
+                return;
+            }
+            const responseText = responseElement.textContent;
+            
+            try {
+                const response = await fetch('/.netlify/functions/generate-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: responseText,
+                        fileName: 'audit-response-outline.pdf'
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'audit-response-outline.pdf';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('PDF generation failed');
+                }
+            } catch (error) {
+                alert('PDF generation failed: ' + error.message);
+            }
+        });
+        
+        document.getElementById('downloadDOCX').addEventListener('click', async () => {
+            const responseElement = document.getElementById('responseLetter');
+            if (!responseElement) {
+                alert('Error: Could not find response letter element');
+                return;
+            }
+            const responseText = responseElement.textContent;
+            
+            try {
+                const response = await fetch('/.netlify/functions/generate-docx', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: responseText,
+                        fileName: 'audit-response-outline.docx'
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'audit-response-outline.docx';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('DOCX generation failed');
+                }
+            } catch (error) {
+                alert('DOCX generation failed: ' + error.message);
+            }
+        });
+        
+        function showStatus(message) {
+            const statusDiv = document.getElementById('uploadStatus');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+        
+        function hideStatus() {
+            document.getElementById('uploadStatus').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
-

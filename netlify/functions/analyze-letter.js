@@ -10,18 +10,12 @@ try {
   const supabaseModule = require("./_supabase.js");
   getSupabaseAdmin = supabaseModule.getSupabaseAdmin;
 } catch (importError) {
-  console.error("Import error:", importError);
+  // Import error - dependencies not available
 }
 
 exports.handler = async (event) => {
-  console.log('=== ANALYZE LETTER FUNCTION START ===');
-  console.log('HTTP Method:', event.httpMethod);
-  console.log('Event body type:', typeof event.body);
-  console.log('Event body length:', event.body ? event.body.length : 0);
-  
   // Check if dependencies loaded successfully
   if (!OpenAI) {
-    console.error('OpenAI not loaded');
     return {
       statusCode: 500,
       headers: {
@@ -34,7 +28,6 @@ exports.handler = async (event) => {
   
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
     return {
       statusCode: 200,
       headers: {
@@ -47,44 +40,27 @@ exports.handler = async (event) => {
   }
 
   try {
-    console.log('Parsing event body...');
     const parsedBody = JSON.parse(event.body || "{}");
-    console.log('Parsed body keys:', Object.keys(parsedBody));
-    
     const { text, fileUrl, imageUrl, userEmail = null, priceId = process.env.STRIPE_PRICE_RESPONSE, stripeSessionId = null } = parsedBody;
     let letterText = text || "";
-    
-    console.log('Letter text length:', letterText.length);
-    console.log('File URL provided:', !!fileUrl);
-    console.log('Image URL provided:', !!imageUrl);
 
     // --- STEP 1: Extract text from file if provided ---
     if (fileUrl) {
       try {
-        console.log('Processing file URL:', fileUrl);
-        
         if (!pdfParse || !mammoth) {
-          console.log('File processing dependencies not available, skipping file processing');
-          console.log('pdfParse available:', !!pdfParse);
-          console.log('mammoth available:', !!mammoth);
           letterText += "\n\n[File uploaded but processing not available - please paste text manually]";
         } else {
-          console.log('File processing dependencies available');
           // Check if it's a data URL (base64 encoded file)
           if (fileUrl.startsWith('data:')) {
             const base64Data = fileUrl.split(',')[1];
             const buffer = Buffer.from(base64Data, 'base64');
             
             if (fileUrl.includes('application/pdf')) {
-              console.log('Processing PDF file, buffer size:', buffer.length);
               const parsed = await pdfParse(buffer);
-              console.log('PDF parsed successfully, text length:', parsed.text.length);
               letterText += "\n\n" + parsed.text;
-              console.log('PDF text extracted, length:', parsed.text.length);
             } else if (fileUrl.includes('application/vnd.openxmlformats') || fileUrl.includes('application/msword')) {
               const { value } = await mammoth.extractRawText({ buffer: buffer });
               letterText += "\n\n" + value;
-              console.log('DOCX text extracted, length:', value.length);
             }
           } else {
             // Handle regular URL
@@ -105,7 +81,6 @@ exports.handler = async (event) => {
           }
         }
       } catch (fileError) {
-        console.error("File processing error:", fileError);
         letterText += "\n\n[File processing error - please paste text manually]";
       }
     }
@@ -113,17 +88,13 @@ exports.handler = async (event) => {
     // --- STEP 2: Extract text from image if provided ---
     if (imageUrl) {
       try {
-        console.log('Processing image URL:', imageUrl.substring(0, 50) + '...');
-        
         if (!Tesseract) {
-          console.log('Image processing dependencies not available, skipping image processing');
           letterText += "\n\n[Image uploaded but OCR processing not available - please paste text manually]";
         } else {
           // Check if it's a data URL (base64 encoded image)
           if (imageUrl.startsWith('data:')) {
             const { data: { text: extractedText } } = await Tesseract.recognize(imageUrl, "eng");
             letterText += "\n\n" + extractedText;
-            console.log('Image text extracted, length:', extractedText.length);
           } else {
             // Handle regular URL
             const { data: { text: extractedText } } = await Tesseract.recognize(imageUrl, "eng");
@@ -131,7 +102,6 @@ exports.handler = async (event) => {
           }
         }
       } catch (imageError) {
-        console.error("Image processing error:", imageError);
         letterText += "\n\n[Image processing error - please paste text manually]";
       }
     }
@@ -144,13 +114,8 @@ exports.handler = async (event) => {
     }
 
     // --- STEP 3: Analyze the letter using OpenAI ---
-    console.log('Starting OpenAI analysis...');
-    console.log('Environment variables available:', Object.keys(process.env).filter(key => key.includes('OPENAI')));
-    
     // Check if OpenAI API key is available
     if (!process.env.OPENAI_API_KEY) {
-      console.error('OpenAI API key not found');
-      console.error('Available env vars:', Object.keys(process.env).slice(0, 10));
       return {
         statusCode: 500,
         headers: {
@@ -161,10 +126,8 @@ exports.handler = async (event) => {
       };
     }
 
-    console.log('OpenAI API key found, initializing client...');
     // Initialize OpenAI client
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    console.log('OpenAI client initialized successfully');
 
     const systemPrompt = `
       You are a senior IRS Taxpayer Advocate with 25+ years of experience specializing in:
@@ -212,9 +175,6 @@ exports.handler = async (event) => {
       Provide actionable, expert-level advice that helps the taxpayer understand their situation clearly and take appropriate action. Vary your explanation style and tone to make each analysis unique while being equally helpful.
     `;
 
-    console.log('Making OpenAI API call...');
-    console.log('Letter text length for API:', letterText.length);
-    
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -224,9 +184,6 @@ exports.handler = async (event) => {
       temperature: 0.7,
       top_p: 0.9,
     });
-
-    console.log('OpenAI API call completed');
-    console.log('Completion usage:', completion.usage);
     
     let aiResponse = completion.choices?.[0]?.message?.content || "No response generated.";
     
@@ -234,8 +191,6 @@ exports.handler = async (event) => {
     if (aiResponse.includes('```json')) {
       aiResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     }
-    
-    console.log('AI response length:', aiResponse.length);
     
     // Calculate confidence score based on token usage
     const confidenceScore = Math.round(Math.max(60, Math.min(95, (1 - (completion.usage?.completion_tokens || 0) / 2048) * 100)));
@@ -294,7 +249,6 @@ exports.handler = async (event) => {
       }
       
     } catch (parseError) {
-      console.error("Failed to parse AI response as JSON:", parseError);
       structuredAnalysis = {
         letterType: detectedNoticeType,
         summary: aiResponse,
@@ -331,13 +285,9 @@ exports.handler = async (event) => {
 
         if (error) throw error;
         recordId = data.id;
-        console.log('Record saved to database:', recordId);
       } catch (dbError) {
-        console.error("Database error:", dbError);
-        console.log('Continuing without database storage');
+        // Continue without database storage
       }
-    } else {
-      console.log('Database not available, skipping storage');
     }
 
     // --- STEP 5: Return structured response ---
@@ -357,7 +307,6 @@ exports.handler = async (event) => {
       }),
     };
   } catch (err) {
-    console.error("Error in analyze-letter.js:", err);
     return {
       statusCode: 500,
       headers: {

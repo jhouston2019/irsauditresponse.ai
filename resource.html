@@ -1,548 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Tax Letter Response - TaxLetterHelp</title>
-  <link rel="stylesheet" href="/styles.css" />
-
-  <!-- Ad Styles -->
-  <link rel="stylesheet" href="/src/ads-styles.css">
-  
-  <!-- AdSense Script -->
-  <script async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-    crossorigin="anonymous">
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Your IRS Response Letter | IRSAuditResponseAI</title>
+    <meta name="description" content="Upload your IRS letter and generate a professional response instantly with AI-powered analysis.">
+    <link rel="canonical" href="https://irsauditresponseai.netlify.app/resource.html">
 </head>
-<body style="background:#0f172a; color:#fff; font-family:'Inter',sans-serif; padding:20px;">
-  <h1>AI Tax Letter Response Generator</h1>
-  <p>Upload your IRS letter document, image, or paste text below.</p>
+<body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
+    <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155;">
+        <div style="color: #f5f5f5;"><strong>IRSAuditResponseAI</strong></div>
+        <div>
+            <a href="/index.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Home</a> |
+            <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Dashboard</a> |
+            <a href="/pricing.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Pricing</a>
+        </div>
+    </nav>
 
-  <!-- Upload Options -->
-  <div style="margin-bottom:20px; padding:20px; background:#1e293b; border-radius:8px;">
-    <h3 style="color:#22c55e; margin-bottom:15px;">📄 Upload Options</h3>
-    
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-bottom:15px;">
-      <div>
-        <label for="fileUpload" style="display:block; margin-bottom:5px; color:#fff;">Document Upload (PDF, DOCX)</label>
-        <input type="file" id="fileUpload" accept=".pdf,.doc,.docx" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151;">
-      </div>
-      <div>
-        <label for="imageUpload" style="display:block; margin-bottom:5px; color:#fff;">Image Upload (JPG, PNG)</label>
-        <input type="file" id="imageUpload" accept="image/*" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151;">
-      </div>
+    <div style="width:min(1120px, 92%); margin-inline:auto; padding:2rem 0;">
+        <div style="max-width:700px; margin:2rem auto; padding:2rem; background:#1e293b; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.3); color:#ffffff; border:1px solid #334155;">
+            <h1 style="text-align:center; margin-bottom:1rem; color:#ffffff; font-size:2rem;">Generate Your IRS Response Letter</h1>
+            <p style="text-align:center; color:#94a3b8; margin-bottom:2rem;">Upload your IRS letter and get a professional response in minutes</p>
+            
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div style="margin-bottom:1.5rem;">
+                    <label for="file" style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#ffffff;">Select IRS Letter File</label>
+                    <input type="file" id="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required style="width:100%; padding:14px 16px; border:2px solid #334155; border-radius:10px; font-family:'Inter',sans-serif; font-size:1rem; background:#0f172a; color:#ffffff;">
+                    <small style="color:#94a3b8; font-size:0.9rem;">Supported formats: PDF, JPG, PNG (Max 10MB)</small>
+                </div>
+                <button type="submit" style="background:#2563eb; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; width:100%;">Upload & Analyze</button>
+            </form>
+            
+            <div id="uploadStatus" style="margin-top: 1rem; display: none;">
+                <p id="statusText" style="color:#ffffff; text-align:center;"></p>
+            </div>
+            
+            <div id="analysisResults" style="margin-top: 2rem; display: none;">
+                <h2 style="color:#93c5fd; font-size:1.5rem; margin-bottom:1rem; border-bottom:2px solid #334155; padding-bottom:0.5rem;">Letter Analysis</h2>
+                <div id="explanation" style="background: #0f172a; padding: 1.5rem; border-radius: 8px; margin: 1rem 0; color:#ffffff; border:1px solid #334155; line-height:1.8;"></div>
+                
+                <h2 style="color:#93c5fd; font-size:1.5rem; margin-bottom:1rem; margin-top:2rem; border-bottom:2px solid #334155; padding-bottom:0.5rem;">Generate Response</h2>
+                
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#ffffff;">Response Tone</label>
+                    <select id="toneSelect" style="width:100%; padding:10px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#ffffff; font-size:1rem;">
+                        <option value="professional">Professional & Formal</option>
+                        <option value="conversational">Conversational & Friendly</option>
+                        <option value="assertive">Assertive & Direct</option>
+                        <option value="conciliatory">Conciliatory & Diplomatic</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#ffffff;">Response Approach</label>
+                    <select id="approachSelect" style="width:100%; padding:10px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#ffffff; font-size:1rem;">
+                        <option value="cooperative">Cooperative & Collaborative</option>
+                        <option value="defensive">Defensive & Protective</option>
+                        <option value="challenging">Challenging & Questioning</option>
+                        <option value="explanatory">Explanatory & Educational</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#ffffff;">Writing Style</label>
+                    <select id="styleSelect" style="width:100%; padding:10px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#ffffff; font-size:1rem;">
+                        <option value="detailed">Detailed & Comprehensive</option>
+                        <option value="concise">Concise & To-the-Point</option>
+                        <option value="technical">Technical & Legal-Focused</option>
+                        <option value="personal">Personal & Relatable</option>
+                    </select>
+                </div>
+                
+                <button id="generateResponse" style="background:#22c55e; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; width:100%; margin-top:1rem;">Generate Response Letter</button>
+                
+                <div id="responseResults" style="margin-top: 2rem; display: none;">
+                    <h2 style="color:#93c5fd; font-size:1.5rem; margin-bottom:1rem; border-bottom:2px solid #334155; padding-bottom:0.5rem;">Generated Response Letter</h2>
+                    <div id="responseLetter" style="background: #0f172a; padding: 1.5rem; border-radius: 8px; margin: 1rem 0; white-space: pre-wrap; color:#ffffff; border:1px solid #334155; line-height:1.8; font-family: 'Courier New', monospace; font-size:0.95rem;"></div>
+                    <div style="margin-top: 1.5rem; display:flex; gap:1rem;">
+                        <button id="downloadPDF" style="background:#dc2626; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; flex:1;">📄 Download PDF</button>
+                        <button id="downloadDOCX" style="background:#059669; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; flex:1;">📝 Download DOCX</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="max-width:700px; margin:2rem auto; padding:1.5rem; background:#1e293b; border-radius:8px; border:1px solid #334155;">
+            <h3 style="color:#93c5fd; margin-top:0;">How It Works</h3>
+            <ol style="color:#cbd5e1; line-height:1.8; padding-left:1.5rem;">
+                <li>Upload your IRS letter (PDF or image)</li>
+                <li>Our AI analyzes the letter and explains it in plain English</li>
+                <li>Choose your preferred response style</li>
+                <li>Generate a professional response letter</li>
+                <li>Download as PDF or DOCX and mail to the IRS</li>
+            </ol>
+            
+            <div style="background:#7f1d1d; border:2px solid #dc2626; border-radius:8px; padding:1rem; margin-top:1.5rem;">
+                <p style="color:#fca5a5; margin:0; font-size:0.9rem;"><strong>Disclaimer:</strong> This is not legal or tax advice. For complex matters, consult a qualified tax professional.</p>
+            </div>
+        </div>
     </div>
-    
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button id="uploadBtn" style="background:#3b82f6; color:#fff; padding:10px 20px; border-radius:6px; border:none; cursor:pointer;">Upload & Process</button>
-      <span id="uploadStatus" style="color:#22c55e; font-size:14px;"></span>
-    </div>
-  </div>
 
-  <!-- User Information -->
-  <div style="margin-bottom:20px; padding:20px; background:#1e293b; border-radius:8px;">
-    <h3 style="color:#22c55e; margin-bottom:15px;">📝 Your Information (Required for Letter)</h3>
-    
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:15px; margin-bottom:15px;">
-      <div>
-        <label for="userName" style="display:block; margin-bottom:5px; color:#fff;">Full Name:</label>
-        <input type="text" id="userName" placeholder="John Smith" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#0f172a; color:#fff;">
-      </div>
-      <div>
-        <label for="userEmail" style="display:block; margin-bottom:5px; color:#fff;">Email Address:</label>
-        <input type="email" id="userEmail" placeholder="john@example.com" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#0f172a; color:#fff;">
-      </div>
-      <div>
-        <label for="userAddress" style="display:block; margin-bottom:5px; color:#fff;">Street Address:</label>
-        <input type="text" id="userAddress" placeholder="123 Main St" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#0f172a; color:#fff;">
-      </div>
-      <div>
-        <label for="userCity" style="display:block; margin-bottom:5px; color:#fff;">City, State, ZIP:</label>
-        <input type="text" id="userCity" placeholder="Anytown, ST 12345" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#0f172a; color:#fff;">
-      </div>
-      <div>
-        <label for="userPhone" style="display:block; margin-bottom:5px; color:#fff;">Phone Number:</label>
-        <input type="tel" id="userPhone" placeholder="(555) 123-4567" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#0f172a; color:#fff;">
-      </div>
-      <div>
-        <label for="userSSN" style="display:block; margin-bottom:5px; color:#fff;">SSN (Last 4 digits):</label>
-        <input type="text" id="userSSN" placeholder="1234" maxlength="4" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#0f172a; color:#fff;">
-      </div>
-    </div>
-  </div>
-
-  <!-- Text Input -->
-  <div style="margin-bottom:20px;">
-    <label for="letterInput" style="display:block; margin-bottom:5px; color:#fff;">Or paste text directly:</label>
-    <textarea id="letterInput" rows="10" style="width:100%; padding:10px; border-radius:6px;"></textarea>
-  </div>
-  
-  <button id="analyzeBtn" style="background:#22c55e; color:#fff; padding:12px 24px; border-radius:6px; border:none; cursor:pointer; font-weight:bold; margin-bottom:20px;">Analyze Letter</button>
-  
-  <!-- Response Style Options -->
-  <div id="responseStyleOptions" style="display:none; margin-bottom:20px; padding:20px; background:#1e293b; border-radius:8px;">
-    <h3 style="color:#22c55e; margin-bottom:15px;">📝 Response Style Options</h3>
-    
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:15px; margin-bottom:15px;">
-      <div>
-        <label style="display:block; margin-bottom:5px; color:#fff; font-weight:bold;">Tone:</label>
-        <select id="toneSelect" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#1e293b; color:#fff;">
-          <option value="professional">Professional & Formal</option>
-          <option value="conversational">Conversational & Friendly</option>
-          <option value="assertive">Assertive & Direct</option>
-          <option value="conciliatory">Conciliatory & Diplomatic</option>
-        </select>
-      </div>
-      
-      <div>
-        <label style="display:block; margin-bottom:5px; color:#fff; font-weight:bold;">Approach:</label>
-        <select id="approachSelect" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#1e293b; color:#fff;">
-          <option value="defensive">Defensive & Protective</option>
-          <option value="cooperative">Cooperative & Collaborative</option>
-          <option value="challenging">Challenging & Questioning</option>
-          <option value="explanatory">Explanatory & Educational</option>
-        </select>
-      </div>
-      
-      <div>
-        <label style="display:block; margin-bottom:5px; color:#fff; font-weight:bold;">Writing Style:</label>
-        <select id="styleSelect" style="width:100%; padding:8px; border-radius:4px; border:1px solid #374151; background:#1e293b; color:#fff;">
-          <option value="detailed">Detailed & Comprehensive</option>
-          <option value="concise">Concise & To-the-Point</option>
-          <option value="technical">Technical & Legal-Focused</option>
-          <option value="personal">Personal & Relatable</option>
-        </select>
-      </div>
-    </div>
-    
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button id="generateBtn" style="background:#3b82f6; color:#fff; padding:10px 20px; border-radius:6px; border:none; cursor:pointer; font-weight:bold;">Generate Response Letter</button>
-      <span id="responseStatusText" style="color:#22c55e; font-size:14px;"></span>
-    </div>
-  </div>
-  
-  <!-- Analysis Status -->
-  <div id="summaryOutput" style="margin-top:15px; padding:10px; background:#1e293b; border-radius:6px; color:#fff; display:none;"></div>
-  
-  <!-- Enhanced Analysis Display -->
-  <div id="analysisContainer" style="display:none; margin-top:20px; padding:20px; background:#1e293b; border-radius:8px;">
-    <h3 style="color:#22c55e; margin-bottom:15px;">📋 Letter Analysis</h3>
-    <div id="analysisDetails" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:15px;">
-      <!-- Analysis details will be populated here -->
-    </div>
-  </div>
-
-  <!-- Response Generation Section -->
-  <div id="responseSection" style="display:none; margin-top:20px; padding:20px; background:#1e293b; border-radius:8px;">
-    <h3 style="color:#22c55e; margin-bottom:15px;">📝 Generate Response Letter</h3>
-    
-    <div style="margin-bottom:15px;">
-      <label for="userInfo" style="display:block; margin-bottom:5px; color:#fff;">Your Information (Optional)</label>
-      <textarea id="userInfo" placeholder="Include any relevant personal information that should be in your response letter..." style="width:100%; padding:10px; border-radius:6px; border:1px solid #374151; background:#0f172a; color:#fff; min-height:80px; resize:vertical;"></textarea>
-    </div>
-    
-    <button id="generateBtn" style="background:#3b82f6; color:#fff; padding:12px 24px; border-radius:6px; border:none; cursor:pointer; font-weight:bold; margin-bottom:15px;">Generate Response Letter</button>
-    
-    <div id="responseStatus" style="margin-bottom:15px; padding:10px; background:#0f172a; border-radius:6px; color:#fff; display:none;"></div>
-    
-    <div id="responseOutput" style="margin-top:20px; padding:15px; background:#0f172a; border-radius:6px; white-space:pre-wrap; color:#fff; border:1px solid #374151; display:none;"></div>
-    
-    <div id="downloadSection" style="display:none; margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
-      <button id="pdfBtn" style="background:#dc2626; color:#fff; padding:10px 20px; border-radius:6px; border:none; cursor:pointer; font-weight:bold;">📄 Download PDF</button>
-      <button id="docxBtn" style="background:#059669; color:#fff; padding:10px 20px; border-radius:6px; border:none; cursor:pointer; font-weight:bold;">📝 Download DOCX</button>
-    </div>
-  </div>
-  
-  <p id="confidence" style="margin-top:10px; color:#22c55e; font-weight:bold;"></p>
-
-  <script>
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const generateBtn = document.getElementById('generateBtn');
-    
-    console.log('Analyze button found:', !!analyzeBtn);
-    console.log('Generate button found:', !!generateBtn);
-    const summaryOutput = document.getElementById('summaryOutput');
-    const responseOutput = document.getElementById('responseOutput');
-    const confidence = document.getElementById('confidence');
-    const pdfBtn = document.getElementById('pdfBtn');
-    const docxBtn = document.getElementById('docxBtn');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const responseStyleOptions = document.getElementById('responseStyleOptions');
-    const toneSelect = document.getElementById('toneSelect');
-    const approachSelect = document.getElementById('approachSelect');
-    const styleSelect = document.getElementById('styleSelect');
-    const responseStatus = document.getElementById('responseStatus');
-    const responseStatusText = document.getElementById('responseStatusText');
-    const uploadStatus = document.getElementById('uploadStatus');
-    const fileUpload = document.getElementById('fileUpload');
-    const imageUpload = document.getElementById('imageUpload');
-    const analysisContainer = document.getElementById('analysisContainer');
-    const analysisDetails = document.getElementById('analysisDetails');
-    const responseSection = document.getElementById('responseSection');
-    const downloadSection = document.getElementById('downloadSection');
-    const userName = document.getElementById('userName');
-    const userEmail = document.getElementById('userEmail');
-    const userAddress = document.getElementById('userAddress');
-    const userCity = document.getElementById('userCity');
-    const userPhone = document.getElementById('userPhone');
-    const userSSN = document.getElementById('userSSN');
-
-    let currentRecordId = null;
-    let uploadedFileUrl = null;
-    let uploadedImageUrl = null;
-
-    // Enhanced analysis display function
-    function displayEnhancedAnalysis(analysis) {
-      analysisContainer.style.display = 'block';
-      
-      const urgencyColor = analysis.urgency === 'High' ? '#dc2626' : 
-                          analysis.urgency === 'Medium' ? '#f59e0b' : '#22c55e';
-      
-      analysisDetails.innerHTML = `
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #22c55e;">
-          <h4 style="color:#22c55e; margin:0 0 10px 0;">📄 Notice Type</h4>
-          <p style="margin:0; color:#fff;">${analysis.letterType || 'Unknown'}</p>
+    <footer style="padding:28px 0; background:#0b1220; color:#cbd5e1; text-align:center;">
+        <div style="width:min(1120px, 92%); margin-inline:auto;">
+            <p>&copy; 2026 IRSAuditResponseAI. <a href="/privacy.html" style="color:#93c5fd; text-decoration:none;">Privacy Policy</a> | <a href="/terms.html" style="color:#93c5fd; text-decoration:none;">Terms</a> | <a href="/disclaimer.html" style="color:#93c5fd; text-decoration:none;">Disclaimer</a></p>
         </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #3b82f6;">
-          <h4 style="color:#3b82f6; margin:0 0 10px 0;">📝 Summary</h4>
-          <p style="margin:0; color:#fff;">${analysis.summary || 'No summary available'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #f59e0b;">
-          <h4 style="color:#f59e0b; margin:0 0 10px 0;">🔍 Reason</h4>
-          <p style="margin:0; color:#fff;">${analysis.reason || 'No reason provided'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #dc2626;">
-          <h4 style="color:#dc2626; margin:0 0 10px 0;">⚡ Urgency</h4>
-          <p style="margin:0; color:${urgencyColor}; font-weight:bold;">${analysis.urgency || 'Medium'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #8b5cf6;">
-          <h4 style="color:#8b5cf6; margin:0 0 10px 0;">📋 Required Actions</h4>
-          <p style="margin:0; color:#fff;">${analysis.requiredActions || 'No specific actions listed'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #06b6d4;">
-          <h4 style="color:#06b6d4; margin:0 0 10px 0;">🚀 Next Steps</h4>
-          <p style="margin:0; color:#fff;">${analysis.nextSteps || 'No next steps provided'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #ef4444;">
-          <h4 style="color:#ef4444; margin:0 0 10px 0;">⚠️ Penalty Risk</h4>
-          <p style="margin:0; color:#fff;">${analysis.penaltyRisk || 'Review notice for penalty information'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #10b981;">
-          <h4 style="color:#10b981; margin:0 0 10px 0;">💳 Payment Options</h4>
-          <p style="margin:0; color:#fff;">${analysis.paymentOptions || 'Contact IRS for payment options'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #6366f1;">
-          <h4 style="color:#6366f1; margin:0 0 10px 0;">⚖️ Appeal Rights</h4>
-          <p style="margin:0; color:#fff;">${analysis.appealRights || 'You have the right to appeal within 30 days'}</p>
-        </div>
-        
-        <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #f97316;">
-          <h4 style="color:#f97316; margin:0 0 10px 0;">⏰ Resolution Timeline</h4>
-          <p style="margin:0; color:#fff;">${analysis.estimatedResolution || 'Varies by case complexity'}</p>
-        </div>
-      `;
-    }
+    </footer>
 
-    // File upload handler
-    uploadBtn.onclick = async () => {
-      const file = fileUpload.files[0];
-      const image = imageUpload.files[0];
-      
-      if (!file && !image) {
-        uploadStatus.textContent = 'Please select a file or image to upload.';
-        return;
-      }
-
-      uploadStatus.textContent = 'Processing file...';
-      
-      try {
-        // Convert files to base64 for direct processing
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            uploadedFileUrl = e.target.result;
-            uploadStatus.textContent = `File ready: ${file.name}`;
-          };
-          reader.readAsDataURL(file);
-        }
+    <script type="module">
+        import { uploadFile, saveDocumentToDatabase } from './src/components/UploadForm.js';
+        import { getCurrentUser } from './src/components/Auth.js';
         
-        if (image) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            uploadedImageUrl = e.target.result;
-            uploadStatus.textContent = `Image ready: ${image.name}`;
-          };
-          reader.readAsDataURL(image);
-        }
-      } catch (error) {
-        uploadStatus.textContent = `Upload error: ${error.message}`;
-        console.error('Upload error:', error);
-      }
-    };
-
-    analyzeBtn.onclick = async () => {
-      console.log('Analyze button clicked');
-      
-      // Validate user information
-      if (!userName.value.trim()) {
-        return alert('Please enter your full name.');
-      }
-      if (!userEmail.value.trim()) {
-        return alert('Please enter your email address.');
-      }
-      if (!userAddress.value.trim()) {
-        return alert('Please enter your street address.');
-      }
-      if (!userCity.value.trim()) {
-        return alert('Please enter your city, state, and ZIP code.');
-      }
-      
-      const text = document.getElementById('letterInput').value.trim();
-      if (!text && !uploadedFileUrl && !uploadedImageUrl) {
-        return alert('Please upload a file, image, or paste your letter text.');
-      }
-      
-      // Show status with proper null checking
-      if (summaryOutput) {
-        summaryOutput.textContent = 'Analyzing...';
-        summaryOutput.style.display = 'block';
-      }
-      if (confidence) {
-        confidence.textContent = '';
-      }
-
-      const requestBody = {
-        text: text || '',
-        fileUrl: uploadedFileUrl || null,
-        imageUrl: uploadedImageUrl || null,
-        userInfo: {
-          name: userName.value.trim(),
-          email: userEmail.value.trim(),
-          address: userAddress.value.trim(),
-          city: userCity.value.trim(),
-          phone: userPhone.value.trim(),
-          ssn: userSSN.value.trim()
-        }
-      };
-
-      try {
-        console.log('Sending to analyze-letter:', {
-          textLength: text.length,
-          hasFileUrl: !!uploadedFileUrl,
-          hasImageUrl: !!uploadedImageUrl,
-          fileUrlType: uploadedFileUrl ? uploadedFileUrl.substring(0, 50) + '...' : 'none'
+        let currentUser = null;
+        let letterText = '';
+        let analysisData = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = await getCurrentUser();
+            if (!currentUser) {
+                currentUser = { id: 'test-user-123', email: 'test@example.com' };
+            }
         });
         
-        const res = await fetch('/.netlify/functions/analyze-letter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                alert('Please login first');
+                return;
+            }
+            
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            try {
+                showStatus('Uploading file...');
+                
+                const filePath = await uploadFile(file, currentUser.id);
+                await saveDocumentToDatabase(currentUser.id, file.name, filePath);
+                
+                showStatus('File uploaded successfully! Extracting text...');
+                
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const base64Data = e.target.result.split(',')[1];
+                        try {
+                            const ocrResponse = await fetch('/.netlify/functions/extract-text', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    imageData: base64Data,
+                                    mimeType: file.type
+                                })
+                            });
+                            
+                            const ocrData = await ocrResponse.json();
+                            
+                            if (ocrData.text) {
+                                letterText = ocrData.text;
+                                showStatus('Text extracted successfully! Analyzing letter...');
+                                await analyzeLetter();
+                            } else {
+                                showStatus('Failed to extract text from image: ' + (ocrData.error || 'Unknown error'));
+                            }
+                        } catch (error) {
+                            showStatus('OCR failed: ' + error.message);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    return;
+                } else if (file.type === 'application/pdf') {
+                    letterText = `PDF content for ${file.name}. This is a placeholder for PDF text extraction.`;
+                } else {
+                    letterText = `Document content for ${file.name}. This is a placeholder for document text extraction.`;
+                }
+                
+                await analyzeLetter();
+                
+            } catch (error) {
+                showStatus('Upload failed: ' + error.message);
+            }
         });
         
-        if (!res.ok) {
-          throw new Error(`Server error: ${res.status}`);
+        async function analyzeLetter() {
+            try {
+                const analysisResponse = await fetch('/.netlify/functions/analyze-letter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: letterText,
+                        userEmail: currentUser.email
+                    })
+                });
+                
+                analysisData = await analysisResponse.json();
+                
+                if (analysisData.summary || analysisData.analysis) {
+                    const explanationElement = document.getElementById('explanation');
+                    if (explanationElement) {
+                        const displayText = analysisData.analysis 
+                            ? JSON.stringify(analysisData.analysis, null, 2)
+                            : analysisData.summary;
+                        explanationElement.textContent = displayText;
+                        document.getElementById('analysisResults').style.display = 'block';
+                        hideStatus();
+                    }
+                } else {
+                    showStatus('Analysis failed: ' + (analysisData.error || 'Unknown error'));
+                }
+            } catch (error) {
+                showStatus('Analysis failed: ' + error.message);
+            }
         }
         
-        const data = await res.json();
-        
-        if (data.error) {
-          if (summaryOutput) {
-            summaryOutput.textContent = `Error: ${data.error}`;
-            summaryOutput.style.display = 'block';
-          }
-          return;
-        }
-        
-        // Display enhanced analysis
-        if (data.analysis) {
-          displayEnhancedAnalysis(data.analysis);
-          if (confidence) {
-            confidence.textContent = `AI Confidence: ${data.analysis.confidence}%`;
-          }
-        } else {
-          if (summaryOutput) {
-            summaryOutput.textContent = data.summary || 'No summary generated.';
-            summaryOutput.style.display = 'block';
-          }
-        }
-        
-        currentRecordId = data.recordId || null;
-        
-        // Show response generation section
-        if (responseSection) {
-          responseSection.style.display = 'block';
-        }
-        if (responseStyleOptions) {
-          responseStyleOptions.style.display = 'block';
-        }
-      } catch (error) {
-        console.error('Analysis error:', error);
-        
-        if (summaryOutput) {
-          summaryOutput.textContent = `Analysis failed: ${error.message}`;
-          summaryOutput.style.display = 'block';
-        }
-      }
-    };
-
-    generateBtn.onclick = async () => {
-      console.log('Generate button clicked');
-      if (!currentRecordId) {
-        if (!confirm('No recordId present. Continue anyway?')) return;
-      }
-      
-      // Show status
-      if (responseStatusText) {
-        responseStatusText.textContent = 'Generating response letter...';
-        responseStatusText.style.display = 'block';
-      }
-
-      const summary = summaryOutput ? summaryOutput.textContent : '';
-      const userData = {
-        name: userName ? userName.value.trim() : '',
-        email: userEmail ? userEmail.value.trim() : '',
-        address: userAddress ? userAddress.value.trim() : '',
-        city: userCity ? userCity.value.trim() : '',
-        phone: userPhone ? userPhone.value.trim() : '',
-        ssn: userSSN ? userSSN.value.trim() : ''
-      };
-      const tone = toneSelect ? toneSelect.value : 'professional';
-      const approach = approachSelect ? approachSelect.value : 'cooperative';
-      const style = styleSelect ? styleSelect.value : 'detailed';
-      
-      try {
-        const res = await fetch('/.netlify/functions/generate-response', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            summary, 
-            recordId: currentRecordId,
-            userData: userData,
-            letterText: document.getElementById('letterInput').value.trim(),
-            tone: tone,
-            approach: approach,
-            style: style
-          })
+        document.getElementById('generateResponse').addEventListener('click', async () => {
+            try {
+                showStatus('Generating response letter...');
+                
+                const tone = document.getElementById('toneSelect').value;
+                const approach = document.getElementById('approachSelect').value;
+                const style = document.getElementById('styleSelect').value;
+                
+                const response = await fetch('/.netlify/functions/generate-response', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        summary: analysisData.summary || JSON.stringify(analysisData.analysis),
+                        tone: tone,
+                        approach: approach,
+                        style: style
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.letter) {
+                    const responseElement = document.getElementById('responseLetter');
+                    if (responseElement) {
+                        responseElement.textContent = data.letter;
+                        document.getElementById('responseResults').style.display = 'block';
+                        hideStatus();
+                    }
+                } else {
+                    showStatus('Response generation failed: ' + (data.error || 'Unknown error'));
+                }
+                
+            } catch (error) {
+                showStatus('Response generation failed: ' + error.message);
+            }
         });
         
-        if (!res.ok) {
-          throw new Error(`Server error: ${res.status}`);
-        }
-        
-        const data = await res.json();
-        
-        if (data.letter) {
-          if (responseOutput) {
-            responseOutput.textContent = data.letter;
-            responseOutput.style.display = 'block';
-          }
-          if (downloadSection) {
-            downloadSection.style.display = 'flex';
-          }
-          if (responseStatusText) {
-            responseStatusText.textContent = 'Response letter generated successfully!';
-            responseStatusText.style.color = '#22c55e';
-          }
-        } else {
-          if (responseStatusText) {
-            responseStatusText.textContent = `Error: ${data.error || 'No response generated.'}`;
-            responseStatusText.style.color = '#dc2626';
-          }
-        }
-      } catch (error) {
-        console.error('Response generation error:', error);
-        
-        if (responseStatusText) {
-          responseStatusText.textContent = `Response generation failed: ${error.message}`;
-          responseStatusText.style.color = '#dc2626';
-        }
-      }
-    };
-
-    pdfBtn.onclick = async () => {
-      const responseText = responseOutput ? responseOutput.textContent : '';
-      if (!responseText) {
-        alert('No response letter available for PDF generation.');
-        return;
-      }
-      
-      try {
-        const res = await fetch('/.netlify/functions/generate-pdf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            text: responseText,
-            fileName: 'IRS_Response_Letter.pdf'
-          })
+        document.getElementById('downloadPDF').addEventListener('click', async () => {
+            const responseElement = document.getElementById('responseLetter');
+            if (!responseElement) {
+                alert('Error: Could not find response letter element');
+                return;
+            }
+            const responseText = responseElement.textContent;
+            
+            try {
+                const response = await fetch('/.netlify/functions/generate-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: responseText,
+                        fileName: 'irs-response-letter.pdf'
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'irs-response-letter.pdf';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('PDF generation failed');
+                }
+            } catch (error) {
+                alert('PDF generation failed: ' + error.message);
+            }
         });
         
-        if (res.ok) {
-          const blob = await res.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'IRS_Response_Letter.pdf';
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } else {
-          alert('Error generating PDF. Please try again.');
-        }
-      } catch (error) {
-        alert('Error generating PDF: ' + error.message);
-      }
-    };
-
-    docxBtn.onclick = async () => {
-      const responseText = responseOutput ? responseOutput.textContent : '';
-      if (!responseText) {
-        alert('No response letter available for DOCX generation.');
-        return;
-      }
-      
-      try {
-        const res = await fetch('/.netlify/functions/generate-docx', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            text: responseText,
-            fileName: 'IRS_Response_Letter.docx'
-          })
+        document.getElementById('downloadDOCX').addEventListener('click', async () => {
+            const responseElement = document.getElementById('responseLetter');
+            if (!responseElement) {
+                alert('Error: Could not find response letter element');
+                return;
+            }
+            const responseText = responseElement.textContent;
+            
+            try {
+                const response = await fetch('/.netlify/functions/generate-docx', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        text: responseText,
+                        fileName: 'irs-response-letter.docx'
+                    })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'irs-response-letter.docx';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('DOCX generation failed');
+                }
+            } catch (error) {
+                alert('DOCX generation failed: ' + error.message);
+            }
         });
         
-        if (res.ok) {
-          const blob = await res.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'IRS_Response_Letter.docx';
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } else {
-          alert('Error generating DOCX. Please try again.');
+        function showStatus(message) {
+            const statusDiv = document.getElementById('uploadStatus');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = message;
+            statusDiv.style.display = 'block';
         }
-      } catch (error) {
-        alert('Error generating DOCX: ' + error.message);
-      }
-    };
-  </script>
-
-  <!-- MOBILE FOOTER STICKY AD -->
-  <div class="native-ad mobile-footer-ad mobile-only" id="ad-mobile-footer"></div>
-
-  <!-- Ad Manager Script -->
-  <script type="module" src="/src/ads-manager.js"></script>
+        
+        function hideStatus() {
+            document.getElementById('uploadStatus').style.display = 'none';
+        }
+    </script>
 </body>
 </html>

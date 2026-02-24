@@ -7,7 +7,7 @@ This guide covers deployment of the **IRS Audit Response** product, which is sep
 ## Product Specifications
 
 - **Name:** IRS Audit Response Preparation
-- **Price:** $197.00 (one-time)
+- **Price:** $19.00 (one-time)
 - **Scope:** Audit-only (rejects all non-audit notices)
 - **Risk Level:** High
 - **Architecture:** Constrained procedural system (not chat-based)
@@ -36,7 +36,7 @@ Create Stripe product with exact specifications:
 **Product Details:**
 - Name: `IRS Audit Response Preparation`
 - Description: `One-time preparation guidance for IRS audits using a constrained, risk-aware system designed to help limit scope and reduce over-disclosure during examinations.`
-- Price: `$197.00 USD`
+- Price: `$19.00 USD`
 - Type: `One-time payment`
 
 **Metadata (REQUIRED):**
@@ -76,7 +76,7 @@ Verify these functions are deployed:
 
 - ✅ `analyze-audit-notice.js` - Audit-only analysis
 - ✅ `generate-audit-response.js` - Restrictive response generation
-- ✅ `create-audit-checkout-session.js` - Stripe checkout ($197)
+- ✅ `create-audit-checkout-session.js` - Stripe checkout ($19)
 
 ### 5. Landing Pages
 
@@ -136,7 +136,7 @@ Complete payment flow:
 
 1. Go to `audit-payment.html`
 2. Enter email
-3. Complete Stripe checkout ($197)
+3. Complete Stripe checkout ($19)
 4. Verify redirect to `audit-success.html`
 5. Verify database record created
 
@@ -169,7 +169,7 @@ All must pass before production deployment:
 - ✅ Over-disclosure warnings appear
 
 ### Payment & Database
-- ✅ Stripe checkout works ($197)
+- ✅ Stripe checkout works ($19)
 - ✅ Database records created correctly
 - ✅ Payment status tracked
 - ✅ Email receipts sent
@@ -251,7 +251,7 @@ Schedule for:
 - 50+ audit analyses completed
 - <5% inappropriate rejections
 - >90% appropriate hard stops
-- $9,850+ revenue ($197 × 50)
+- $950+ revenue ($19 × 50)
 
 ### 90-Day Goals
 - 200+ audit analyses completed

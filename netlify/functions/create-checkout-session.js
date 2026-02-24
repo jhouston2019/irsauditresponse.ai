@@ -4,12 +4,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function handler(event) {
   try {
-    // Debug: Check environment variables
-    console.log('SITE_URL:', process.env.SITE_URL);
-    console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'Set' : 'Missing');
-    console.log('STRIPE_PRICE_RESPONSE:', process.env.STRIPE_PRICE_RESPONSE);
-    
-    const { recordId = null, customerEmail = null } = JSON.parse(event.body || "{}"); // send from client if available
+    const { recordId = null, customerEmail = null } = JSON.parse(event.body || "{}");
     const priceId = process.env.STRIPE_PRICE_RESPONSE || process.env.STRIPE_PRICE_ID || "price_49USD_single";
     
     // Validate required environment variables
@@ -18,9 +13,6 @@ export async function handler(event) {
     }
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY environment variable is not set');
-    }
-    if (!priceId || priceId === "price_49USD_single") {
-      console.warn('Warning: Using default price ID. Consider setting STRIPE_PRICE_RESPONSE or STRIPE_PRICE_ID environment variable.');
     }
 
     let session;
