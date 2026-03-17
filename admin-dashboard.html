@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard - IRS Audit Response</title>
+  <title>Admin Dashboard - IRSAuditResponseAI</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -255,10 +255,26 @@
       window.location.href = '/audit-response.html';
     }
 
+    // Check admin authentication on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const adminUser = sessionStorage.getItem('adminUser');
+      
+      if (!adminToken || !adminUser) {
+        alert('Admin access required. Please login first.');
+        window.location.href = '/index.html';
+        return;
+      }
+      
+      document.querySelector('.logo').textContent = `Admin Dashboard - ${adminUser}`;
+    });
+
     // Logout functionality
     document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('adminToken');
+      sessionStorage.removeItem('adminUser');
       sessionStorage.removeItem('adminAuth');
-      window.location.href = '/audit-response.html';
+      window.location.href = '/index.html';
     });
 
     // Load dashboard data
