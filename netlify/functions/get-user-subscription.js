@@ -90,7 +90,7 @@ function getPlanLimits(planType) {
     'STARTER': {
       lettersPerMonth: 1,
       features: ['analysis', 'response_generation', 'pdf_download'],
-      price: 19
+      price: 49
     },
     'PRO': {
       lettersPerMonth: 3,
