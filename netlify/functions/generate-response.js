@@ -23,66 +23,82 @@ exports.handler = async (event) => {
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      temperature: 0.8,
-      top_p: 0.9,
+      temperature: 0.7,
+      top_p: 0.85,
       messages: [
         { 
           role: "system", 
-          content: `You are a certified tax professional and audit response specialist. 
+          content: `You are generating a formal IRS response letter that matches the structure used in professional tax correspondence.
 
-Generate precise, factual IRS audit or CP2000 response letters. Reference the specific notice, explain discrepancies clearly, cite documentation, and maintain a respectful tone requesting case reconsideration.
+CRITICAL: Follow this EXACT structure for ALL responses:
 
-Write a professional, IRS-compliant response letter with the following specifications:
+-----------------------------------
 
-**TONE: ${tone}**
-- Professional & Formal: Use formal language, proper titles, and official terminology
-- Conversational & Friendly: Use approachable language while maintaining professionalism
-- Assertive & Direct: Be firm and direct in your statements and requests
-- Conciliatory & Diplomatic: Use diplomatic language to find common ground
+[Taxpayer Name]
+[Address Line 1]
+[City, State ZIP]
 
-**APPROACH: ${approach}**
-- Defensive & Protective: Focus on protecting taxpayer rights and challenging IRS positions
-- Cooperative & Collaborative: Work with the IRS to resolve issues amicably
-- Challenging & Questioning: Question IRS findings and demand detailed explanations
-- Explanatory & Educational: Focus on explaining the taxpayer's position clearly
+[Date]
 
-**WRITING STYLE: ${style}**
-- Detailed & Comprehensive: Provide extensive explanations and supporting details
-- Concise & To-the-Point: Keep responses brief and focused on key points
-- Technical & Legal-Focused: Use legal terminology and cite specific tax laws
-- Personal & Relatable: Use personal examples and relatable language
+Internal Revenue Service
+[Correct IRS Address based on notice]
 
-1. **Format & Structure:**
-   - Use proper business letter format with date, recipient, and subject line
-   - Reference the specific IRS notice number, date, and taxpayer ID
-   - Include proper salutation and closing
+RE: Response to IRS Notice [Notice Number]
+Tax Year: [Year]
+SSN: XXX-XX-[Last 4]
 
-2. **Content Requirements:**
-   - Address each specific issue raised by the IRS
-   - Provide clear, factual explanations with supporting details
-   - Include relevant tax law references when appropriate
-   - Request specific actions or clarifications as needed
-   - Offer to provide additional documentation if required
+-----------------------------------
 
-3. **Professional Standards:**
-   - Use precise IRS terminology and form references
-   - Include appropriate legal disclaimers
-   - Follow current IRS response guidelines
-   - Ensure all statements are accurate and verifiable
+Dear Sir or Madam,
 
-4. **Response Elements:**
-   - Acknowledge receipt of the notice
-   - State your position clearly and concisely
-   - Provide supporting documentation references
-   - Request specific relief or clarification
-   - Include contact information for follow-up
-   - Set reasonable expectations for response time
+INTRO PARAGRAPH:
+"This letter is submitted in response to IRS Notice [Notice Number] regarding [brief issue]. The purpose of this response is to address the discrepancy identified and provide clarification and supporting information."
 
-Write a response that matches the specified tone, approach, and style while protecting the taxpayer's rights and maintaining professional standards.` 
+-----------------------------------
+
+SECTION 1 — NOTICE SUMMARY
+[Clear explanation of what the IRS is asserting]
+
+SECTION 2 — ISSUE RESPONSE
+[Direct response to each issue raised - no hedging, no uncertainty language]
+
+SECTION 3 — SUPPORTING POSITION
+[Clarify facts and reference documentation]
+
+-----------------------------------
+
+CLOSING PARAGRAPH:
+"Based on the information provided, we respectfully request that the IRS review this response and make any necessary adjustments to the account. Please contact me if additional information is required."
+
+-----------------------------------
+
+Sincerely,
+[Taxpayer Name]
+
+-----------------------------------
+
+LANGUAGE REQUIREMENTS:
+- NO casual tone or AI-style phrasing
+- NO uncertainty language ("may", "might", "it seems", "appears to be")
+- Use formal, controlled, declarative language
+- Replace "you may want to" with "This response addresses"
+- Replace "it seems" with "The discrepancy relates to"
+- Replace "AI suggests" with "The following explanation is provided"
+- Use "We respectfully request" for all requests
+
+TONE: Formal, controlled, declarative, professional
+MUST READ LIKE: Formal IRS correspondence from a tax professional
+MUST NOT READ LIKE: AI-generated conversational text
+
+**TONE MODIFIER: ${tone}**
+**APPROACH MODIFIER: ${approach}**
+**STYLE MODIFIER: ${style}**
+
+Apply these modifiers while maintaining the formal structure above.` 
         },
         { 
           role: "user", 
-          content: `Based on this IRS letter analysis, write a professional response letter:\n\n${summary}\n\nEnsure the response addresses all issues raised, provides clear explanations, and follows proper IRS correspondence protocols.` 
+          content: `Based on this IRS letter analysis, generate a formal response letter following the exact structure provided:\n\n${summary}\n\nUse proper IRS correspondence format. No casual language. No AI tone. Format as professional tax correspondence.` 
         }
       ],
     });
