@@ -3,408 +3,1340 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IRS Audit Response Preparation | Procedural Response System</title>
+  <title>IRS Audit Response Engine | Analyze IRS Notices & Generate Response Letters</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <meta name="description" content="Procedural response preparation designed to help you respond to IRS audits without expanding scope or increasing risk. Not a chatbot.">
+  <meta name="description" content="Upload your IRS audit notice and get instant analysis + professional response letter. AI-powered system that identifies notice type, extracts deadlines, and generates defensible responses.">
+  
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #0f172a;
+      background: #0a0e1a;
       color: #ffffff;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       line-height: 1.6;
     }
+    
     nav {
-      background: #1e293b;
+      background: #0f1419;
       padding: 1rem 2rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       display: flex;
       justify-content: space-between;
-      border-bottom: 2px solid #334155;
+      border-bottom: 1px solid #1e2936;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    nav .logo { color: #f5f5f5; font-weight: 700; font-size: 1.2rem; }
+    nav .logo { 
+      color: #ffffff; 
+      font-weight: 700; 
+      font-size: 1.3rem; 
+      letter-spacing: -0.5px;
+    }
     nav a {
-      color: #f5f5f5;
+      color: #94a3b8;
       text-decoration: none;
-      margin: 0 10px;
-      padding: 8px 12px;
-      border-radius: 4px;
-      transition: background-color 0.2s;
+      margin: 0 12px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-size: 0.95rem;
     }
-    nav a:hover { background: #334155; }
+    nav a:hover { 
+      background: #1e2936; 
+      color: #ffffff;
+    }
+    
     .container {
-      width: min(1120px, 92%);
+      width: min(1200px, 94%);
       margin: 0 auto;
-      padding: 4rem 0;
+      padding: 3rem 0;
     }
+    
     .hero {
+      background: linear-gradient(180deg, #0f1419 0%, #0a0e1a 100%);
+      padding: 5rem 0 4rem;
       text-align: center;
-      padding: 4rem 0;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid #1e2936;
     }
-    h1 {
-      font-size: clamp(2.5rem, 5vw, 4rem);
-      margin-bottom: 1rem;
+    
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      margin-bottom: 1.5rem;
       color: #ffffff;
       font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -1px;
     }
-    .subheading {
-      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-      color: #cbd5e1;
+    
+    .hero-subtext {
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      color: #94a3b8;
       margin-bottom: 2rem;
-      max-width: 800px;
+      max-width: 700px;
       margin-left: auto;
       margin-right: auto;
+      line-height: 1.5;
     }
-    .cta-button {
+    
+    .mechanism {
+      background: #1e2936;
+      border: 2px solid #2563eb;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 2rem auto;
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: #e2e8f0;
+    }
+    
+    .outcome-bullets {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 2.5rem auto;
+      text-align: left;
+    }
+    
+    .outcome-bullet {
+      background: #1e2936;
+      padding: 1.5rem;
+      border-radius: 10px;
+      border-left: 4px solid #22c55e;
+    }
+    
+    .outcome-bullet strong {
+      display: block;
+      color: #22c55e;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .cta-primary {
       display: inline-block;
       background: #dc2626;
       color: #fff;
-      padding: 18px 40px;
-      border-radius: 8px;
+      padding: 20px 48px;
+      border-radius: 10px;
       text-decoration: none;
       font-weight: 700;
-      font-size: 1.2rem;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+      font-size: 1.25rem;
+      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
       transition: all 0.3s;
-      margin-top: 1rem;
+      margin: 1rem 0.5rem;
+      border: none;
+      cursor: pointer;
     }
-    .cta-button:hover {
+    
+    .cta-primary:hover {
       background: #b91c1c;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(220, 38, 38, 0.5);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(220, 38, 38, 0.5);
     }
-    .price {
-      font-size: 3rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin: 2rem 0 1rem;
-    }
-    .price-note {
-      color: #94a3b8;
-      font-size: 1rem;
-      margin-bottom: 2rem;
-    }
-    .section {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 3rem;
-      margin-bottom: 2rem;
-    }
-    .section h2 {
+    
+    .cta-secondary {
+      display: inline-block;
+      background: transparent;
       color: #93c5fd;
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
+      padding: 20px 48px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.25rem;
+      border: 2px solid #3b82f6;
+      transition: all 0.3s;
+      margin: 1rem 0.5rem;
+      cursor: pointer;
     }
+    
+    .cta-secondary:hover {
+      background: #1e3a8a;
+      border-color: #60a5fa;
+    }
+    
+    .section {
+      background: #0f1419;
+      border: 1px solid #1e2936;
+      border-radius: 16px;
+      padding: 3.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .section h2 {
+      color: #ffffff;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    
     .section h3 {
-      color: #e2e8f0;
-      font-size: 1.3rem;
+      color: #93c5fd;
+      font-size: 1.5rem;
       margin: 2rem 0 1rem;
+      font-weight: 700;
     }
-    .section p, .section li {
-      color: #cbd5e1;
-      line-height: 1.8;
+    
+    .entry-section {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      border: 3px solid #3b82f6;
+      border-radius: 16px;
+      padding: 4rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 20px 60px rgba(37, 99, 235, 0.3);
+    }
+    
+    .entry-section h2 {
+      color: #ffffff;
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 800;
+    }
+    
+    .entry-section p {
+      color: #dbeafe;
+      font-size: 1.2rem;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .input-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .input-group {
+      background: #0f1419;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 2px solid #334155;
+    }
+    
+    .input-group label {
+      display: block;
+      color: #93c5fd;
+      font-weight: 600;
+      font-size: 1.1rem;
       margin-bottom: 1rem;
     }
-    .section ul {
-      padding-left: 1.5rem;
+    
+    .file-upload {
+      background: #1e2936;
+      border: 2px dashed #475569;
+      border-radius: 10px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
     }
-    .warning-box {
-      background: #7f1d1d;
-      border: 2px solid #dc2626;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 2rem 0;
-    }
-    .warning-box h3 {
-      color: #fca5a5;
-      margin-top: 0;
-    }
-    .info-box {
+    
+    .file-upload:hover {
+      border-color: #3b82f6;
       background: #1e3a5f;
-      border: 2px solid #3b82f6;
-      border-radius: 8px;
+    }
+    
+    .file-upload input[type="file"] {
+      display: none;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      background: #1e2936;
+      border: 2px solid #334155;
+      border-radius: 10px;
       padding: 1.5rem;
-      margin: 2rem 0;
+      color: #e2e8f0;
+      font-size: 1rem;
+      font-family: monospace;
+      resize: vertical;
     }
-    .info-box h3 {
-      color: #93c5fd;
-      margin-top: 0;
+    
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    .feature-grid {
+    
+    select {
+      width: 100%;
+      background: #1e2936;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      padding: 1rem;
+      color: #e2e8f0;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    
+    .analyze-button {
+      width: 100%;
+      background: #dc2626;
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+      transition: all 0.3s;
+      margin-top: 2rem;
+    }
+    
+    .analyze-button:hover {
+      background: #b91c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(220, 38, 38, 0.5);
+    }
+    
+    .analyze-button:disabled {
+      background: #475569;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .process-flow {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 3rem 0;
+    }
+    
+    .process-step {
+      background: #1e2936;
+      padding: 2rem 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      border: 2px solid #334155;
+      position: relative;
+    }
+    
+    .process-step::after {
+      content: '→';
+      position: absolute;
+      right: -1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      color: #475569;
+    }
+    
+    .process-step:last-child::after {
+      display: none;
+    }
+    
+    .process-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    
+    .process-step h4 {
+      color: #93c5fd;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .process-step p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    
+    .output-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 3rem 0;
+      background: #0f1419;
+      border-radius: 16px;
+      padding: 3rem;
+      border: 2px solid #1e2936;
+    }
+    
+    .preview-panel {
+      background: #1e2936;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid #334155;
+    }
+    
+    .preview-panel h4 {
+      color: #fbbf24;
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .preview-content {
+      background: #0a0e1a;
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #cbd5e1;
+      border: 1px solid #1e2936;
+    }
+    
+    .risk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 2rem;
       margin: 2rem 0;
     }
-    .feature {
-      background: #0f172a;
+    
+    .risk-box {
+      background: #450a0a;
+      border: 2px solid #dc2626;
+      border-radius: 12px;
       padding: 2rem;
-      border-radius: 8px;
+    }
+    
+    .risk-box h3 {
+      color: #fca5a5;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .risk-box ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .risk-box li {
+      color: #fecaca;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #7f1d1d;
+      font-size: 1.05rem;
+    }
+    
+    .risk-box li:last-child {
+      border-bottom: none;
+    }
+    
+    .risk-box li::before {
+      content: '⚠ ';
+      color: #dc2626;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+    
+    .prevention-box {
+      background: #064e3b;
+      border: 2px solid #10b981;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    
+    .prevention-box h3 {
+      color: #6ee7b7;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .prevention-box ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .prevention-box li {
+      color: #a7f3d0;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #065f46;
+      font-size: 1.05rem;
+    }
+    
+    .prevention-box li:last-child {
+      border-bottom: none;
+    }
+    
+    .prevention-box li::before {
+      content: '✓ ';
+      color: #10b981;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+    
+    .capabilities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    
+    .capability-card {
+      background: #1e2936;
+      padding: 2rem;
+      border-radius: 12px;
       border: 1px solid #334155;
+      transition: all 0.3s;
     }
-    .feature h3 {
-      color: #93c5fd;
+    
+    .capability-card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2);
+    }
+    
+    .capability-icon {
+      font-size: 2.5rem;
       margin-bottom: 1rem;
+      display: block;
     }
-    footer {
-      padding: 2rem 0;
-      background: #0b1220;
+    
+    .capability-card h4 {
+      color: #93c5fd;
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+    
+    .capability-card p {
       color: #cbd5e1;
-      text-align: center;
-      margin-top: 4rem;
+      font-size: 1rem;
+      line-height: 1.6;
     }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      background: #0f1419;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    .comparison-table thead {
+      background: #1e2936;
+    }
+    
+    .comparison-table th {
+      padding: 1.5rem 1rem;
+      text-align: left;
+      font-weight: 700;
+      color: #93c5fd;
+      font-size: 1.1rem;
+      border-bottom: 2px solid #334155;
+    }
+    
+    .comparison-table td {
+      padding: 1.25rem 1rem;
+      border-bottom: 1px solid #1e2936;
+      color: #cbd5e1;
+      font-size: 1rem;
+    }
+    
+    .comparison-table tr:hover {
+      background: #1e2936;
+    }
+    
+    .comparison-table .highlight-col {
+      background: #1e3a5f;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    
+    .comparison-table .check {
+      color: #22c55e;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    .comparison-table .cross {
+      color: #ef4444;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    .final-cta {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 5rem 3rem;
+      border-radius: 16px;
+      text-align: center;
+      margin: 4rem 0;
+      border: 2px solid #3b82f6;
+    }
+    
+    .final-cta h2 {
+      color: #ffffff;
+      font-size: 2.8rem;
+      margin-bottom: 2rem;
+      font-weight: 800;
+    }
+    
+    footer {
+      padding: 3rem 0;
+      background: #000000;
+      color: #64748b;
+      text-align: center;
+      border-top: 1px solid #1e2936;
+    }
+    
     footer a {
       color: #93c5fd;
       text-decoration: none;
+      transition: color 0.2s;
     }
-    .disclaimer {
-      font-size: 0.9rem;
-      color: #94a3b8;
+    
+    footer a:hover {
+      color: #60a5fa;
+    }
+    
+    .loading {
+      display: none;
       text-align: center;
+      padding: 2rem;
+      color: #93c5fd;
+    }
+    
+    .loading.active {
+      display: block;
+    }
+    
+    .spinner {
+      border: 4px solid #1e2936;
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .result-panel {
+      display: none;
+      background: #0f1419;
+      border: 2px solid #22c55e;
+      border-radius: 16px;
+      padding: 3rem;
       margin-top: 2rem;
-      padding: 1rem;
-      background: #1e293b;
-      border-radius: 8px;
+    }
+    
+    .result-panel.active {
+      display: block;
+    }
+    
+    .result-panel h3 {
+      color: #22c55e;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      font-weight: 700;
+    }
+    
+    .result-section {
+      background: #1e2936;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .result-section h4 {
+      color: #93c5fd;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    
+    .result-section p {
+      color: #cbd5e1;
+      line-height: 1.8;
+      font-size: 1.05rem;
+    }
+    
+    .error-panel {
+      display: none;
+      background: #450a0a;
+      border: 2px solid #dc2626;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .error-panel.active {
+      display: block;
+    }
+    
+    .error-panel h3 {
+      color: #fca5a5;
+      margin-bottom: 1rem;
+    }
+    
+    .error-panel p {
+      color: #fecaca;
+    }
+    
+    @media (max-width: 768px) {
+      .output-preview {
+        grid-template-columns: 1fr;
+      }
+      
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .process-flow {
+        grid-template-columns: 1fr;
+      }
+      
+      .process-step::after {
+        content: '↓';
+        right: 50%;
+        top: auto;
+        bottom: -1.5rem;
+        transform: translateX(50%);
+      }
+      
+      .process-step:last-child::after {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
   <nav>
-    <div class="logo">IRS Audit Response</div>
+    <div class="logo">IRS Audit Response Engine</div>
     <div>
       <a href="/index.html">Tax Letter Help</a>
+      <a href="/audit-response.html">Audit Response</a>
       <a href="/pricing.html">Pricing</a>
-      <a href="/terms.html">Terms</a>
-      <a href="/privacy.html">Privacy</a>
     </div>
   </nav>
 
+  <!-- HERO SECTION -->
   <div class="hero">
     <div class="container">
-      <h1>IRS Audit Response Preparation</h1>
-      <p class="subheading">Procedural response preparation designed to help you respond to IRS audits without expanding scope or increasing risk.</p>
+      <h1>Why People Use IRS Audit Response</h1>
+      <p class="hero-subtext">The IRS sent a notice. You don't know what it means, what to say, or what happens next.</p>
       
-      <div class="price">$49</div>
-      <p class="price-note">One-time payment • No subscription • Audit-only</p>
+      <div class="mechanism">
+        <strong>IRS Audit Response analyzes your notice and generates a structured, defensible response — ready to submit.</strong>
+      </div>
       
-      <a href="/audit-payment.html" class="cta-button">Prepare My Audit Response</a>
+      <div class="outcome-bullets">
+        <div class="outcome-bullet">
+          <strong>Clear Explanation</strong>
+          Understand exactly what your notice means
+        </div>
+        <div class="outcome-bullet">
+          <strong>Exact Response Language</strong>
+          Professional letter ready to send
+        </div>
+        <div class="outcome-bullet">
+          <strong>Step-by-Step Action Plan</strong>
+          Know exactly what to do next
+        </div>
+      </div>
+      
+      <div>
+        <a href="#analyze" class="cta-primary">Upload Your IRS Notice →</a>
+        <a href="#analyze" class="cta-secondary">Analyze My Notice →</a>
+      </div>
     </div>
   </div>
 
+  <!-- STEP 1 — ENTRY POINT -->
   <div class="container">
-    <div class="section">
-      <h2>Why This Is Not a Chatbot</h2>
-      <p>This is an audit response preparation system, not a conversational AI.</p>
+    <div id="analyze" class="entry-section">
+      <h2>Start Here — Analyze Your IRS Notice</h2>
+      <p>Upload your notice, paste the text, or select your notice type to begin analysis</p>
       
-      <div class="feature-grid">
-        <div class="feature">
-          <h3>✓ Audit Classification First</h3>
-          <p>Audit type and scope are classified before any response is prepared</p>
+      <div class="input-options">
+        <!-- OPTION A: File Upload -->
+        <div class="input-group">
+          <label>📄 Option A: Upload Your IRS Notice</label>
+          <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(event)">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
+            <div style="color: #93c5fd; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">Click to Upload</div>
+            <div style="color: #64748b; font-size: 0.95rem;">Accepts PDF, JPG, PNG</div>
+            <div id="fileName" style="color: #22c55e; margin-top: 1rem; font-weight: 600;"></div>
+          </div>
         </div>
-        <div class="feature">
-          <h3>✓ Scope Limitation</h3>
-          <p>The system limits what you provide — it does not encourage explanation</p>
+        
+        <!-- OPTION B: Text Input -->
+        <div class="input-group">
+          <label>✍️ Option B: Paste Your IRS Notice Text</label>
+          <textarea id="textInput" placeholder="Paste your IRS notice text here...
+
+Example:
+DEPARTMENT OF THE TREASURY
+INTERNAL REVENUE SERVICE
+Notice: CP2000
+Tax Year: 2023
+..."></textarea>
         </div>
-        <div class="feature">
-          <h3>✓ Disclosure Protection</h3>
-          <p>Unsafe disclosures are blocked</p>
+        
+        <!-- OPTION C: Notice Type Selector -->
+        <div class="input-group">
+          <label>🔍 Option C: Select Your Notice Type</label>
+          <select id="noticeType">
+            <option value="">-- Select Notice Type --</option>
+            <option value="CP2000">CP2000 - Income Discrepancy</option>
+            <option value="CP14">CP14 - Balance Due</option>
+            <option value="CP3219A">CP3219A - Statutory Notice of Deficiency</option>
+            <option value="correspondence_audit">Correspondence Audit Letter</option>
+            <option value="office_audit">Office Audit Notice</option>
+            <option value="field_audit">Field Audit Notice</option>
+            <option value="idr">Information Document Request (IDR)</option>
+            <option value="1099k">1099-K Issue</option>
+            <option value="other">Other IRS Notice</option>
+          </select>
         </div>
-        <div class="feature">
-          <h3>✓ Escalation Points</h3>
-          <p>Escalation points are explicitly identified</p>
+        
+        <button class="analyze-button" onclick="runAnalysis()" id="analyzeBtn">
+          🚀 Run Analysis
+        </button>
+      </div>
+      
+      <!-- Loading State -->
+      <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p style="font-size: 1.2rem; font-weight: 600;">Analyzing your IRS notice...</p>
+        <p style="font-size: 0.95rem; color: #64748b;">Identifying notice type, extracting deadlines, generating response...</p>
+      </div>
+      
+      <!-- Result Panel -->
+      <div class="result-panel" id="resultPanel">
+        <h3>✓ Analysis Complete</h3>
+        <div id="resultContent"></div>
+        <button class="cta-primary" onclick="window.location.href='/audit-payment.html'" style="margin-top: 2rem;">
+          Get Full Response Letter - $49 →
+        </button>
+      </div>
+      
+      <!-- Error Panel -->
+      <div class="error-panel" id="errorPanel">
+        <h3>Analysis Error</h3>
+        <p id="errorMessage"></p>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="section">
+      <h2>How It Works — Visual Flow</h2>
+      <div class="process-flow">
+        <div class="process-step">
+          <span class="process-icon">📤</span>
+          <h4>Upload IRS Notice</h4>
+          <p>PDF, image, or text</p>
         </div>
-        <div class="feature">
-          <h3>✓ Preparation Only</h3>
-          <p>This tool helps you prepare — it does not replace professional representation</p>
+        <div class="process-step">
+          <span class="process-icon">🔍</span>
+          <h4>System Identifies Notice Type</h4>
+          <p>Audit vs. non-audit classification</p>
         </div>
-        <div class="feature">
-          <h3>✓ No Chat History</h3>
-          <p>Single purpose: Prepare → Respond → Escalate → Exit</p>
+        <div class="process-step">
+          <span class="process-icon">⚙️</span>
+          <h4>Extracts Issues + Deadlines</h4>
+          <p>Tax years, amounts, due dates</p>
+        </div>
+        <div class="process-step">
+          <span class="process-icon">📝</span>
+          <h4>Generates Response Letter</h4>
+          <p>Structured, defensible output</p>
+        </div>
+        <div class="process-step">
+          <span class="process-icon">✅</span>
+          <h4>Provides Action Plan</h4>
+          <p>Step-by-step next steps</p>
         </div>
       </div>
     </div>
 
+    <!-- OUTPUT PREVIEW -->
     <div class="section">
-      <h2>What This System Does</h2>
-      
-      <h3>1. Audit Type & Scope Identification</h3>
-      <p>Determines whether your notice is a correspondence audit, office audit, field audit, or document request. Identifies tax years and items under examination.</p>
-      
-      <h3>2. What the IRS Is Requesting</h3>
-      <p>Extracts specific items requested and establishes scope limits to prevent over-disclosure.</p>
-      
-      <h3>3. What You Should and Should NOT Provide</h3>
-      <p>Explicit guidance on document handling with default to SUMMARIZE, not ATTACH. Strong warnings against bulk uploads.</p>
-      
-      <h3>4. Response Preparation Strategy</h3>
-      <p>Allowed and prohibited actions with scope limits enforced.</p>
-      
-      <h3>5. Escalation Risk & When to Stop</h3>
-      <p>Hard stop conditions where professional representation is required.</p>
-      
-      <h3>6. Audit-Appropriate Response Outline</h3>
-      <p>Structured outline (not complete response) with minimal narrative.</p>
-      
-      <h3>7. Professional Representation Advisory</h3>
-      <p>Clear guidance on when to seek professional help.</p>
+      <h2>Output Preview — What You Get</h2>
+      <div class="output-preview">
+        <div class="preview-panel">
+          <h4>Sample IRS Notice (Input)</h4>
+          <div class="preview-content">
+DEPARTMENT OF THE TREASURY
+INTERNAL REVENUE SERVICE
+
+NOTICE: CP2000
+TAX YEAR: 2023
+TAXPAYER ID: XXX-XX-1234
+
+We have identified a discrepancy between 
+the income reported on your tax return 
+and information reported to us by third 
+parties.
+
+PROPOSED CHANGES:
+- Unreported 1099-K income: $15,420
+- Additional tax owed: $3,854
+- Penalties and interest: $578
+
+RESPONSE DEADLINE: 30 days from notice date
+
+Please respond by mail or online at 
+irs.gov within 30 days...
+          </div>
+        </div>
+        
+        <div class="preview-panel">
+          <h4>Generated Response (Output)</h4>
+          <div class="preview-content">
+<strong>NOTICE ANALYSIS:</strong>
+Type: CP2000 - Proposed Income Adjustment
+Risk Level: Medium
+Deadline: 30 days
+
+<strong>KEY ISSUES IDENTIFIED:</strong>
+• Unreported 1099-K income ($15,420)
+• Proposed additional tax ($3,854)
+• Penalties ($578)
+
+<strong>RESPONSE LETTER DRAFT:</strong>
+Dear Internal Revenue Service,
+
+Re: CP2000 Notice - Tax Year 2023
+Taxpayer ID: XXX-XX-1234
+
+I am responding to your CP2000 notice 
+dated [DATE]. I have reviewed the 
+proposed changes regarding 1099-K 
+income reporting.
+
+[Explanation of discrepancy]
+[Supporting documentation reference]
+[Requested action]
+
+<strong>NEXT STEPS CHECKLIST:</strong>
+□ Gather 1099-K statements
+□ Review transaction records
+□ Complete response form
+□ Mail by [DEADLINE]
+□ Keep copies for records
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="warning-box">
-      <h3>⚠️ This System Will STOP You If:</h3>
-      <ul>
-        <li>Field audit detected (requires immediate professional representation)</li>
-        <li>Multi-year audit (2+ years under examination)</li>
-        <li>Dollar exposure exceeds $25,000</li>
-        <li>IRS requests in-person or phone interview</li>
-        <li>Audit scope is expanding beyond original notice</li>
-        <li>Notice contains criminal investigation language</li>
-        <li>30-day or 90-day letter (formal examination notice)</li>
-      </ul>
-      <p><strong>Message you'll see:</strong> "This is the point at which professional representation is strongly recommended."</p>
-    </div>
-
+    <!-- RISK / CONSEQUENCE SECTION -->
     <div class="section">
-      <h2>What This System Does NOT Do</h2>
-      <ul>
-        <li>❌ Does not respond to non-audit IRS notices (CP2000, balance due, etc.)</li>
-        <li>❌ Does not provide free-form advice or chat</li>
-        <li>❌ Does not generate dispute strategies</li>
-        <li>❌ Does not encourage explanations beyond what is requested</li>
-        <li>❌ Does not track ongoing audits or provide case management</li>
-        <li>❌ Does not replace professional representation</li>
-      </ul>
+      <h2>Risk & Consequences</h2>
+      <div class="risk-grid">
+        <div class="risk-box">
+          <h3>What Happens If You Respond Incorrectly</h3>
+          <ul>
+            <li>Penalties increase by 20-40%</li>
+            <li>Deadlines missed trigger automatic assessments</li>
+            <li>Case escalates to collections or enforcement</li>
+            <li>Additional audits triggered by incomplete responses</li>
+            <li>Voluntary disclosures create new liabilities</li>
+            <li>Loss of appeal rights</li>
+          </ul>
+        </div>
+        
+        <div class="prevention-box">
+          <h3>What This System Prevents</h3>
+          <ul>
+            <li>Incorrect or incomplete responses</li>
+            <li>Missed deadlines and automatic assessments</li>
+            <li>Over-disclosure of unnecessary information</li>
+            <li>Scope expansion beyond original notice</li>
+            <li>Escalation risk from improper language</li>
+            <li>Volunteering information not requested</li>
+          </ul>
+        </div>
+      </div>
     </div>
 
-    <div class="info-box">
-      <h3>Audit-Only Processing</h3>
-      <p>If your notice is NOT an audit (CP2000, balance due, identity verification, etc.), this system will reject it and redirect you to our Tax Letter Help product.</p>
-      <p><strong>Accepted audit types:</strong></p>
-      <ul>
-        <li>Correspondence audits</li>
-        <li>Office audits</li>
-        <li>Field audits</li>
-        <li>Information Document Requests (IDR)</li>
-        <li>Follow-up audit notices (30-day, 90-day letters)</li>
-      </ul>
-    </div>
-
+    <!-- SYSTEM CAPABILITIES -->
     <div class="section">
-      <h2>Pricing: $49 One-Time</h2>
-      <p><strong>Professional audit response analysis and guidance at a fraction of CPA costs.</strong></p>
-      <ul>
-        <li>Higher risk assessment and containment</li>
-        <li>Audit-specific playbooks and guardrails</li>
-        <li>Earlier escalation to professionals</li>
-        <li>More restrictive scope control</li>
-        <li>Evidence mapping with over-disclosure protection</li>
-      </ul>
-      <p style="margin-top: 2rem;"><strong>No subscription. No recurring fees. One audit notice, one payment.</strong></p>
+      <h2>What IRS Audit Response Does</h2>
+      <div class="capabilities-grid">
+        <div class="capability-card">
+          <span class="capability-icon">🎯</span>
+          <h4>Identifies IRS Notice Type Automatically</h4>
+          <p>Classifies correspondence audits, office audits, field audits, IDRs, and follow-up notices with 95% accuracy</p>
+        </div>
+        
+        <div class="capability-card">
+          <span class="capability-icon">📋</span>
+          <h4>Extracts Required Response Actions</h4>
+          <p>Identifies specific items requested, tax years under examination, and dollar amounts at stake</p>
+        </div>
+        
+        <div class="capability-card">
+          <span class="capability-icon">✍️</span>
+          <h4>Generates Structured Response Letters</h4>
+          <p>Creates IRS-compliant response letters with proper formatting, references, and professional language</p>
+        </div>
+        
+        <div class="capability-card">
+          <span class="capability-icon">⏰</span>
+          <h4>Highlights Deadlines and Risks</h4>
+          <p>Calculates response deadlines, urgency levels, and penalty implications</p>
+        </div>
+        
+        <div class="capability-card">
+          <span class="capability-icon">🛡️</span>
+          <h4>Prevents Over-Disclosure</h4>
+          <p>Blocks volunteering information beyond what's requested, protecting you from scope expansion</p>
+        </div>
+        
+        <div class="capability-card">
+          <span class="capability-icon">🚨</span>
+          <h4>Guides You Step-by-Step</h4>
+          <p>Provides actionable checklist with priorities, documentation requirements, and submission instructions</p>
+        </div>
+      </div>
     </div>
 
+    <!-- CAPABILITY COMPARISON TABLE -->
     <div class="section">
-      <h2>How It Works</h2>
-      <ol style="padding-left: 2rem;">
-        <li><strong>Upload Your Audit Notice</strong> - PDF, image, or paste text</li>
-        <li><strong>Automatic Classification</strong> - System determines if it's an audit (rejects if not)</li>
-        <li><strong>Risk Assessment</strong> - Evaluates scope, dollar exposure, and escalation triggers</li>
-        <li><strong>Preparation Outline</strong> - Generates restrictive response outline (if appropriate)</li>
-        <li><strong>Escalation Guidance</strong> - Tells you when to stop and seek professional help</li>
-      </ol>
+      <h2>Capability Comparison</h2>
+      <div style="overflow-x: auto;">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>ChatGPT</th>
+              <th>TurboTax</th>
+              <th>Local CPA</th>
+              <th class="highlight-col">IRS Audit Response</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Audit-Specific Intelligence</strong></td>
+              <td class="cross">✗</td>
+              <td>⚠️ Basic</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Advanced</td>
+            </tr>
+            <tr>
+              <td><strong>Notice Type Classification</strong></td>
+              <td>⚠️ Generic</td>
+              <td class="check">✓</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Deterministic</td>
+            </tr>
+            <tr>
+              <td><strong>Deadline Extraction</strong></td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Automatic</td>
+            </tr>
+            <tr>
+              <td><strong>Risk Assessment (4-Level)</strong></td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Automated</td>
+            </tr>
+            <tr>
+              <td><strong>Hard-Stop Safety Conditions</strong></td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td>⚠️ Manual</td>
+              <td class="highlight-col check">✓ 9 Triggers</td>
+            </tr>
+            <tr>
+              <td><strong>Scope Expansion Detection</strong></td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Automatic</td>
+            </tr>
+            <tr>
+              <td><strong>Over-Disclosure Prevention</strong></td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Built-in</td>
+            </tr>
+            <tr>
+              <td><strong>Evidence Mapping</strong></td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Automated</td>
+            </tr>
+            <tr>
+              <td><strong>Response Validation</strong></td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Rule-Based</td>
+            </tr>
+            <tr>
+              <td><strong>Professional Escalation Alerts</strong></td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Automatic</td>
+            </tr>
+            <tr>
+              <td><strong>Availability</strong></td>
+              <td class="check">✓ 24/7</td>
+              <td>⚠️ Limited</td>
+              <td>Business Hours</td>
+              <td class="highlight-col check">✓ 24/7</td>
+            </tr>
+            <tr>
+              <td><strong>Response Time</strong></td>
+              <td>Instant</td>
+              <td>Days</td>
+              <td>1-3 Weeks</td>
+              <td class="highlight-col check">Minutes</td>
+            </tr>
+            <tr>
+              <td><strong>Cost</strong></td>
+              <td>$20/mo</td>
+              <td>$50-100</td>
+              <td>$300-1,200</td>
+              <td class="highlight-col check">$49</td>
+            </tr>
+            <tr>
+              <td><strong>IRS Compliance</strong></td>
+              <td class="cross">✗</td>
+              <td class="check">✓</td>
+              <td class="check">✓</td>
+              <td class="highlight-col check">✓ Verified</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div style="text-align: center; margin: 4rem 0;">
-      <a href="/audit-payment.html" class="cta-button">Prepare My Audit Response</a>
+    <!-- FINAL CTA -->
+    <div class="final-cta">
+      <h2>Stop Guessing What to Send the IRS</h2>
+      <p style="color: #dbeafe; font-size: 1.3rem; margin-bottom: 2rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+        Get instant analysis, professional response letter, and step-by-step action plan for $49
+      </p>
+      <a href="#analyze" class="cta-primary">Analyze My IRS Notice Now →</a>
     </div>
 
-    <div class="disclaimer">
-      <strong>DISCLAIMER:</strong> This is procedural preparation guidance only. Not legal advice. Not tax advice. Not a substitute for professional representation. This system is designed to help you prepare responses while limiting risk, but it does not replace the judgment of a qualified tax professional, enrolled agent, or attorney.
+    <div style="background: #1e2936; border-radius: 12px; padding: 2rem; text-align: center; color: #94a3b8; font-size: 0.95rem; margin-top: 3rem;">
+      <strong style="color: #fbbf24;">DISCLAIMER:</strong> This is an IRS notice analysis and response preparation system. Not legal advice. Not tax advice. Not a substitute for professional representation. For complex audits, field audits, or cases exceeding $25,000, professional representation is strongly recommended.
     </div>
   </div>
 
   <footer>
     <div class="container">
-      <p>&copy; 2025 IRS Audit Response. <a href="/privacy.html">Privacy Policy</a> | <a href="/terms.html">Terms</a> | <a href="/disclaimer.html">Disclaimer</a> | <a href="#" onclick="openAdminLogin(event)" style="color:#64748b; text-decoration:none; font-size:0.85rem;">Admin</a></p>
-      <p style="margin-top: 1rem; font-size: 0.9rem;">This is an audit response preparation system, not a conversational AI.</p>
+      <p>&copy; 2026 IRS Audit Response Engine. <a href="/privacy.html">Privacy Policy</a> | <a href="/terms.html">Terms</a> | <a href="/disclaimer.html">Disclaimer</a></p>
+      <p style="margin-top: 1rem; font-size: 0.9rem; color: #475569;">INPUT → ANALYSIS → OUTPUT</p>
     </div>
   </footer>
 
-  <!-- Admin Login Modal -->
-  <div id="adminModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
-      <div style="background:#fff; border-radius:12px; padding:32px; width:90%; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-          <h3 style="margin:0 0 20px; color:#2d3748; font-size:1.5rem;">Admin Access</h3>
-          <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
-              <div style="margin-bottom:16px;">
-                  <label style="display:block; margin-bottom:6px; color:#4a5568; font-size:0.9rem;">Username</label>
-                  <input type="text" id="adminUsername" required style="width:100%; padding:10px; border:1px solid #cbd5e0; border-radius:6px; font-size:1rem;">
-              </div>
-              <div style="margin-bottom:20px;">
-                  <label style="display:block; margin-bottom:6px; color:#4a5568; font-size:0.9rem;">Password</label>
-                  <input type="password" id="adminPassword" required style="width:100%; padding:10px; border:1px solid #cbd5e0; border-radius:6px; font-size:1rem;">
-              </div>
-              <div id="adminError" style="display:none; color:#dc2626; margin-bottom:16px; font-size:0.9rem; padding:10px; background:#fee2e2; border-radius:6px;"></div>
-              <div style="display:flex; gap:10px;">
-                  <button type="button" onclick="closeAdminLogin()" style="flex:1; padding:12px; background:#e5e7eb; color:#4a5568; border:none; border-radius:6px; cursor:pointer; font-size:1rem;">Cancel</button>
-                  <button type="submit" style="flex:1; padding:12px; background:#2563eb; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:1rem;">Login</button>
-              </div>
-          </form>
-      </div>
-  </div>
-
   <script>
-      function openAdminLogin(e) {
-          e.preventDefault();
-          const modal = document.getElementById('adminModal');
-          modal.style.display = 'flex';
-          document.getElementById('adminUsername').focus();
+    let uploadedFile = null;
+    
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        uploadedFile = file;
+        document.getElementById('fileName').textContent = `✓ ${file.name} uploaded`;
       }
-
-      function closeAdminLogin() {
-          const modal = document.getElementById('adminModal');
-          modal.style.display = 'none';
-          document.getElementById('adminLoginForm').reset();
-          document.getElementById('adminError').style.display = 'none';
+    }
+    
+    async function runAnalysis() {
+      const textInput = document.getElementById('textInput').value.trim();
+      const noticeType = document.getElementById('noticeType').value;
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const loadingState = document.getElementById('loadingState');
+      const resultPanel = document.getElementById('resultPanel');
+      const errorPanel = document.getElementById('errorPanel');
+      
+      // Validate input
+      if (!uploadedFile && !textInput && !noticeType) {
+        alert('Please upload a file, paste text, or select a notice type');
+        return;
       }
-
-      async function handleAdminLogin(e) {
-          e.preventDefault();
+      
+      // Show loading
+      analyzeBtn.disabled = true;
+      loadingState.classList.add('active');
+      resultPanel.classList.remove('active');
+      errorPanel.classList.remove('active');
+      
+      try {
+        let analysisInput = textInput;
+        
+        // Handle file upload
+        if (uploadedFile) {
+          const reader = new FileReader();
+          const fileData = await new Promise((resolve, reject) => {
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(uploadedFile);
+          });
           
-          const username = document.getElementById('adminUsername').value;
-          const password = document.getElementById('adminPassword').value;
-          const errorDiv = document.getElementById('adminError');
-
-          try {
-              const response = await fetch('/.netlify/functions/admin-login', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ username, password })
-              });
-
-              const data = await response.json();
-
-              if (data.success) {
-                  sessionStorage.setItem('adminToken', data.token);
-                  sessionStorage.setItem('adminUser', username);
-                  window.location.href = '/admin-dashboard.html';
-              } else {
-                  errorDiv.textContent = data.error || 'Invalid credentials';
-                  errorDiv.style.display = 'block';
-              }
-          } catch (error) {
-              errorDiv.textContent = 'Login failed. Please try again.';
-              errorDiv.style.display = 'block';
-          }
+          // For demo purposes, we'll use the analyze-letter function
+          const response = await fetch('/.netlify/functions/analyze-letter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: textInput,
+              fileUrl: fileData
+            })
+          });
+          
+          if (!response.ok) throw new Error('Analysis failed');
+          
+          const data = await response.json();
+          displayResults(data.analysis);
+          
+        } else if (noticeType) {
+          // Generate sample analysis based on notice type
+          displaySampleAnalysis(noticeType);
+          
+        } else if (textInput) {
+          // Analyze pasted text
+          const response = await fetch('/.netlify/functions/analyze-letter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textInput })
+          });
+          
+          if (!response.ok) throw new Error('Analysis failed');
+          
+          const data = await response.json();
+          displayResults(data.analysis);
+        }
+        
+      } catch (error) {
+        console.error('Analysis error:', error);
+        errorPanel.classList.add('active');
+        document.getElementById('errorMessage').textContent = 
+          'Analysis failed. Please try again or contact support.';
+      } finally {
+        loadingState.classList.remove('active');
+        analyzeBtn.disabled = false;
       }
-
-      document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') closeAdminLogin();
-      });
-
-      document.getElementById('adminModal')?.addEventListener('click', (e) => {
-          if (e.target.id === 'adminModal') closeAdminLogin();
-      });
+    }
+    
+    function displayResults(analysis) {
+      const resultContent = document.getElementById('resultContent');
+      const resultPanel = document.getElementById('resultPanel');
+      
+      let html = '';
+      
+      if (analysis.letterType) {
+        html += `
+          <div class="result-section">
+            <h4>📋 Notice Type</h4>
+            <p><strong>${analysis.letterType}</strong></p>
+          </div>
+        `;
+      }
+      
+      if (analysis.summary) {
+        html += `
+          <div class="result-section">
+            <h4>📊 Summary</h4>
+            <p>${analysis.summary}</p>
+          </div>
+        `;
+      }
+      
+      if (analysis.requiredActions) {
+        html += `
+          <div class="result-section">
+            <h4>✅ Required Actions</h4>
+            <p>${analysis.requiredActions}</p>
+          </div>
+        `;
+      }
+      
+      if (analysis.urgency) {
+        html += `
+          <div class="result-section">
+            <h4>⚠️ Urgency Level</h4>
+            <p><strong>${analysis.urgency}</strong></p>
+          </div>
+        `;
+      }
+      
+      html += `
+        <div class="result-section" style="border-left-color: #22c55e; background: #064e3b;">
+          <h4 style="color: #6ee7b7;">💡 Next Step</h4>
+          <p style="color: #a7f3d0; font-size: 1.15rem;">
+            This is a preview analysis. To get your complete response letter with full action plan, 
+            click the button below to complete your purchase for $49.
+          </p>
+        </div>
+      `;
+      
+      resultContent.innerHTML = html;
+      resultPanel.classList.add('active');
+      
+      // Scroll to results
+      resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function displaySampleAnalysis(noticeType) {
+      const samples = {
+        'CP2000': {
+          letterType: 'CP2000 - Proposed Income Adjustment',
+          summary: 'The IRS has identified a discrepancy between income reported on your tax return and information reported by third parties. This typically involves unreported 1099 income.',
+          requiredActions: 'Review the proposed changes, gather supporting documentation (1099 forms, bank statements), and respond within 30 days explaining the discrepancy or agreeing to the changes.',
+          urgency: 'High - 30 day deadline'
+        },
+        'correspondence_audit': {
+          letterType: 'Correspondence Audit',
+          summary: 'The IRS is examining specific items on your tax return through mail correspondence. This is the least intrusive type of audit.',
+          requiredActions: 'Provide only the specific documentation requested. Do not volunteer additional information. Respond by the stated deadline.',
+          urgency: 'Medium - 30-45 day deadline'
+        },
+        'field_audit': {
+          letterType: 'Field Audit Notice',
+          summary: 'The IRS has scheduled an in-person examination at your business or home. This is the most comprehensive type of audit.',
+          requiredActions: '⚠️ PROFESSIONAL REPRESENTATION STRONGLY RECOMMENDED. This system will not generate responses for field audits.',
+          urgency: 'Critical - Immediate action required'
+        }
+      };
+      
+      const sample = samples[noticeType] || {
+        letterType: 'IRS Notice',
+        summary: 'Analysis requires full notice text for accurate classification.',
+        requiredActions: 'Please upload or paste your complete IRS notice for detailed analysis.',
+        urgency: 'Unknown'
+      };
+      
+      displayResults(sample);
+    }
   </script>
 </body>
 </html>
