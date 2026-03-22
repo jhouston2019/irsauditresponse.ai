@@ -24,13 +24,13 @@ export async function handler(event) {
     const msg = {
       to,
       from: process.env.SUPPORT_EMAIL,
-      subject: 'Your IRS Audit Response Letter is Ready',
+      subject: 'Your audit response letter is ready',
       text: 'Attached is your AI-generated IRS response letter PDF.',
       html: `
-        <h2>Your IRS Audit Response Letter is Ready</h2>
-        <p>Thank you for using AuditResponseAI! Your AI-generated audit response letter is attached as a PDF.</p>
+        <h2>Your audit response letter is ready</h2>
+        <p>Thank you for using IRS Audit Defense Pro! Your AI-generated audit response letter is attached as a PDF.</p>
         <p>Please review the letter carefully before sending it to the IRS. Remember to consult with a tax professional for complex matters.</p>
-        <p>Best regards,<br>The AuditResponseAI Team</p>
+        <p>Best regards,<br>The IRS Audit Defense Pro Team</p>
       `,
       attachments: [{
         content: pdfBuffer.toString('base64'),

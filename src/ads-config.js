@@ -31,7 +31,7 @@ const AD_CONFIG = {
   maxAdsDesktop: 3,
   maxAdsMobile: 2,
   
-  // Slot IDs for IRS Audit Response (replace with actual slot IDs from AdSense)
+  // Slot IDs for IRS Audit Defense Pro (replace with actual slot IDs from AdSense)
   slots: {
     postContent: 'POST_CONTENT_SLOT_ID_IRS',
     exitGrid: 'EXIT_GRID_SLOT_ID_IRS',

@@ -1,5 +1,5 @@
 // AUDIT CORE — HIGH RISK — DO NOT MODIFY WITHOUT FULL TEST SUITE
-// IRS Audit Response Generator
+// IRS Audit Defense Pro Generator
 // Purpose: Generate RESTRICTIVE audit response outlines
 // NO free-form responses, NO dispute strategy
 

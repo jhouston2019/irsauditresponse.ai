@@ -1,6 +1,6 @@
 # 🚨 CRITICAL FIXES REQUIRED - IMMEDIATE ACTION NEEDED
 
-## IRS Audit Response AI - Emergency Remediation Plan
+## IRS Audit Defense Pro - Emergency Remediation Plan
 
 **Status:** ⛔ **NOT PRODUCTION READY**  
 **Risk Level:** 🔴 **HIGH**  
@@ -184,9 +184,9 @@ console.log('OpenAI API key found, initializing client...');
 **Issue:** Site uses THREE different brand names
 
 **Found:**
-- "IRSAuditResponseAI" (index.html, SEO pages)
-- "TaxLetterHelp" (payment.html, upload.html, legal pages)
-- "AuditResponseAI" (resources.html, examples.html)
+- "IRS Audit Defense Pro" (index.html, SEO pages)
+- "IRS Audit Defense Pro" (payment.html, upload.html, legal pages)
+- "IRS Audit Defense Pro" (resources.html, examples.html)
 
 **Impact:**
 - Confuses users
@@ -201,7 +201,7 @@ console.log('OpenAI API key found, initializing client...');
 4. Update footer copyrights
 5. Update page titles
 
-**Recommended Brand:** "IRSAuditResponseAI"
+**Recommended Brand:** "IRS Audit Defense Pro"
 
 **Estimated Time:** 6 hours
 
@@ -339,7 +339,7 @@ console.log('OpenAI API key found, initializing client...');
 **Priority: P1 - HIGH PRIORITY**
 
 - [ ] **Choose primary brand name** (1 hour)
-  - Decision: "IRSAuditResponseAI"
+  - Decision: "IRS Audit Defense Pro"
   - Document decision
   - Get stakeholder approval
 
@@ -568,8 +568,8 @@ async function verifyPaymentStatus(email) {
 **Search and replace across ALL files:**
 
 **Replace:**
-- "TaxLetterHelp" → "IRSAuditResponseAI"
-- "AuditResponseAI" → "IRSAuditResponseAI"
+- "IRS Audit Defense Pro" → "IRS Audit Defense Pro"
+- "IRS Audit Defense Pro" → "IRS Audit Defense Pro"
 - "taxletterhelp.com" → "irsauditresponseai.com" (or chosen domain)
 
 **Files to update (partial list):**
@@ -584,7 +584,7 @@ async function verifyPaymentStatus(email) {
 # Windows PowerShell
 Get-ChildItem -Recurse -Include *.html,*.md,*.json | 
   ForEach-Object {
-    (Get-Content $_.FullName) -replace 'TaxLetterHelp', 'IRSAuditResponseAI' | 
+    (Get-Content $_.FullName) -replace 'IRS Audit Defense Pro', 'IRS Audit Defense Pro' | 
     Set-Content $_.FullName
   }
 ```

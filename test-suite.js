@@ -1,4 +1,4 @@
-// Test suite for TaxLetterHelp application
+// Test suite for IRS Audit Defense Pro application
 // Run with: node test-suite.js
 
 import fs from 'fs';
@@ -216,7 +216,7 @@ test('Documentation is complete', () => {
 });
 
 // Run all tests
-console.log('🧪 Running TaxLetterHelp Test Suite...\n');
+console.log('🧪 Running IRS Audit Defense Pro Test Suite...\n');
 
 // Add more tests here as needed
 

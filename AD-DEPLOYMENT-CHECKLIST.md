@@ -3,7 +3,7 @@
 ## PRE-DEPLOYMENT
 
 ### 1. AdSense Account Setup
-- [ ] AdSense account approved for IRS Audit Response domain
+- [ ] AdSense account approved for IRS Audit Defense Pro domain
 - [ ] Publisher ID obtained (ca-pub-XXXXXXXXXXXXXXXX)
 - [ ] Ad units created in AdSense dashboard:
   - [ ] Post-Content Ad Unit (slot ID obtained)

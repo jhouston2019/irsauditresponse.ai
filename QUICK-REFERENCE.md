@@ -22,7 +22,7 @@
 7. ✅ Enabled payment check in upload.html
 
 ### 🎨 Branding (2 fixes)
-8. ✅ Standardized to "IRSAuditResponseAI"
+8. ✅ Standardized to "IRS Audit Defense Pro"
 9. ✅ Updated legal pages (dates, emails, domains)
 
 ### 🔧 Config (2 fixes)

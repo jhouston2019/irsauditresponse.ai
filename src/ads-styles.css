@@ -153,7 +153,7 @@
   margin-top: 40px;
 }
 
-/* Dark mode support for IRS Audit Response theme */
+/* Dark mode support for IRS Audit Defense Pro theme */
 @media (prefers-color-scheme: dark) {
   .native-ad {
     background: #1e293b;

@@ -1,5 +1,5 @@
 // AUDIT CORE — HIGH RISK — DO NOT MODIFY WITHOUT FULL TEST SUITE
-// Stripe Checkout for IRS Audit Response ($49 one-time)
+// Stripe Checkout for IRS Audit Defense Pro ($49 one-time)
 // Purpose: Create checkout session for audit response product
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -32,7 +32,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // IRS Audit Response Product Configuration
+    // IRS Audit Defense Pro Product Configuration
     // $49.00 USD - One-time payment
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -41,7 +41,7 @@ exports.handler = async (event) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'IRS Audit Response Preparation',
+              name: 'IRS Audit Defense Pro',
               description: 'One-time preparation guidance for IRS audits using a constrained, risk-aware system designed to help limit scope and reduce over-disclosure during examinations.',
               metadata: {
                 product_type: 'irs_audit_response',

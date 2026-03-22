@@ -47,7 +47,7 @@ class AdManager {
     
     // Debug log (dev mode only)
     if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
-      console.debug('[ADS] IRS Audit Response ads initialized');
+      console.debug('[ADS] IRS Audit Defense Pro ads initialized');
       console.debug('[ADS] Desktop max:', AD_CONFIG.maxAdsDesktop);
       console.debug('[ADS] Mobile max:', AD_CONFIG.maxAdsMobile);
       console.debug('[ADS] Session cap:', AD_CONFIG.sessionCap);

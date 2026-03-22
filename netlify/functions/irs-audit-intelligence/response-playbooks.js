@@ -1,5 +1,5 @@
 // AUDIT CORE — HIGH RISK — DO NOT MODIFY WITHOUT FULL TEST SUITE
-// IRS Audit Response Playbooks
+// IRS Audit Defense Pro Playbooks
 // Purpose: Restrictive, scope-limiting response strategies
 // NO free-form advice, NO dispute strategy, NO over-disclosure
 

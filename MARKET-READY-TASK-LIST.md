@@ -28,7 +28,7 @@
 **Steps:**
 1. Go to https://analytics.google.com
 2. Click "Create Property"
-3. Name: "IRS Audit Response AI"
+3. Name: "IRS Audit Defense Pro"
 4. Select timezone and currency
 5. Copy your Measurement ID (format: `G-XXXXXXXXXX`)
 6. Replace placeholder in files:
@@ -80,7 +80,7 @@ foreach ($file in $files) {
 - Copy the Price ID (starts with `price_`)
 
 **Product 2: Audit Response**
-- Name: "IRS Audit Response Preparation"
+- Name: "IRS Audit Defense Pro"
 - Description: "Risk-aware audit response preparation with guardrails"
 - Price: $19.00 USD one-time
 - Copy the Price ID (starts with `price_`)
@@ -117,7 +117,7 @@ foreach ($file in $files) {
 **A. Create Supabase Project (5 min)**
 1. Go to https://supabase.com
 2. Click "New Project"
-3. Name: "IRS Audit Response AI"
+3. Name: "IRS Audit Defense Pro"
 4. Database password: (save securely)
 5. Region: Choose closest to your users
 6. Wait for project to initialize (~2 min)
@@ -271,7 +271,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_xxxxx
 2. Create account or login
 3. Go to API keys section
 4. Click "Create new secret key"
-5. Name it: "IRS Audit Response AI Production"
+5. Name it: "IRS Audit Defense Pro Production"
 6. Copy the key (starts with `sk-proj-` or `sk-`)
 7. Add to Netlify environment variables
 
@@ -483,7 +483,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_xxxxx
 - Photoshop
 
 **Content:**
-- Brand name: "IRSAuditResponseAI"
+- Brand name: "IRS Audit Defense Pro"
 - Tagline: "AI-Powered IRS Letter Response"
 - Price: "$19 One-Time"
 - Visual: Professional, trustworthy design

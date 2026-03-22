@@ -4,7 +4,7 @@
 
 ## OVERVIEW
 
-This ad system is a monetization floor for IRS Audit Response. It generates revenue from non-buyers without interfering with paid conversions.
+This ad system is a monetization floor for IRS Audit Defense Pro. It generates revenue from non-buyers without interfering with paid conversions.
 
 ### Key Principles
 
@@ -314,7 +314,7 @@ pageExclusions: [
 
 ## END STATE
 
-IRS Audit Response now has:
+IRS Audit Defense Pro now has:
 
 ✅ Exact same monetization floor as Tax Letter Help  
 ✅ Trust-preserving ad placements  

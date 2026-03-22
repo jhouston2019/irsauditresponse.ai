@@ -1,7 +1,7 @@
 {
-  "name": "auditresponseai",
+  "name": "irs-audit-defense-pro",
   "version": "1.0.0",
-  "description": "AI-powered tax letter analysis and response generation",
+  "description": "IRS Audit Defense Pro — AI-powered tax letter analysis and response generation",
   "type": "module",
   "scripts": {
     "dev": "vite",

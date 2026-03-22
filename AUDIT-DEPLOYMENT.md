@@ -1,12 +1,12 @@
-# IRS Audit Response Deployment Guide
+# IRS Audit Defense Pro Deployment Guide
 
 ## Overview
 
-This guide covers deployment of the **IRS Audit Response** product, which is separate from and more restrictive than Tax Letter Help.
+This guide covers deployment of the **IRS Audit Defense Pro** product, which is separate from and more restrictive than Tax Letter Help.
 
 ## Product Specifications
 
-- **Name:** IRS Audit Response Preparation
+- **Name:** IRS Audit Defense Pro
 - **Price:** $19.00 (one-time)
 - **Scope:** Audit-only (rejects all non-audit notices)
 - **Risk Level:** High
@@ -34,7 +34,7 @@ Verify:
 Create Stripe product with exact specifications:
 
 **Product Details:**
-- Name: `IRS Audit Response Preparation`
+- Name: `IRS Audit Defense Pro`
 - Description: `One-time preparation guidance for IRS audits using a constrained, risk-aware system designed to help limit scope and reduce over-disclosure during examinations.`
 - Price: `$19.00 USD`
 - Type: `One-time payment`

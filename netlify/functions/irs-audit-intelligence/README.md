@@ -234,7 +234,7 @@ console.assert(multiYearResult.analysis.risks.escalationRequired === true);
 
 ## Differentiation from Tax Letter Help
 
-| Feature | Tax Letter Help | IRS Audit Response |
+| Feature | Tax Letter Help | IRS Audit Defense Pro |
 |---------|----------------|-------------------|
 | Price | $79 | $149 |
 | Scope | All IRS notices | Audits only |

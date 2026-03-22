@@ -1,5 +1,5 @@
 # ✅ LAUNCH READINESS CHECKLIST
-## IRS Audit Response AI - Pre-Launch Verification
+## IRS Audit Defense Pro - Pre-Launch Verification
 
 **Print this page and check off items as you complete them.**
 
@@ -41,7 +41,7 @@
 ## 🟡 HIGH PRIORITY (SHOULD FIX BEFORE LAUNCH)
 
 ### Branding Consistency
-- [ ] **Choose ONE brand name (recommend: IRSAuditResponseAI)**
+- [ ] **Choose ONE brand name (recommend: IRS Audit Defense Pro)**
 - [ ] **Update all navigation headers (49 HTML files)**
 - [ ] **Update all footer copyrights (49 HTML files)**
 - [ ] **Update all page titles**
@@ -718,7 +718,7 @@
 1. `resource.html` - Add full functionality
 
 ### Global Changes:
-1. Replace "TaxLetterHelp" → "IRSAuditResponseAI"
+1. Replace "IRS Audit Defense Pro" → "IRS Audit Defense Pro"
 2. Replace "ca-pub-XXXXXXXXXXXXXXXX" → Real AdSense ID
 3. Replace "taxletterhelp.com" → Your domain
 4. Remove all console.log statements

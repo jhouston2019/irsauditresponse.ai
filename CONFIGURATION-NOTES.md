@@ -16,7 +16,7 @@
 - ✅ Created `verify-payment.js` Netlify function
 
 ### Branding Fixes:
-- ✅ Standardized brand name to "IRSAuditResponseAI" across all main pages
+- ✅ Standardized brand name to "IRS Audit Defense Pro" across all main pages
 - ✅ Updated legal pages (privacy, terms, disclaimer) with correct dates (February 2026)
 - ✅ Changed support email to `support@irsauditresponseai.com`
 - ✅ Updated domain references to `irsauditresponseai.netlify.app`
@@ -95,7 +95,7 @@ SENDGRID_API_KEY=SG.your-sendgrid-key
 1. Create Stripe account at https://stripe.com
 2. Create two products:
    - "AI Tax Letter Analysis Package" - $19.00
-   - "IRS Audit Response Preparation" - $19.00
+   - "IRS Audit Defense Pro" - $19.00
 3. Get price IDs for each product
 4. Set `STRIPE_PRICE_RESPONSE` environment variable
 5. Configure webhook endpoint: `https://your-site.netlify.app/.netlify/functions/stripe-webhook`

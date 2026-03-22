@@ -1,8 +1,8 @@
-# IRS Audit Response - Quick Start Guide
+# IRS Audit Defense Pro - Quick Start Guide
 
 ## 🚀 Get Started in 5 Minutes
 
-This guide will help you quickly deploy and test the IRS Audit Response system.
+This guide will help you quickly deploy and test the IRS Audit Defense Pro system.
 
 ---
 
@@ -30,7 +30,7 @@ SELECT * FROM audit_responses LIMIT 1;
 1. Go to Stripe Dashboard → Products
 2. Click "Add Product"
 3. Fill in:
-   - **Name:** IRS Audit Response Preparation
+   - **Name:** IRS Audit Defense Pro
    - **Description:** One-time preparation guidance for IRS audits using a constrained, risk-aware system designed to help limit scope and reduce over-disclosure during examinations.
    - **Pricing:** $19.00 USD (one-time)
 
@@ -69,7 +69,7 @@ STRIPE_AUDIT_PRICE_ID=price_xxxxxxxxxxxxx
 
 ```bash
 git add .
-git commit -m "Add IRS Audit Response system"
+git commit -m "Add IRS Audit Defense Pro system"
 git push origin main
 ```
 
@@ -279,7 +279,7 @@ You're ready for production when:
 
 ## 🎉 You're Done!
 
-The IRS Audit Response system is now live and ready to:
+The IRS Audit Defense Pro system is now live and ready to:
 
 1. **Reject** non-audit notices
 2. **Classify** audit types

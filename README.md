@@ -1,10 +1,10 @@
-# AuditResponseAI
+# IRS Audit Defense Pro
 
 AI-powered IRS audit response letter generator with precision and professionalism.
 
 ## About
 
-AuditResponseAI is a specialized AI tool designed to help taxpayers respond to IRS audit notices and CP2000 letters with professional, accurate, and stress-free assistance. Generate precise, factual IRS audit or CP2000 response letters that reference specific notices, explain discrepancies clearly, cite documentation, and maintain a respectful tone requesting case reconsideration.
+IRS Audit Defense Pro is a specialized AI tool designed to help taxpayers respond to IRS audit notices and CP2000 letters with professional, accurate, and stress-free assistance. Generate precise, factual IRS audit or CP2000 response letters that reference specific notices, explain discrepancies clearly, cite documentation, and maintain a respectful tone requesting case reconsideration.
 
 ## Features
 
@@ -46,7 +46,7 @@ Required environment variables:
 - `STRIPE_PUBLIC_KEY` - Your Stripe publishable key
 - `STRIPE_PRICE_ID` - Your Stripe price ID for audit response
 - `SITE_URL` - Your production domain (https://auditresponse.ai)
-- `APP_NAME` - AuditResponseAI
+- `APP_NAME` - IRS Audit Defense Pro
 - `TAGLINE` - Handle IRS audits and CP2000 notices with AI precision
 - `PRIMARY_COLOR` - #2563eb
 
@@ -96,7 +96,7 @@ Deploy to Netlify:
 ## File Structure
 
 ```
-auditresponseai/
+irs-audit-defense-pro/
 ├── src/
 │   ├── components/
 │   │   ├── Auth.js              # Authentication functions

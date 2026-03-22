@@ -1,19 +1,19 @@
-# Admin Access Setup - IRS Audit Response
+# Admin Access Setup - IRS Audit Defense Pro
 
 ## Overview
 
-Admin access has been added to both the main landing page and the IRS Audit Response landing page for system monitoring and management.
+Admin access has been added to both the main landing page and the IRS Audit Defense Pro landing page for system monitoring and management.
 
 ---
 
 ## Access Points
 
 ### 1. Main Landing Page (index.html)
-- **Location:** Footer - `© 2025 IRSAuditResponseAI. Privacy Policy | Terms | Disclaimer | Admin`
+- **Location:** Footer - `© 2025 IRS Audit Defense Pro. Privacy Policy | Terms | Disclaimer | Admin`
 - **Link Color:** Gray (#64748b) - subtle and unobtrusive
 
 ### 2. Audit Response Landing Page (audit-response.html)
-- **Location:** Footer - `© 2025 IRS Audit Response. Privacy Policy | Terms | Disclaimer | Admin`
+- **Location:** Footer - `© 2025 IRS Audit Defense Pro. Privacy Policy | Terms | Disclaimer | Admin`
 - **Link Color:** Gray (#64748b) - subtle and unobtrusive
 
 ---

@@ -1,6 +1,6 @@
-# TaxLetterHelp Setup Guide
+# IRS Audit Defense Pro Setup Guide
 
-This guide will help you set up the TaxLetterHelp application for production use.
+This guide will help you set up the IRS Audit Defense Pro application for production use.
 
 ## Prerequisites
 

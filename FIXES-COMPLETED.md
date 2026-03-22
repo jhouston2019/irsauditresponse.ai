@@ -106,8 +106,8 @@
 **Files Updated:** 15+ files
 
 **Changes:**
-- "TaxLetterHelp" → "IRSAuditResponseAI"
-- "AuditResponseAI" → "IRSAuditResponseAI"
+- "IRS Audit Defense Pro" → "IRS Audit Defense Pro"
+- "IRS Audit Defense Pro" → "IRS Audit Defense Pro"
 - Updated all navigation headers
 - Updated all footers
 - Updated all page titles
@@ -125,7 +125,7 @@
 - `resource.html`
 - `audit-upload.html`
 
-**Result:** Consistent "IRSAuditResponseAI" brand across entire site
+**Result:** Consistent "IRS Audit Defense Pro" brand across entire site
 
 ---
 
@@ -344,7 +344,7 @@ Get-ChildItem -Recurse -Include *.html |
 1. Create Stripe account
 2. Create two products:
    - "AI Tax Letter Analysis Package" - $19.00
-   - "IRS Audit Response Preparation" - $19.00
+   - "IRS Audit Defense Pro" - $19.00
 3. Copy price IDs
 4. Set STRIPE_PRICE_RESPONSE in Netlify
 5. Configure webhook endpoint

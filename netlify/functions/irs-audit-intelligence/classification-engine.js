@@ -1,5 +1,5 @@
 // AUDIT CORE — HIGH RISK — DO NOT MODIFY WITHOUT FULL TEST SUITE
-// IRS Audit Response Classification Engine
+// IRS Audit Defense Pro Classification Engine
 // Purpose: Deterministic notice classification (AUDIT-ONLY)
 // Rejects all non-audit notices
 

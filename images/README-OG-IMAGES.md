@@ -12,7 +12,7 @@ The following OG images need to be created (1200x630px) with the design specs:
 ## Required Images
 
 1. **og-image.jpg** ✅ (Already exists)
-   - Title: "TaxLetterHelp"
+   - Title: "IRS Audit Defense Pro"
    - Subtitle: "Understand and Respond to Any IRS Letter Instantly"
 
 2. **upload-og.jpg** (Need to create)

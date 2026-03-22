@@ -1,5 +1,5 @@
 # 🗺️ ROADMAP TO LAUNCH
-## IRS Audit Response AI - Visual Timeline
+## IRS Audit Defense Pro - Visual Timeline
 
 **Current Status:** 🔴 Pre-Launch (80% Complete)  
 **Target Launch:** 2-4 weeks from now  
@@ -497,7 +497,7 @@ TOTAL:    $165,500 (Conservative estimate)
 
 ```
 ┌─────────────────────────────────────────────┐
-│ OPTION A: IRSAuditResponseAI                │
+│ OPTION A: IRS Audit Defense Pro                │
 │ Pros: Descriptive, SEO-friendly             │
 │ Cons: Long, generic                         │
 │ Recommendation: ⭐⭐⭐⭐⭐                      │
@@ -511,7 +511,7 @@ TOTAL:    $165,500 (Conservative estimate)
 └─────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────┐
-│ OPTION C: TaxLetterHelp                     │
+│ OPTION C: IRS Audit Defense Pro                     │
 │ Pros: Friendly, approachable                │
 │ Cons: Less professional, audit-focused      │
 │ Recommendation: ⭐⭐                          │
