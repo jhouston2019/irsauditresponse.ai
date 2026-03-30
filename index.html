@@ -48,6 +48,65 @@
   
   <!-- Ad Styles -->
   <link rel="stylesheet" href="/src/ads-styles.css">
+  <style>
+    #platform-dashboard-preview.platform-preview-section {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 72px 0;
+    }
+    #platform-dashboard-preview .dashboard-visual-wrap {
+      width: min(1120px, 92%);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #platform-dashboard-preview .screenshot-container {
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+      border: none;
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      overflow: hidden;
+      line-height: 0;
+    }
+    #platform-dashboard-preview .screenshot-container img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+    }
+    #platform-dashboard-preview .platform-preview-callouts {
+      margin-top: 2rem;
+      text-align: center;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #platform-dashboard-preview .platform-preview-callouts h2 {
+      color: #ffffff;
+      font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+      margin: 0 0 0.75rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    #platform-dashboard-preview .platform-preview-callouts p {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 1.05rem;
+      line-height: 1.65;
+      margin: 0;
+    }
+    @media (max-width: 768px) {
+      #platform-dashboard-preview .dashboard-visual-wrap,
+      #platform-dashboard-preview .screenshot-container {
+        max-width: 100%;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        box-sizing: border-box;
+      }
+    }
+  </style>
 </head>
 
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
@@ -72,6 +131,19 @@
                 <div style="margin-top:30px;">
                     <a href="payment.html" style="background:#2563eb; color:#fff; padding:14px 28px; border-radius:6px; text-decoration:none; box-shadow:0 4px 12px rgba(37, 99, 235, 0.3);" aria-label="Get professional IRS audit response for $49">Get My Audit Response Letter - $49</a>
                     <p style="font-size:0.95rem; color:#94a3b8; margin:12px auto 0; text-align:center; max-width:600px; line-height:1.5;">You don't need to figure out how to structure your response — it's handled for you.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PLATFORM / DASHBOARD PREVIEW -->
+        <section id="platform-dashboard-preview" class="platform-preview-section" aria-labelledby="platform-preview-heading">
+            <div class="dashboard-visual-wrap">
+                <div class="screenshot-container">
+                    <img src="./images/dashboard-preview.png" alt="IRS Audit Defense Pro app dashboard showing letter analysis and response workflow" width="1200" height="750" loading="lazy" decoding="async" />
+                </div>
+                <div class="platform-preview-callouts">
+                    <h2 id="platform-preview-heading">See your workspace before you pay</h2>
+                    <p>Upload your notice, review structured analysis, and download a response formatted the way IRS correspondence is typically organized—clear steps, no guesswork.</p>
                 </div>
             </div>
         </section>
