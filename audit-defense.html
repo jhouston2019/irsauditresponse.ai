@@ -8,6 +8,7 @@
   <meta name="description" content="Analyze your IRS notice and generate a professional, submission-ready response letter." />
   <meta name="supabase-url" content="%%SUPABASE_URL%%">
   <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
       --navy: #0f1e35;
@@ -404,7 +405,7 @@ Contact: 1-800-829-8310`;
       if (f) handleFile(f);
     });
 
-    function handleFile(file) {
+    async function handleFile(file) {
       const name = file.name || 'file';
       $('fileLabel').textContent = name;
       if (file.type === 'text/plain' || name.toLowerCase().endsWith('.txt')) {
@@ -416,6 +417,46 @@ Contact: 1-800-829-8310`;
           updateAnalyzeEnabled();
         };
         r.readAsText(file);
+        return;
+      }
+      if (file.type === 'application/pdf' || name.toLowerCase().endsWith('.pdf')) {
+        const fileUrl = URL.createObjectURL(file);
+        try {
+          pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          const pdf = await pdfjsLib.getDocument(fileUrl).promise;
+          let fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const pageText = content.items
+              .map((item) => item.str)
+              .join(' ');
+            fullText += pageText + '\n';
+          }
+          fullText = fullText.trim();
+          if (fullText.length > 50) {
+            $('noticeText').value = fullText;
+            state.fileBase64 = null;
+            state.fileType = null;
+          } else {
+            const r = new FileReader();
+            r.onload = () => {
+              if (typeof r.result === 'string' && r.result.includes(',')) {
+                state.fileBase64 = r.result.split(',')[1];
+                state.fileType = file.type;
+              }
+              updateAnalyzeEnabled();
+            };
+            r.readAsDataURL(file);
+            return;
+          }
+        } catch (e) {
+          console.error('PDF extract error:', e);
+        } finally {
+          URL.revokeObjectURL(fileUrl);
+        }
+        updateAnalyzeEnabled();
         return;
       }
       const r = new FileReader();
