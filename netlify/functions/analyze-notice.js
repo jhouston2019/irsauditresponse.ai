@@ -1,12 +1,6 @@
 const OpenAI = require("openai");
+const pdfParse = require("pdf-parse");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
-
-let PDFParseCtor;
-try {
-  PDFParseCtor = require("pdf-parse").PDFParse;
-} catch (_) {
-  PDFParseCtor = null;
-}
 
 const ANALYSIS_SYSTEM_PROMPT = `You are an expert IRS correspondence analyst with 20 years of experience
 in tax controversy, audit defense, and IRS notice resolution.
@@ -168,28 +162,76 @@ async function extractTextFromFile(fileBase64, fileType) {
   const buffer = Buffer.from(fileBase64, "base64");
   const ft = (fileType || "").toLowerCase();
 
-  if (ft.includes("pdf")) {
-    if (!PDFParseCtor) return "";
-    let parser;
-    try {
-      parser = new PDFParseCtor({ data: buffer });
-      const data = await parser.getText();
-      return (data && data.text) || "";
-    } catch (e) {
-      console.error("analyze-notice pdf-parse error:", e.message);
-      return "";
-    } finally {
-      try {
-        if (parser && typeof parser.destroy === "function") await parser.destroy();
-      } catch (_) {}
-    }
-  }
-
   if (ft.includes("text") || ft.includes("plain")) {
     return buffer.toString("utf8");
   }
 
   return "";
+}
+
+/**
+ * PDF: Buffer → pdf-parse; if text is short/empty, GPT-4o vision on PDF data URL.
+ */
+async function extractPdfNoticeText(openai, fileBase64) {
+  const pdfBuffer = Buffer.from(fileBase64, "base64");
+  let extractedText = "";
+  try {
+    const pdfData = await pdfParse(pdfBuffer);
+    extractedText = (pdfData && pdfData.text ? String(pdfData.text) : "").trim();
+  } catch (e) {
+    console.error("analyze-notice pdf-parse error:", e.message);
+  }
+  let extraction = "pdf-parse";
+  console.log(
+    JSON.stringify({
+      fn: "analyze-notice",
+      extraction,
+      charCount: extractedText.length,
+    })
+  );
+
+  if (extractedText.length < 50) {
+    extraction = "vision";
+    extractedText = (await extractNoticeVisionFromPdfBase64(openai, fileBase64)).trim();
+    console.log(
+      JSON.stringify({
+        fn: "analyze-notice",
+        extraction,
+        charCount: extractedText.length,
+      })
+    );
+  }
+
+  return extractedText;
+}
+
+async function extractNoticeVisionFromPdfBase64(openai, base64) {
+  const dataUrl = `data:application/pdf;base64,${base64}`;
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Extract all text from this IRS notice image exactly as it appears. Return only the raw text, no commentary.",
+            },
+            { type: "image_url", image_url: { url: dataUrl } },
+          ],
+        },
+      ],
+      max_tokens: 4096,
+    });
+    if (completion.usage) {
+      console.log(JSON.stringify({ fn: "analyze-notice-pdf-vision", usage: completion.usage }));
+    }
+    return (completion.choices?.[0]?.message?.content || "").trim();
+  } catch (e) {
+    console.error("analyze-notice pdf vision error:", e.message);
+    return "";
+  }
 }
 
 async function extractTextWithVision(openai, mimeType, base64) {
@@ -298,15 +340,20 @@ exports.handler = async (event) => {
           confidence: "low",
         });
       }
-    } else {
-      const extracted = await extractTextFromFile(fileBase64, ft);
+    } else if (ft.includes("pdf")) {
+      const extracted = await extractPdfNoticeText(openai, fileBase64);
       noticeText = [noticeText, extracted].filter(Boolean).join("\n\n");
-      if (!extracted && ft.includes("pdf")) {
+      if (!extracted.trim()) {
         return json(200, event, {
-          analysis: fallbackAnalysis("Could not extract text from this PDF. Paste the notice text or try a clearer scan."),
+          analysis: fallbackAnalysis(
+            "Could not extract text from this PDF. Paste the notice text or try a clearer scan."
+          ),
           confidence: "low",
         });
       }
+    } else {
+      const extracted = await extractTextFromFile(fileBase64, ft);
+      noticeText = [noticeText, extracted].filter(Boolean).join("\n\n");
     }
   }
 

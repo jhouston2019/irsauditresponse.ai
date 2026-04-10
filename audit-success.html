@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Successful - IRS Audit Defense Pro</title>
+  <meta name="supabase-url" content="%%SUPABASE_URL%%">
+  <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
   <meta name="ga-measurement-id" content="" />
   <script src="/src/analytics.js" defer></script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -71,6 +73,9 @@
       <p>Your payment of $49 has been processed successfully.</p>
       <p>You now have access to the full IRS Audit Defense wizard.</p>
       <p id="verifyLine" class="status-note" style="display:none;"></p>
+      <p id="redirectMsg" class="status-note" style="margin-top:1rem;">
+        Redirecting to your workspace in <span id="countdown">5</span> seconds…
+      </p>
 
       <a href="/audit-defense.html" class="cta-button" id="primaryCta">Start My IRS Defense →</a>
 
@@ -81,7 +86,19 @@
   </div>
 
   <script type="module">
-    import { getSession } from './src/components/Auth.js';
+    async function getSession() {
+      try {
+        const url = document.querySelector('meta[name="supabase-url"]')?.content;
+        const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+        if (!url || !key || url.includes('%%')) return null;
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        const supabase = createClient(url, key);
+        const { data } = await supabase.auth.getSession();
+        return data?.session || null;
+      } catch {
+        return null;
+      }
+    }
 
     const verifyLine = document.getElementById('verifyLine');
     try {
@@ -96,15 +113,27 @@
         const data = await res.json().catch(() => ({}));
         verifyLine.style.display = 'block';
         if (data.hasPaid) {
-          verifyLine.textContent = 'Payment verified for your account. Continuing to the wizard…';
-          setTimeout(() => { window.location.replace('/audit-defense.html'); }, 2000);
+          verifyLine.textContent = 'Payment verified for your account.';
         } else {
-          verifyLine.textContent = 'If you just paid, your record may take a moment to sync. You can still open the wizard — sign in with the same email you used at checkout.';
+          verifyLine.textContent =
+            'If you just paid, your record may take a moment to sync. Sign in with the same email you used at checkout.';
         }
       }
     } catch (_) {
       /* non-blocking */
     }
+
+    let sec = 5;
+    const cd = document.getElementById('countdown');
+    const t = setInterval(() => {
+      sec -= 1;
+      if (cd) cd.textContent = String(Math.max(0, sec));
+      if (sec <= 0) clearInterval(t);
+    }, 1000);
+
+    setTimeout(() => {
+      window.location.href = '/audit-defense.html';
+    }, 5000);
   </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 [build]
-  command = ""
+  command = "bash netlify/inject-env.sh"
   publish = "."
 
 [build.environment]

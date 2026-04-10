@@ -51,8 +51,9 @@ function sanitizeString(s, maxLen = 150000) {
   return str.length > maxLen ? str.slice(0, maxLen) : str;
 }
 
-async function userHasPaid(email) {
-  if (!email) return false;
+async function userHasPaid(user) {
+  if (!user || !user.email) return false;
+  const email = user.email;
   const supabase = getSupabaseAdmin();
   const { data: tlhLetters } = await supabase
     .from("tlh_letters")
@@ -128,11 +129,11 @@ async function authorizeWizardRequest(event) {
 
   const bypass = process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "1" || process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "true";
   if (!bypass) {
-    const paid = await userHasPaid(user.email);
+    const paid = await userHasPaid(user);
     if (!paid) {
       return {
         ok: false,
-        response: json(403, event, {
+        response: json(402, event, {
           error: "Active purchase required",
           code: "payment_required",
         }),
