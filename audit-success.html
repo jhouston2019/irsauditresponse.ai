@@ -1,27 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ga-purchase="1">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Successful - IRS Audit Defense Pro</title>
-  
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
-    gtag('event', 'purchase', {
-      transaction_id: new URLSearchParams(window.location.search).get('session_id'),
-      value: 19.00,
-      currency: 'USD',
-      items: [{
-        item_id: 'audit_response',
-        item_name: 'IRS Audit Defense Pro'
-      }]
-    });
-  </script>
+  <meta name="ga-measurement-id" content="" />
+  <script src="/src/analytics.js" defer></script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -76,6 +60,7 @@
     .cta-button:hover {
       background: #b91c1c;
     }
+    .status-note { font-size: 0.9rem; color: #94a3b8; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -84,16 +69,42 @@
       <div class="checkmark">✓</div>
       <h1>Payment Successful</h1>
       <p>Your payment of $49 has been processed successfully.</p>
-      <p>You now have access to the IRS Audit Defense Pro system.</p>
-      <p><strong>Next Step:</strong> Upload your IRS audit notice to begin the analysis.</p>
-      
-      <a href="/audit-upload.html" class="cta-button">Upload Audit Notice</a>
-      
+      <p>You now have access to the full IRS Audit Defense wizard.</p>
+      <p id="verifyLine" class="status-note" style="display:none;"></p>
+
+      <a href="/audit-defense.html" class="cta-button" id="primaryCta">Start My IRS Defense →</a>
+
       <p style="margin-top: 2rem; font-size: 0.9rem; color: #94a3b8;">
         A receipt has been sent to your email address.
       </p>
     </div>
   </div>
+
+  <script type="module">
+    import { getSession } from './src/components/Auth.js';
+
+    const verifyLine = document.getElementById('verifyLine');
+    try {
+      const session = await getSession();
+      const email = session?.user?.email;
+      if (email) {
+        const res = await fetch('/.netlify/functions/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json().catch(() => ({}));
+        verifyLine.style.display = 'block';
+        if (data.hasPaid) {
+          verifyLine.textContent = 'Payment verified for your account. Continuing to the wizard…';
+          setTimeout(() => { window.location.replace('/audit-defense.html'); }, 2000);
+        } else {
+          verifyLine.textContent = 'If you just paid, your record may take a moment to sync. You can still open the wizard — sign in with the same email you used at checkout.';
+        }
+      }
+    } catch (_) {
+      /* non-blocking */
+    }
+  </script>
 </body>
 </html>
-

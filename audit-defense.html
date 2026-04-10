@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IRS Audit Defense — Notice Analysis & Response Letter</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="description" content="Analyze your IRS notice and generate a professional, submission-ready response letter." />
+  <style>
+    :root {
+      --navy: #0f1e35;
+      --navy2: #152a45;
+      --border: #d1d5db;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --red: #b91c1c;
+      --amber: #d97706;
+      --green: #15803d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: var(--text); background: #f3f4f6; line-height: 1.55; }
+    h1, h2, h3, h4 { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0f172a; }
+    .top-bar { background: var(--navy); color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+    .top-bar a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; }
+    .top-bar a:hover { color: #fff; text-decoration: underline; }
+    .shell { max-width: 1100px; margin: 0 auto; padding: 1.25rem; }
+    .progress-wrap { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+    .progress-steps { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: space-between; }
+    .step-pill { flex: 1; min-width: 120px; text-align: center; padding: 0.5rem 0.35rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: var(--muted); border: 1px solid var(--border); background: #fafafa; }
+    .step-pill.active { background: var(--navy2); color: #fff; border-color: var(--navy2); }
+    .step-pill.done { background: #ecfdf5; color: var(--green); border-color: #86efac; }
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.75rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.35rem; color: #374151; }
+    textarea, input[type="text"], input[type="email"], select { width: 100%; padding: 0.65rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; font-family: inherit; }
+    textarea { min-height: 220px; resize: vertical; font-family: ui-monospace, monospace; font-size: 0.9rem; }
+    .dropzone { border: 2px dashed #94a3b8; border-radius: 10px; padding: 2rem; text-align: center; cursor: pointer; background: #f9fafb; transition: border-color 0.2s, background 0.2s; margin-top: 0.5rem; }
+    .dropzone:hover, .dropzone.drag { border-color: var(--navy2); background: #eff6ff; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    @media (max-width: 640px) { .row2 { grid-template-columns: 1fr; } }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.75rem 1.35rem; border-radius: 8px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; font-family: inherit; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #0a1528; }
+    .btn-secondary { background: #e5e7eb; color: #111827; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-outline { background: #fff; border: 2px solid var(--navy); color: var(--navy); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1.25rem; }
+    .error-inline { color: var(--red); font-size: 0.9rem; margin-top: 0.5rem; display: none; }
+    .error-inline.show { display: block; }
+    .loading-overlay { display: none; align-items: center; gap: 0.75rem; padding: 1rem; background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; margin-top: 1rem; }
+    .loading-overlay.show { display: flex; }
+    .spinner { width: 22px; height: 22px; border: 3px solid #bfdbfe; border-top-color: var(--navy); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .analysis-header { background: var(--navy); color: #fff; padding: 1rem 1.25rem; border-radius: 8px 8px 0 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin: -1.75rem -1.75rem 1.25rem -1.75rem; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.25rem; }
+    @media (max-width: 900px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .metrics { grid-template-columns: 1fr; } }
+    .metric { border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem; background: #fafafa; }
+    .metric-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 600; }
+    .metric-value { font-size: 1.15rem; font-weight: 700; margin-top: 0.25rem; }
+    .metric-value.warn { color: var(--red); }
+    .risk-pill { display: inline-block; padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    .risk-low { background: #dcfce7; color: #166534; }
+    .risk-moderate { background: #fef3c7; color: #92400e; }
+    .risk-high { background: #fee2e2; color: #991b1b; }
+    .risk-critical { background: #fee2e2; color: #7f1d1d; border: 2px solid #dc2626; animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.35); } 50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); } }
+    table.disc { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+    table.disc th, table.disc td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; }
+    table.disc th { background: #f3f4f6; font-weight: 700; }
+    tr.amber-row { background: #fffbeb; }
+    .checklist { list-style: none; margin: 0.5rem 0; }
+    .checklist li { padding: 0.45rem 0 0.45rem 1.75rem; position: relative; border-bottom: 1px solid #e5e7eb; }
+    .checklist li::before { content: '☐'; position: absolute; left: 0; color: var(--muted); }
+    .doc-list li { padding: 0.35rem 0; padding-left: 1.5rem; position: relative; list-style: none; }
+    .doc-list li::before { content: '📄'; position: absolute; left: 0; }
+    .strategy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    @media (max-width: 640px) { .strategy-grid { grid-template-columns: 1fr; } }
+    .strategy-card { border: 2px solid var(--border); border-radius: 10px; padding: 1.1rem; cursor: pointer; background: #fff; text-align: left; position: relative; transition: border-color 0.2s, box-shadow 0.2s; }
+    .strategy-card:hover { border-color: #94a3b8; }
+    .strategy-card.selected { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,30,53,0.12); }
+    .strategy-card .rec { position: absolute; top: 0.65rem; right: 0.65rem; background: #fef3c7; color: #92400e; font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.45rem; border-radius: 4px; text-transform: uppercase; }
+    .letter-wrap { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+    .letter-display { font-family: 'Courier New', ui-monospace, monospace; font-size: 0.82rem; line-height: 1.5; white-space: pre-wrap; background: #fff; color: #111; min-height: 320px; border: 1px solid #e5e7eb; padding: 1.25rem; border-radius: 6px; }
+    .letter-display .ph { background: #fef3c7; padding: 0 2px; border-radius: 2px; }
+    .letter-edit { width: 100%; min-height: 420px; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; }
+    .fill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+    @media (max-width: 640px) { .fill-grid { grid-template-columns: 1fr; } }
+    .gate-banner { background: #fef3c7; border: 1px solid #fbbf24; color: #78350f; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.95rem; }
+    .disclaimer-foot { font-size: 0.8rem; color: var(--muted); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .dc-legal { font-size: 11px; line-height: 1.45; color: var(--muted); margin-top: 0.75rem; max-width: 52rem; }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <strong style="font-family: Georgia, serif; font-size: 1.15rem;">IRS Audit Defense</strong>
+    <nav>
+      <a href="/index.html">Home</a> ·
+      <a href="/pricing.html">Pricing</a> ·
+      <a href="/login.html">Sign in</a> ·
+      <a href="/audit-payment.html">Purchase access</a>
+    </nav>
+  </header>
+
+  <div class="shell">
+    <div id="authGate" class="gate-banner" style="display: none;">
+      You need an account and an active purchase to use this tool.
+      <a href="/login.html">Sign in</a> or <a href="/audit-payment.html">complete checkout</a>.
+      For staging, your administrator can set <code>AUDIT_DEFENSE_BYPASS_PAYMENT</code> on Netlify.
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-steps" id="progressSteps">
+        <div class="step-pill active" data-step="1">1. Input</div>
+        <div class="step-pill" data-step="2">2. Analysis</div>
+        <div class="step-pill" data-step="3">3. Strategy</div>
+        <div class="step-pill" data-step="4">4. Letter</div>
+      </div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="step1" class="card step-panel active">
+      <h2 style="margin-bottom: 0.5rem;">Notice input</h2>
+      <p style="color: var(--muted); margin-bottom: 1rem;">Paste your notice or upload a PDF, image, or text file.</p>
+      <label for="noticeText">Paste your IRS notice here</label>
+      <textarea id="noticeText" placeholder="Paste the full text of your IRS notice…"></textarea>
+      <label style="margin-top: 1rem;">Upload file (optional)</label>
+      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload notice file">
+        <div>Drag & drop or click — PDF, JPG, PNG, TXT</div>
+        <div id="fileLabel" style="margin-top:0.5rem;font-size:0.85rem;color:var(--muted);"></div>
+      </div>
+      <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.txt,application/pdf,image/*,text/plain" style="display:none" />
+      <div class="row2">
+        <div>
+          <label for="noticeType">Notice type (optional override)</label>
+          <select id="noticeType">
+            <option value="">— Auto-detect —</option>
+            <option value="CP2000">CP2000</option>
+            <option value="CP2501">CP2501</option>
+            <option value="CP3219A">CP3219A</option>
+            <option value="CP75">CP75</option>
+            <option value="CP14">CP14</option>
+            <option value="LT11">LT11</option>
+            <option value="LT16">LT16</option>
+            <option value="LT38">LT38</option>
+            <option value="886-A">886-A</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="taxYear">Tax year (optional override)</label>
+          <input type="text" id="taxYear" placeholder="e.g. 2022" />
+        </div>
+      </div>
+      <div style="margin-top:1rem;">
+        <label for="context">Supporting context</label>
+        <select id="context">
+          <option value="">— Select —</option>
+          <option value="W-2 employee">W-2 employee</option>
+          <option value="1099 freelancer/contractor">1099 freelancer/contractor</option>
+          <option value="Small business/Schedule C">Small business/Schedule C</option>
+          <option value="Investment/capital gains">Investment/capital gains</option>
+          <option value="Rental income">Rental income</option>
+          <option value="Multiple sources">Multiple sources</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="btn btn-secondary" id="btnDemo">Load demo CP2000 notice</button>
+        <button type="button" class="btn btn-primary" id="btnAnalyze" disabled>Analyze My Notice</button>
+        <button type="button" class="btn btn-outline" id="btnBack1" style="display:none;">Back</button>
+      </div>
+      <p class="dc-legal">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
+      <div id="step1Error" class="error-inline"></div>
+      <div id="step1Loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <span id="step1LoadingText">Analyzing notice…</span>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" class="card step-panel">
+      <div class="analysis-header">
+        <div>
+          <span style="opacity:0.85;font-size:0.85rem;">Notice</span>
+          <div id="hdrNoticeType" style="font-size:1.25rem;font-family:Georgia,serif;">—</div>
+        </div>
+        <div id="hdrRiskWrap"></div>
+      </div>
+      <div class="metrics" id="metricsRow"></div>
+      <h3>What the IRS is saying</h3>
+      <p id="plainEnglish" style="margin:0.5rem 0 0.25rem;"></p>
+      <p id="whatIfIgnored" style="font-style:italic;color:var(--muted);font-size:0.95rem;"></p>
+      <div id="discWrap" style="display:none;margin-top:1.25rem;">
+        <h3>Discrepancies</h3>
+        <table class="disc" id="discTable"><thead><tr><th>Source</th><th>Type</th><th>IRS claims</th><th>You reported</th><th>Difference</th></tr></thead><tbody></tbody></table>
+      </div>
+      <h3 style="margin-top:1.25rem;">What must be addressed in your response</h3>
+      <ul class="checklist" id="keyIssues"></ul>
+      <h3 style="margin-top:1.25rem;">Gather these before responding</h3>
+      <ul class="doc-list" id="docNeeded"></ul>
+      <div id="criticalNote" style="display:none;margin-top:1rem;padding:0.75rem;border:2px solid #dc2626;border-radius:8px;background:#fef2f2;color:#991b1b;font-weight:600;"></div>
+      <p class="dc-legal" style="margin-top:1rem;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
+      <div class="toolbar">
+        <button type="button" class="btn btn-secondary" id="btnBack2">← Back</button>
+        <button type="button" class="btn btn-primary" id="btnToStrategy">Choose Your Response Strategy →</button>
+      </div>
+      <div id="step2Loading" class="loading-overlay"><div class="spinner"></div><span>Loading…</span></div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" class="card step-panel">
+      <h2 style="margin-bottom:0.5rem;">Response strategy</h2>
+      <p style="color:var(--muted);">Select one approach. The recommended option reflects your notice analysis.</p>
+      <div class="strategy-grid" id="strategyGrid"></div>
+      <div id="strategyDetail" style="margin-top:1.25rem;padding:1rem;background:#f9fafb;border-radius:8px;border:1px solid var(--border);display:none;"></div>
+      <div class="toolbar">
+        <button type="button" class="btn btn-secondary" id="btnBack3">← Back</button>
+        <button type="button" class="btn btn-primary" id="btnGenLetter" disabled>Generate My Response Letter →</button>
+      </div>
+      <div id="step3Loading" class="loading-overlay"><div class="spinner"></div><span>Drafting your letter…</span></div>
+    </div>
+
+    <!-- Step 4 -->
+    <div id="step4" class="card step-panel">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <h2 id="letterTitleBar" style="margin:0;font-size:1.1rem;">Your IRS Response Letter</h2>
+        <div>
+          <button type="button" class="btn btn-secondary" id="btnToggleEdit">Edit letter</button>
+        </div>
+      </div>
+      <div class="letter-wrap">
+        <div id="letterDisplay" class="letter-display"></div>
+        <textarea id="letterEdit" class="letter-edit" style="display:none;"></textarea>
+      </div>
+      <p class="dc-legal" style="margin-top:0.75rem;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
+      <h3 style="margin-top:1.25rem;">Fill placeholders</h3>
+      <p style="font-size:0.9rem;color:var(--muted);">Complete your details. [DATE] defaults to today.</p>
+      <div class="fill-grid">
+        <div><label>Full name</label><input type="text" id="fillName" /></div>
+        <div><label>Street address</label><input type="text" id="fillAddress" /></div>
+        <div><label>City, State ZIP</label><input type="text" id="fillCity" /></div>
+        <div><label>Phone</label><input type="text" id="fillPhone" /></div>
+        <div><label>Email</label><input type="email" id="fillEmail" /></div>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="btn btn-primary" id="btnFillPh">Fill placeholders</button>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="btn btn-secondary" id="btnBack4">← Back</button>
+        <button type="button" class="btn btn-primary" id="btnCopy">Copy letter</button>
+        <button type="button" class="btn btn-primary" id="btnPdf">Download PDF</button>
+        <button type="button" class="btn btn-primary" id="btnDocx">Download Word</button>
+        <button type="button" class="btn btn-danger" id="btnStartOver">Start over</button>
+      </div>
+      <div id="step4Error" class="error-inline"></div>
+      <div id="step4Loading" class="loading-overlay"><div class="spinner"></div><span id="step4LoadingText">Working…</span></div>
+    </div>
+
+    <p class="disclaimer-foot">
+      This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.
+      <a href="/disclaimer.html">Full disclaimer</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a>
+    </p>
+  </div>
+
+  <script type="module">
+    import { getSession } from './src/components/Auth.js';
+
+    const DEMO_CP2000 = `Department of the Treasury — Internal Revenue Service
+Ogden, UT 84201-0040
+
+Notice: CP2000
+Tax Year: 2022
+Notice Date: March 15, 2024
+Social Security Number: XXX-XX-7291
+Amount Due: $6,284.00
+Response Deadline: April 30, 2024
+
+Dear Taxpayer,
+
+We have information that doesn't match what you reported on your
+2022 federal income tax return. Please review this notice carefully.
+
+Income reported to us but not on your return:
+- Robinhood Markets Inc. (1099-B): $31,200 in proceeds
+- Upwork Global Inc. (1099-NEC): $14,800
+- Coinbase Inc. (1099-MISC): $3,100
+
+Proposed changes to your 2022 Form 1040:
+Additional income: $49,100
+Additional self-employment tax (on $14,800): $2,093
+Additional income tax: $4,191
+Total proposed amount due: $6,284
+
+If we do not receive your response by April 30, 2024, we will
+send a Statutory Notice of Deficiency (CP3219A).
+
+Contact: 1-800-829-8310`;
+
+    const API = {
+      analyze: '/.netlify/functions/analyze-notice',
+      letter: '/.netlify/functions/generate-letter',
+      pdf: '/.netlify/functions/generate-pdf',
+      docx: '/.netlify/functions/generate-docx',
+    };
+
+    const state = {
+      step: 1,
+      accessToken: null,
+      fileBase64: null,
+      fileType: null,
+      analysis: null,
+      confidence: null,
+      strategy: null,
+      letterRaw: '',
+      editing: false,
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function showStep(n) {
+      state.step = n;
+      document.querySelectorAll('.step-panel').forEach((el) => el.classList.remove('active'));
+      $(`step${n}`).classList.add('active');
+      document.querySelectorAll('.step-pill').forEach((pill) => {
+        const s = +pill.dataset.step;
+        pill.classList.remove('active', 'done');
+        if (s === n) pill.classList.add('active');
+        else if (s < n) pill.classList.add('done');
+      });
+    }
+
+    function parseMoney(amt) {
+      if (!amt || typeof amt !== 'string') return 0;
+      const n = parseFloat(amt.replace(/[^0-9.]/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+
+    function daysUntil(dateStr) {
+      if (!dateStr || dateStr === 'Not specified') return null;
+      const tryParse = Date.parse(dateStr);
+      if (!isNaN(tryParse)) {
+        return Math.ceil((tryParse - Date.now()) / (86400000));
+      }
+      const m = dateStr.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s*(\d{4})/);
+      if (m) {
+        const d = new Date(`${m[1]} ${m[2]}, ${m[3]}`);
+        if (!isNaN(d)) return Math.ceil((d - Date.now()) / (86400000));
+      }
+      return null;
+    }
+
+    function authHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${state.accessToken}`,
+      };
+    }
+
+    function updateAnalyzeEnabled() {
+      const text = $('noticeText').value.trim();
+      const ok = text.length > 0 || !!state.fileBase64;
+      $('btnAnalyze').disabled = !ok;
+    }
+
+    $('noticeText').addEventListener('input', updateAnalyzeEnabled);
+
+    $('btnDemo').addEventListener('click', () => {
+      $('noticeText').value = DEMO_CP2000;
+      state.fileBase64 = null;
+      state.fileType = null;
+      $('fileLabel').textContent = '';
+      updateAnalyzeEnabled();
+    });
+
+    const dz = $('dropzone');
+    const fin = $('fileInput');
+    dz.addEventListener('click', () => fin.click());
+    dz.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fin.click(); } });
+    ['dragenter', 'dragover'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('drag'); }));
+    dz.addEventListener('drop', (e) => {
+      const f = e.dataTransfer.files[0];
+      if (f) handleFile(f);
+    });
+    fin.addEventListener('change', () => {
+      const f = fin.files[0];
+      if (f) handleFile(f);
+    });
+
+    function handleFile(file) {
+      const name = file.name || 'file';
+      $('fileLabel').textContent = name;
+      if (file.type === 'text/plain' || name.toLowerCase().endsWith('.txt')) {
+        const r = new FileReader();
+        r.onload = () => {
+          $('noticeText').value = (r.result || '').toString();
+          state.fileBase64 = null;
+          state.fileType = null;
+          updateAnalyzeEnabled();
+        };
+        r.readAsText(file);
+        return;
+      }
+      const r = new FileReader();
+      r.onload = () => {
+        const res = r.result;
+        if (typeof res === 'string' && res.includes(',')) {
+          state.fileBase64 = res.split(',')[1];
+          state.fileType = file.type || 'application/octet-stream';
+        }
+        updateAnalyzeEnabled();
+      };
+      r.readAsDataURL(file);
+    }
+
+    $('btnAnalyze').addEventListener('click', async () => {
+      $('step1Error').classList.remove('show');
+      $('step1Error').textContent = '';
+      const text = $('noticeText').value.trim();
+      if (!text && !state.fileBase64) {
+        $('step1Error').textContent = 'Paste your notice or upload a file before analyzing.';
+        $('step1Error').classList.add('show');
+        return;
+      }
+      if (state.accessToken === null) {
+        $('authGate').style.display = 'block';
+        $('step1Error').textContent = 'Please sign in to continue.';
+        $('step1Error').classList.add('show');
+        return;
+      }
+
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 30000);
+      $('step1Loading').classList.add('show');
+      $('btnAnalyze').disabled = true;
+      try {
+        const body = {
+          text,
+          fileBase64: state.fileBase64 || undefined,
+          fileType: state.fileType || undefined,
+          noticeType: $('noticeType').value || undefined,
+          taxYear: $('taxYear').value.trim() || undefined,
+          context: $('context').value || undefined,
+        };
+        const res = await fetch(API.analyze, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (data.code === 'payment_required') {
+            throw new Error('Purchase required. Complete checkout to unlock analysis.');
+          }
+          throw new Error(data.error || 'Analysis failed');
+        }
+        state.analysis = data.analysis;
+        state.confidence = data.confidence;
+        renderStep2();
+        showStep(2);
+      } catch (e) {
+        const msg = e.name === 'AbortError' ? 'Request timed out. Try again with a shorter notice or file.' : (e.message || 'Analysis failed');
+        $('step1Error').textContent = msg;
+        $('step1Error').classList.add('show');
+      } finally {
+        clearTimeout(t);
+        $('step1Loading').classList.remove('show');
+        updateAnalyzeEnabled();
+      }
+    });
+
+    function renderStep2() {
+      const a = state.analysis;
+      $('hdrNoticeType').textContent = a.noticeType || 'Notice';
+      const risk = (a.riskLevel || 'moderate').toLowerCase();
+      const cls = risk === 'low' ? 'risk-low' : risk === 'moderate' ? 'risk-moderate' : 'risk-high';
+      let riskHtml = `<span class="risk-pill ${risk === 'critical' ? 'risk-critical' : cls}">${risk}</span>`;
+      if (risk === 'critical') {
+        riskHtml += '<div style="margin-top:0.35rem;font-size:0.8rem;opacity:0.95;">Seek professional review</div>';
+      }
+      $('hdrRiskWrap').innerHTML = riskHtml;
+
+      const amt = a.irsProposedAmount || 'Not specified';
+      const amtNum = parseMoney(amt);
+      const dl = a.deadline || 'Not specified';
+      const dLeft = a.daysUntilDeadline != null ? a.daysUntilDeadline : daysUntil(dl);
+
+      const metrics = [
+        { label: 'Notice type', value: a.noticeType || '—', warn: false },
+        { label: 'Tax year', value: a.taxYear || '—', warn: false },
+        { label: 'Proposed amount', value: amt, warn: amtNum > 1000 },
+        { label: 'Response deadline', value: dl + (dLeft != null ? ` (${dLeft} days)` : ''), warn: dLeft != null && dLeft < 14 },
+      ];
+      $('metricsRow').innerHTML = metrics.map((m) => `
+        <div class="metric">
+          <div class="metric-label">${m.label}</div>
+          <div class="metric-value ${m.warn ? 'warn' : ''}">${m.value}</div>
+        </div>`).join('');
+
+      $('plainEnglish').textContent = a.plainEnglish || '';
+      $('whatIfIgnored').textContent = a.whatHappensIfIgnored || '';
+
+      const tbody = $('discTable').querySelector('tbody');
+      tbody.innerHTML = '';
+      if (Array.isArray(a.discrepancies) && a.discrepancies.length) {
+        $('discWrap').style.display = 'block';
+        for (const row of a.discrepancies) {
+          const tr = document.createElement('tr');
+          if ((row.reportedAmount || '').toLowerCase().includes('not reported')) tr.classList.add('amber-row');
+          tr.innerHTML = `<td>${escapeHtml(row.source)}</td><td>${escapeHtml(row.type)}</td><td>${escapeHtml(row.irsAmount)}</td><td>${escapeHtml(row.reportedAmount)}</td><td>${escapeHtml(row.difference)}</td>`;
+          tbody.appendChild(tr);
+        }
+      } else {
+        $('discWrap').style.display = 'none';
+      }
+
+      const ki = $('keyIssues');
+      ki.innerHTML = '';
+      (a.keyIssuesToAddress || []).forEach((x) => {
+        const li = document.createElement('li');
+        li.textContent = x;
+        ki.appendChild(li);
+      });
+
+      const dn = $('docNeeded');
+      dn.innerHTML = '';
+      (a.documentationNeeded || []).forEach((x) => {
+        const li = document.createElement('li');
+        li.textContent = x;
+        dn.appendChild(li);
+      });
+
+      const cn = $('criticalNote');
+      if (risk === 'critical') {
+        cn.style.display = 'block';
+        cn.textContent = 'Critical risk: consult a tax attorney or enrolled agent before responding.';
+      } else {
+        cn.style.display = 'none';
+      }
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s == null ? '' : String(s);
+      return d.innerHTML;
+    }
+
+    $('btnBack2').addEventListener('click', () => showStep(1));
+    $('btnToStrategy').addEventListener('click', () => {
+      renderStep3();
+      showStep(3);
+    });
+
+    function renderStep3() {
+      const a = state.analysis;
+      const strategies = Array.isArray(a.availableStrategies) ? a.availableStrategies : [];
+      const grid = $('strategyGrid');
+      grid.innerHTML = '';
+      state.strategy = null;
+      $('btnGenLetter').disabled = true;
+      $('strategyDetail').style.display = 'none';
+
+      const byId = {};
+      strategies.forEach((s) => { byId[s.id] = s; });
+      ['agree', 'partial', 'dispute', 'extension'].forEach((id) => {
+        const s = byId[id] || { id, title: id, subtitle: '', description: '', recommended: false, risk: 'moderate', outcome: '' };
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'strategy-card';
+        card.dataset.id = id;
+        const recBadge = s.recommended ? '<span class="rec">Recommended</span>' : '';
+        card.innerHTML = `${recBadge}<div style="font-family:Georgia,serif;font-size:1.05rem;font-weight:700;">${escapeHtml(s.title)}</div>
+          <div style="font-size:0.85rem;color:var(--muted);margin:0.25rem 0;">${escapeHtml(s.subtitle)}</div>
+          <div style="font-size:0.9rem;margin:0.5rem 0;">${escapeHtml(s.description)}</div>
+          <div style="font-size:0.75rem;text-transform:uppercase;font-weight:700;color:var(--muted);">Risk: ${escapeHtml(s.risk)}</div>
+          <div style="font-size:0.85rem;margin-top:0.35rem;"><strong>Outcome:</strong> ${escapeHtml(s.outcome)}</div>`;
+        card.addEventListener('click', () => {
+          grid.querySelectorAll('.strategy-card').forEach((c) => c.classList.remove('selected'));
+          card.classList.add('selected');
+          state.strategy = id;
+          $('btnGenLetter').disabled = false;
+          const detail = $('strategyDetail');
+          detail.style.display = 'block';
+          const codes = (a.relevantIRSCodes || []).join(', ');
+          detail.innerHTML = `
+            <p><strong>Why this strategy:</strong> ${escapeHtml(a.recommendedStrategyRationale || '')}</p>
+            <p style="margin-top:0.5rem;"><strong>Legal basis:</strong> ${codes ? escapeHtml(codes) : 'See letter draft for citations.'}</p>
+            <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted);">Gather the documents listed in the analysis before mailing.</p>
+          `;
+        });
+        grid.appendChild(card);
+      });
+
+      const rec = a.recommendedStrategy;
+      if (rec) {
+        const el = grid.querySelector(`[data-id="${rec}"]`);
+        if (el) setTimeout(() => el.click(), 0);
+      }
+    }
+
+    $('btnBack3').addEventListener('click', () => showStep(2));
+
+    $('btnGenLetter').addEventListener('click', async () => {
+      if (!state.strategy || !state.analysis) return;
+      $('step3Loading').classList.add('show');
+      $('btnGenLetter').disabled = true;
+      try {
+        const res = await fetch(API.letter, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            analysis: state.analysis,
+            strategy: state.strategy,
+            taxpayerName: $('fillName').value.trim() || undefined,
+            taxpayerAddress: [$('fillAddress').value.trim(), $('fillCity').value.trim()].filter(Boolean).join(', ') || undefined,
+            additionalContext: $('context').value || undefined,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Letter generation failed');
+        state.letterRaw = data.letter || '';
+        state.editing = false;
+        renderLetterDisplay();
+        const a = state.analysis;
+        $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
+        showStep(4);
+      } catch (e) {
+        alert(e.message || 'Letter generation failed');
+      } finally {
+        $('step3Loading').classList.remove('show');
+        $('btnGenLetter').disabled = false;
+      }
+    });
+
+    function highlightPlaceholders(text) {
+      const escaped = escapeHtml(text);
+      return escaped.replace(/(\[[^\]]+\])/g, '<span class="ph">$1</span>');
+    }
+
+    function renderLetterDisplay() {
+      const el = $('letterDisplay');
+      const ed = $('letterEdit');
+      if (state.editing) {
+        el.style.display = 'none';
+        ed.style.display = 'block';
+        ed.value = state.letterRaw;
+      } else {
+        ed.style.display = 'none';
+        el.style.display = 'block';
+        el.innerHTML = highlightPlaceholders(state.letterRaw);
+      }
+    }
+
+    $('btnToggleEdit').addEventListener('click', () => {
+      if (!state.editing) {
+        state.editing = true;
+        $('letterEdit').value = state.letterRaw;
+        $('btnToggleEdit').textContent = 'Lock edits';
+      } else {
+        state.letterRaw = $('letterEdit').value;
+        state.editing = false;
+        $('btnToggleEdit').textContent = 'Edit letter';
+      }
+      renderLetterDisplay();
+    });
+
+    $('btnFillPh').addEventListener('click', () => {
+      let t = state.editing ? $('letterEdit').value : state.letterRaw;
+      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const name = $('fillName').value.trim();
+      const addr = $('fillAddress').value.trim();
+      const city = $('fillCity').value.trim();
+      const phone = $('fillPhone').value.trim();
+      const email = $('fillEmail').value.trim();
+      const map = [
+        [/\[DATE\]/gi, today],
+        [/\[TAXPAYER NAME\]/gi, name || '[TAXPAYER NAME]'],
+        [/\[PRINTED NAME\]/gi, name || '[PRINTED NAME]'],
+        [/\[ADDRESS\]/gi, addr || '[ADDRESS]'],
+        [/\[CITY STATE ZIP\]/gi, city || '[CITY STATE ZIP]'],
+        [/\[PHONE\]/gi, phone || '[PHONE]'],
+        [/\[EMAIL\]/gi, email || '[EMAIL]'],
+        [/\[TAXPAYER SIGNATURE\]/gi, name || '[TAXPAYER SIGNATURE]'],
+        [/\[SSN LAST 4\]/gi, '[SSN LAST 4]'],
+      ];
+      map.forEach(([re, val]) => { t = t.replace(re, val); });
+      state.letterRaw = t;
+      if (state.editing) $('letterEdit').value = t;
+      renderLetterDisplay();
+    });
+
+    $('btnBack4').addEventListener('click', () => showStep(3));
+
+    async function downloadBinary(url, body, filename) {
+      const res = await fetch(url, { method: 'POST', headers: authHeaders(), body: JSON.stringify(body) });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Download failed');
+      }
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    $('btnCopy').addEventListener('click', async () => {
+      const text = state.editing ? $('letterEdit').value : state.letterRaw;
+      try {
+        await navigator.clipboard.writeText(text);
+        $('btnCopy').textContent = 'Copied!';
+        setTimeout(() => { $('btnCopy').textContent = 'Copy letter'; }, 2000);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        $('btnCopy').textContent = 'Copied!';
+        setTimeout(() => { $('btnCopy').textContent = 'Copy letter'; }, 2000);
+      }
+    });
+
+    $('btnPdf').addEventListener('click', async () => {
+      $('step4Error').classList.remove('show');
+      $('step4Loading').classList.add('show');
+      try {
+        const text = state.editing ? $('letterEdit').value : state.letterRaw;
+        await downloadBinary(API.pdf, { text, fileName: 'irs-response-letter.pdf' }, 'irs-response-letter.pdf');
+      } catch (e) {
+        $('step4Error').textContent = e.message;
+        $('step4Error').classList.add('show');
+      } finally {
+        $('step4Loading').classList.remove('show');
+      }
+    });
+
+    $('btnDocx').addEventListener('click', async () => {
+      $('step4Error').classList.remove('show');
+      $('step4Loading').classList.add('show');
+      try {
+        const text = state.editing ? $('letterEdit').value : state.letterRaw;
+        await downloadBinary(API.docx, { text, fileName: 'irs-response-letter.docx' }, 'irs-response-letter.docx');
+      } catch (e) {
+        $('step4Error').textContent = e.message;
+        $('step4Error').classList.add('show');
+      } finally {
+        $('step4Loading').classList.remove('show');
+      }
+    });
+
+    $('btnStartOver').addEventListener('click', () => {
+      if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
+      state.fileBase64 = null;
+      state.fileType = null;
+      state.analysis = null;
+      state.strategy = null;
+      state.letterRaw = '';
+      state.editing = false;
+      $('noticeText').value = '';
+      $('fileLabel').textContent = '';
+      $('noticeType').value = '';
+      $('taxYear').value = '';
+      $('context').value = '';
+      $('fillName').value = '';
+      $('fillAddress').value = '';
+      $('fillCity').value = '';
+      $('fillPhone').value = '';
+      $('fillEmail').value = '';
+      $('letterDisplay').innerHTML = '';
+      $('letterEdit').value = '';
+      $('btnToggleEdit').textContent = 'Edit letter';
+      showStep(1);
+      updateAnalyzeEnabled();
+    });
+
+    async function boot() {
+      const session = await getSession();
+      if (session && session.access_token) {
+        state.accessToken = session.access_token;
+        $('authGate').style.display = 'none';
+      } else {
+        state.accessToken = 'bypass';
+        $('authGate').style.display = 'none';
+      }
+      updateAnalyzeEnabled();
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+  </script>
+</body>
+</html>

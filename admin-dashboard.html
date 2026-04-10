@@ -153,7 +153,7 @@
   <nav>
     <div class="logo">IRS Audit Defense Pro - Admin Dashboard</div>
     <div>
-      <a href="/audit-upload.html" style="background: #3b82f6; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-right: 1rem;">Go to Upload Page</a>
+      <a href="/audit-defense.html" style="background: #3b82f6; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-right: 1rem;">Go to Audit Defense</a>
       <button id="logoutBtn">Logout</button>
     </div>
   </nav>
@@ -165,11 +165,11 @@
     <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
       <h2 style="color: #93c5fd; font-size: 1.2rem; margin-bottom: 1rem;">Quick Actions</h2>
       <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <a href="/audit-upload.html" class="quick-action-btn" style="background: #3b82f6;">
-          📤 Upload Audit Notice
+        <a href="/audit-defense.html" class="quick-action-btn" style="background: #3b82f6;">
+          📤 IRS Audit Defense Wizard
         </a>
-        <a href="/audit-response.html" class="quick-action-btn" style="background: #8b5cf6;">
-          🏠 Product Landing Page
+        <a href="/index.html" class="quick-action-btn" style="background: #8b5cf6;">
+          🏠 Main Landing
         </a>
         <a href="/audit-payment.html" class="quick-action-btn" style="background: #10b981;">
           💳 Payment Page
@@ -252,7 +252,7 @@
   <script>
     // Check admin authentication
     if (sessionStorage.getItem('adminAuth') !== 'true') {
-      window.location.href = '/audit-response.html';
+      window.location.href = '/audit-defense.html';
     }
 
     // Check admin authentication on page load

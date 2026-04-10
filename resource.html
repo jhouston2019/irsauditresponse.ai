@@ -108,16 +108,18 @@
 
     <script type="module">
         import { uploadFile, saveDocumentToDatabase } from './src/components/UploadForm.js';
-        import { getCurrentUser } from './src/components/Auth.js';
+        import { getCurrentUser, getSession } from './src/components/Auth.js';
         
         let currentUser = null;
         let letterText = '';
         let analysisData = null;
+        let pendingFilePayload = null;
         
         document.addEventListener('DOMContentLoaded', async () => {
             currentUser = await getCurrentUser();
             if (!currentUser) {
-                currentUser = { id: 'test-user-123', email: 'test@example.com' };
+                alert('Please login first to access this feature.');
+                window.location.href = '/login.html';
             }
         });
         
@@ -175,7 +177,19 @@
                     reader.readAsDataURL(file);
                     return;
                 } else if (file.type === 'application/pdf') {
-                    letterText = `PDF content for ${file.name}. This is a placeholder for PDF text extraction.`;
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        pendingFilePayload = {
+                            fileBase64: reader.result.split(',')[1],
+                            fileType: file.type || 'application/pdf'
+                        };
+                        letterText = '';
+                        showStatus('Analyzing PDF...');
+                        await analyzeLetter();
+                        pendingFilePayload = null;
+                    };
+                    reader.readAsDataURL(file);
+                    return;
                 } else {
                     letterText = `Document content for ${file.name}. This is a placeholder for document text extraction.`;
                 }
@@ -189,24 +203,40 @@
         
         async function analyzeLetter() {
             try {
-                const analysisResponse = await fetch('/.netlify/functions/analyze-letter', {
+                const session = await getSession();
+                const token = session?.access_token;
+                if (!token) {
+                    showStatus('Session expired. Please sign in again.');
+                    return;
+                }
+
+                const analyzeBody = { text: letterText || '' };
+                if (pendingFilePayload) {
+                    analyzeBody.fileBase64 = pendingFilePayload.fileBase64;
+                    analyzeBody.fileType = pendingFilePayload.fileType;
+                }
+
+                const analysisResponse = await fetch('/.netlify/functions/analyze-notice', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        text: letterText,
-                        userEmail: currentUser.email
-                    })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(analyzeBody)
                 });
                 
                 analysisData = await analysisResponse.json();
                 
-                if (analysisData.summary || analysisData.analysis) {
+                if (!analysisResponse.ok) {
+                    showStatus(analysisData.error || ('Analysis failed (' + analysisResponse.status + ')'));
+                    return;
+                }
+
+                if (analysisData.analysis) {
                     const explanationElement = document.getElementById('explanation');
                     if (explanationElement) {
-                        const displayText = analysisData.analysis 
-                            ? JSON.stringify(analysisData.analysis, null, 2)
-                            : analysisData.summary;
-                        explanationElement.textContent = displayText;
+                        const a = analysisData.analysis;
+                        explanationElement.textContent = [a.noticeType && ('Notice: ' + a.noticeType), a.plainEnglish].filter(Boolean).join('\n\n') || JSON.stringify(a, null, 2);
                         document.getElementById('analysisResults').style.display = 'block';
                         hideStatus();
                     }
@@ -230,7 +260,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        summary: analysisData.summary || JSON.stringify(analysisData.analysis),
+                        summary: analysisData.analysis
+                            ? (analysisData.analysis.plainEnglish || JSON.stringify(analysisData.analysis))
+                            : (analysisData.summary || ''),
                         tone: tone,
                         approach: approach,
                         style: style
@@ -264,9 +296,18 @@
             const responseText = responseElement.textContent;
             
             try {
+                const session = await getSession();
+                const token = session?.access_token;
+                if (!token) {
+                    alert('Please sign in to download.');
+                    return;
+                }
                 const response = await fetch('/.netlify/functions/generate-pdf', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
                     body: JSON.stringify({ 
                         text: responseText,
                         fileName: 'irs-response-letter.pdf'
@@ -298,9 +339,18 @@
             const responseText = responseElement.textContent;
             
             try {
+                const session = await getSession();
+                const token = session?.access_token;
+                if (!token) {
+                    alert('Please sign in to download.');
+                    return;
+                }
                 const response = await fetch('/.netlify/functions/generate-docx', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
                     body: JSON.stringify({ 
                         text: responseText,
                         fileName: 'irs-response-letter.docx'

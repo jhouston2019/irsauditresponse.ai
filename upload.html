@@ -16,7 +16,7 @@
     <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155;">
         <div style="color: #f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
         <div>
-            <a href="/upload.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Upload</a> |
+            <a href="/audit-defense.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">IRS Defense</a> |
             <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Dashboard</a> |
             <a href="/pricing.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Pricing</a> |
             <a href="/login.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Login</a>
@@ -64,10 +64,11 @@
 
     <script type="module">
         import { uploadFile, saveDocumentToDatabase } from './src/components/UploadForm.js';
-        import { getCurrentUser } from './src/components/Auth.js';
+        import { getCurrentUser, getSession } from './src/components/Auth.js';
         
         let currentUser = null;
         let letterText = '';
+        let pendingFilePayload = null;
         
         // Check payment status and user authentication
         document.addEventListener('DOMContentLoaded', async () => {
@@ -90,8 +91,8 @@
                 const paymentData = await paymentCheck.json();
                 
                 if (!paymentData.hasPaid) {
-                    alert('Payment required to access AI analysis features. Redirecting to payment page...');
-                    window.location.href = '/payment.html';
+                    alert('Payment required to access AI analysis features. Redirecting to checkout…');
+                    window.location.href = '/audit-payment.html';
                     return;
                 }
             } catch (error) {
@@ -169,9 +170,19 @@
                     reader.readAsDataURL(file);
                     return; // Exit early for images
                 } else if (file.type === 'application/pdf') {
-                    // For PDFs, we'll use a placeholder for now
-                    // In production, you'd use a PDF parsing library
-                    letterText = `PDF content for ${file.name}. This is a placeholder for PDF text extraction.`;
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        pendingFilePayload = {
+                            fileBase64: reader.result.split(',')[1],
+                            fileType: file.type || 'application/pdf'
+                        };
+                        letterText = '';
+                        showStatus('Analyzing PDF...');
+                        await analyzeLetter();
+                        pendingFilePayload = null;
+                    };
+                    reader.readAsDataURL(file);
+                    return;
                 } else {
                     letterText = `Document content for ${file.name}. This is a placeholder for document text extraction.`;
                 }
@@ -202,22 +213,41 @@
                     return;
                 }
                 
-                const analysisResponse = await fetch('/.netlify/functions/analyze-letter', {
+                const session = await getSession();
+                const token = session?.access_token;
+                if (!token) {
+                    showStatus('Session expired. Please sign in again.');
+                    return;
+                }
+
+                const analyzeBody = { text: letterText || '' };
+                if (pendingFilePayload) {
+                    analyzeBody.fileBase64 = pendingFilePayload.fileBase64;
+                    analyzeBody.fileType = pendingFilePayload.fileType;
+                }
+
+                const analysisResponse = await fetch('/.netlify/functions/analyze-notice', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        text: letterText,
-                        fileUrl: null,
-                        imageUrl: null
-                    })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(analyzeBody)
                 });
                 
                 const analysisData = await analysisResponse.json();
                 
-                if (analysisData.summary || analysisData.explanation) {
+                if (!analysisResponse.ok) {
+                    showStatus(analysisData.error || ('Analysis failed (' + analysisResponse.status + ')'));
+                    return;
+                }
+
+                if (analysisData.analysis) {
                     const explanationElement = document.getElementById('explanation');
                     if (explanationElement) {
-                        explanationElement.textContent = analysisData.summary || analysisData.explanation;
+                        const a = analysisData.analysis;
+                        const block = [a.noticeType && ('Notice: ' + a.noticeType), a.plainEnglish].filter(Boolean).join('\n\n');
+                        explanationElement.textContent = block || JSON.stringify(a, null, 2);
                         document.getElementById('analysisResults').style.display = 'block';
                         hideStatus();
                     } else {
@@ -275,9 +305,18 @@
             const responseText = responseElement.textContent;
             
             try {
+                const session = await getSession();
+                const token = session?.access_token;
+                if (!token) {
+                    alert('Please sign in to download.');
+                    return;
+                }
                 const response = await fetch('/.netlify/functions/generate-pdf', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
                     body: JSON.stringify({ 
                         text: responseText,
                         fileName: 'response-letter.pdf'
@@ -309,9 +348,18 @@
             const responseText = responseElement.textContent;
             
             try {
+                const session = await getSession();
+                const token = session?.access_token;
+                if (!token) {
+                    alert('Please sign in to download.');
+                    return;
+                }
                 const response = await fetch('/.netlify/functions/generate-docx', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
                     body: JSON.stringify({ 
                         text: responseText,
                         fileName: 'response-letter.docx'

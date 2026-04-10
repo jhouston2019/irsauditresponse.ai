@@ -5,14 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IRS Audit Defense Pro – AI Audit Letter Generator</title>
   
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
-  </script>
+  <meta name="ga-measurement-id" content="" />
+  <script src="/src/analytics.js" defer></script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <meta name="description" content="Respond to IRS audit and CP2000 notices instantly with IRS Audit Defense Pro. Professional, accurate, and stress-free.">
   <meta name="keywords" content="IRS letter help, CP2000, 1099K, tax notice, audit response, IRS explanation, AI tax help, respond to IRS">
@@ -36,7 +30,7 @@
     "@type": "Organization",
     "name": "IRS Audit Defense Pro",
     "url": "https://irsauditresponseai.netlify.app",
-    "logo": "https://irsauditresponseai.netlify.app/images/logo.png",
+    "logo": "https://irsauditresponseai.netlify.app/images/og-image.jpg",
     "sameAs": [
       "https://www.linkedin.com/company/irs-audit-defense-pro",
       "https://x.com/irsauditdefensepro",
@@ -49,17 +43,17 @@
   <!-- Ad Styles -->
   <link rel="stylesheet" href="/src/ads-styles.css">
   <style>
-    #platform-dashboard-preview.platform-preview-section {
+    #demo.platform-preview-section {
       background: #0f172a;
       color: #ffffff;
       padding: 72px 0;
     }
-    #platform-dashboard-preview .dashboard-visual-wrap {
+    #demo .dashboard-visual-wrap {
       width: min(1120px, 92%);
       margin-left: auto;
       margin-right: auto;
     }
-    #platform-dashboard-preview .screenshot-container {
+    #demo .screenshot-container {
       box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
       border: none;
       padding: 0;
@@ -68,35 +62,35 @@
       overflow: hidden;
       line-height: 0;
     }
-    #platform-dashboard-preview .screenshot-container img {
+    #demo .screenshot-container img {
       display: block;
       width: 100%;
       max-width: 100%;
       height: auto;
     }
-    #platform-dashboard-preview .platform-preview-callouts {
+    #demo .platform-preview-callouts {
       margin-top: 2rem;
       text-align: center;
       max-width: 720px;
       margin-left: auto;
       margin-right: auto;
     }
-    #platform-dashboard-preview .platform-preview-callouts h2 {
+    #demo .platform-preview-callouts h2 {
       color: #ffffff;
       font-size: clamp(1.35rem, 2.5vw, 1.85rem);
       margin: 0 0 0.75rem;
       font-weight: 700;
       line-height: 1.25;
     }
-    #platform-dashboard-preview .platform-preview-callouts p {
+    #demo .platform-preview-callouts p {
       color: rgba(255, 255, 255, 0.65);
       font-size: 1.05rem;
       line-height: 1.65;
       margin: 0;
     }
     @media (max-width: 768px) {
-      #platform-dashboard-preview .dashboard-visual-wrap,
-      #platform-dashboard-preview .screenshot-container {
+      #demo .dashboard-visual-wrap,
+      #demo .screenshot-container {
         max-width: 100%;
         width: 100%;
         margin-left: 0;
@@ -113,6 +107,7 @@
   <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155; align-items:center;">
     <div style="color:#f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
         <div>
+      <a href="/audit-defense.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">IRS Defense</a> |
       <a href="/pricing.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Pricing</a> |
       <a href="/terms.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Terms</a> |
       <a href="/privacy.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Privacy</a>
@@ -121,29 +116,38 @@
 
     <main>
         <!-- HERO -->
-        <section id="upload-irs-letter" style="position:relative; min-height:280px; display:grid; place-items:center; text-align:center; color:#ffffff; padding:48px 0; background: url('./images/taxhelp.jpg') center/cover no-repeat;">
+        <section id="upload-irs-letter" style="position:relative; min-height:280px; display:grid; place-items:center; text-align:center; color:#ffffff; padding:48px 0; background: url('./images/og-image.jpg') center/cover no-repeat;">
             <div style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.65); z-index:1;"></div>
             <div style="width:min(1120px, 92%); margin-inline:auto; position:relative; z-index:2;">
                 <h1 style="font-size:clamp(2rem, 3.8vw, 3rem); margin:0.25rem 0; text-shadow:0 2px 24px rgba(0,0,0,0.5); color:#ffffff; text-align:center;">Handle IRS audits and CP2000 notices with AI precision</h1>
                 <p style="font-size:clamp(1.125rem, 1.5vw, 1.25rem); color:#ffffff; margin:14px auto 8px auto; text-align:center; display:block; width:100%;">Generate professional IRS audit response letters instantly</p>
                 <p style="font-size:1rem; color:#cbd5e1; margin:12px auto 8px auto; text-align:center; display:block; max-width:700px; line-height:1.6;">Most taxpayers try to respond on their own — but miss key details or structure, which can lead to delays, follow-ups, or escalation.</p>
                 <div style="background:rgba(37, 99, 235, 0.2); border:1px solid rgba(37, 99, 235, 0.4); border-radius:20px; padding:8px 16px; margin:8px auto; display:inline-block; font-size:0.9rem; color:#ffffff;">✓ Available in all 50 states • ✓ All IRS service centers • ✓ 24/7 Access</div>
-                <div style="margin-top:30px;">
-                    <a href="payment.html" style="background:#2563eb; color:#fff; padding:14px 28px; border-radius:6px; text-decoration:none; box-shadow:0 4px 12px rgba(37, 99, 235, 0.3);" aria-label="Get professional IRS audit response for $49">Get My Audit Response Letter - $49</a>
-                    <p style="font-size:0.95rem; color:#94a3b8; margin:12px auto 0; text-align:center; max-width:600px; line-height:1.5;">You don't need to figure out how to structure your response — it's handled for you.</p>
+                <div style="margin-top:30px; display:flex; flex-wrap:wrap; gap:12px; justify-content:center; align-items:center;">
+                    <a href="/audit-defense.html" style="background:#2563eb; color:#fff; padding:14px 28px; border-radius:6px; text-decoration:none; box-shadow:0 4px 12px rgba(37, 99, 235, 0.3);" aria-label="Analyze your IRS notice">Analyze My Notice Free →</a>
+                    <a href="#demo" style="background:transparent; color:#e2e8f0; padding:14px 28px; border-radius:6px; text-decoration:none; border:2px solid rgba(255,255,255,0.35);" aria-label="See how it works">See How It Works</a>
+                    <p style="font-size:0.95rem; color:#94a3b8; margin:12px auto 0; text-align:center; max-width:600px; line-height:1.5; width:100%;">Paste or upload your notice, review AI analysis, pick a strategy, and download your draft letter. Purchase unlocks full generation when required.</p>
                 </div>
             </div>
         </section>
 
-        <!-- PLATFORM / DASHBOARD PREVIEW -->
-        <section id="platform-dashboard-preview" class="platform-preview-section" aria-labelledby="platform-preview-heading">
+        <!-- DEMO / WORKFLOW PREVIEW (no external image — avoids broken assets) -->
+        <section id="demo" class="platform-preview-section" aria-labelledby="platform-preview-heading" style="scroll-margin-top:72px;">
             <div class="dashboard-visual-wrap">
-                <div class="screenshot-container">
-                    <img src="./images/dashboard-preview.png" alt="IRS Audit Defense Pro app dashboard showing letter analysis and response workflow" width="1200" height="750" loading="lazy" decoding="async" />
+                <div class="screenshot-container" style="background:#0f172a; border:1px solid #334155; border-radius:12px; padding:1.5rem; min-height:280px;">
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:1rem;">
+                        <div style="background:#1e293b; border:1px solid #475569; border-radius:8px; padding:12px; text-align:center;"><div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase;">Notice</div><div style="color:#fff; font-weight:700; margin-top:4px;">CP2000</div></div>
+                        <div style="background:#1e293b; border:1px solid #475569; border-radius:8px; padding:12px; text-align:center;"><div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase;">Tax year</div><div style="color:#fff; font-weight:700; margin-top:4px;">2022</div></div>
+                        <div style="background:#1e293b; border:1px solid #7f1d1d; border-radius:8px; padding:12px; text-align:center;"><div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase;">Proposed</div><div style="color:#fca5a5; font-weight:700; margin-top:4px;">$6,284</div></div>
+                        <div style="background:#1e293b; border:1px solid #475569; border-radius:8px; padding:12px; text-align:center;"><div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase;">Deadline</div><div style="color:#fff; font-weight:700; margin-top:4px;">Apr 30</div></div>
+                    </div>
+                    <div style="background:#0a0f1a; border-radius:8px; padding:1rem; color:#cbd5e1; font-size:0.9rem; line-height:1.5; border:1px solid #334155;">
+                        <strong style="color:#93c5fd;">What the IRS is saying</strong> — Sample analysis view: plain-English summary, discrepancy table, risk level, and documentation checklist. Next: choose agreement, partial dispute, full dispute, or extension — then generate your draft letter.
+                    </div>
                 </div>
                 <div class="platform-preview-callouts">
-                    <h2 id="platform-preview-heading">See your workspace before you pay</h2>
-                    <p>Upload your notice, review structured analysis, and download a response formatted the way IRS correspondence is typically organized—clear steps, no guesswork.</p>
+                    <h2 id="platform-preview-heading">How the wizard works</h2>
+                    <p>Four steps: paste or upload your notice → structured analysis → pick a response strategy → copy or download your draft letter (PDF or Word).</p>
                 </div>
             </div>
         </section>
@@ -720,7 +724,7 @@
             <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ Covers CP2000, 1099-K, audit notices, and common IRS correspondence</li>
             <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ Structured response format typically used in professional tax correspondence</li>
                             </ul>
-          <a href="payment.html" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; text-decoration:none; border-radius:10px; background:linear-gradient(180deg, #22c55e, #16a34a); color:#ffffff; box-shadow:0 6px 18px rgba(34, 197, 94, 0.35); transition:transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;" aria-label="Generate professional IRS response letter">Generate My IRS Response Letter Now</a>
+          <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; text-decoration:none; border-radius:10px; background:linear-gradient(180deg, #22c55e, #16a34a); color:#ffffff; box-shadow:0 6px 18px rgba(34, 197, 94, 0.35); transition:transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;" aria-label="Open IRS Audit Defense wizard">Start IRS Audit Defense →</a>
                 </div>
 
         <p style="color:#64748b; margin-top:1.5rem;">✓ One-time payment • ✓ Works in all 50 states • ✓ No geographic restrictions</p>
@@ -791,7 +795,7 @@
                 <p style="color:#cbd5e1; margin:8px 0 18px; font-size:1.05rem; line-height:1.7;">See exactly how your response will be structured before you submit it.</p>
                 <p style="color:#fbbf24; margin:8px 0 18px; font-size:1.1rem; font-weight:600; line-height:1.7;">Start with a structured response. Escalate only if needed.</p>
                 <p style="color:#94a3b8; margin:8px 0 28px; font-size:1rem; line-height:1.7;">The goal is simple: help you submit a clear, complete response that reduces errors, delays, and unnecessary follow-up.</p>
-                <a href="payment.html" style="display:inline-block; padding:14px 22px; font-weight:600; text-decoration:none; border-radius:10px; background:linear-gradient(180deg, #22c55e, #16a34a); color:#ffffff; box-shadow:0 6px 18px rgba(34, 197, 94, 0.35); transition:transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;" aria-label="Join 10,000+ Americans who've resolved their IRS letters">Join 10,000+ Americans Who've Resolved Their IRS Letters</a>
+                <a href="/audit-defense.html" style="display:inline-block; padding:14px 22px; font-weight:600; text-decoration:none; border-radius:10px; background:linear-gradient(180deg, #22c55e, #16a34a); color:#ffffff; box-shadow:0 6px 18px rgba(34, 197, 94, 0.35); transition:transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;" aria-label="Open IRS Audit Defense wizard">Open IRS Audit Defense →</a>
             </div>
         </section>
     </main>
@@ -815,6 +819,7 @@
                     <br>and all 50 states
                 </p>
             </div>
+            <p style="font-size:11px; color:#94a3b8; max-width:720px; margin:0 auto 16px; line-height:1.5;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
             <p>&copy; 2025 IRS Audit Defense Pro. <a href="/privacy.html" style="color:#93c5fd; text-decoration:none;">Privacy Policy</a> | <a href="/terms.html" style="color:#93c5fd; text-decoration:none;">Terms</a> | <a href="/disclaimer.html" style="color:#93c5fd; text-decoration:none;">Disclaimer</a> | <a href="#" onclick="openAdminLogin(event)" style="color:#64748b; text-decoration:none; font-size:0.85rem;">Admin</a></p>
         </div>
     </footer>

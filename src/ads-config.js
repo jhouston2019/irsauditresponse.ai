@@ -22,8 +22,7 @@ const AD_CONFIG = {
     '/login',
     '/signup',
     '/dashboard',
-    '/audit-upload.html',
-    '/audit-response.html',
+    '/audit-defense.html',
     '/upload.html'
   ],
   

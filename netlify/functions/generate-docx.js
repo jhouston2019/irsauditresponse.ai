@@ -1,74 +1,69 @@
 const { Document, Packer, Paragraph, TextRun } = require("docx");
+const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
 
 exports.handler = async (event) => {
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers: corsHeaders(event), body: "" };
+  }
+
+  if (event.httpMethod !== "POST") {
+    return json(405, event, { error: "Method not allowed" });
+  }
+
+  const auth = await authorizeWizardRequest(event);
+  if (!auth.ok) return auth.response;
+
+  let text;
+  let fileName = "irs-response-letter.docx";
+  try {
+    const body = JSON.parse(event.body || "{}");
+    text = sanitizeString(body.text || "", 200000);
+    fileName = sanitizeString(body.fileName || fileName, 120) || "irs-response-letter.docx";
+  } catch {
+    return json(400, event, { error: "Invalid JSON body" });
+  }
+
+  if (!text) {
+    return json(400, event, { error: "No text provided for DOCX generation" });
   }
 
   try {
-    const { text, fileName = 'response-letter.docx' } = JSON.parse(event.body || '{}');
-    
-    if (!text) {
-      return {
-        statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify({ error: 'No text provided for DOCX generation' })
-      };
-    }
-    
-    // Create a new DOCX document
+    const paragraphs = text.split(/\r?\n/).map(
+      (line) =>
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: line.length ? line : " ",
+              font: "Georgia",
+              size: 24,
+            }),
+          ],
+        })
+    );
+
     const doc = new Document({
-      sections: [{
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: text,
-                size: 24, // 12pt font
-              }),
-            ],
-          }),
-        ],
-      }],
+      sections: [
+        {
+          properties: {},
+          children: paragraphs,
+        },
+      ],
     });
 
-    // Generate DOCX buffer
     const buffer = await Packer.toBuffer(doc);
-    
+
     return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename="${fileName}"`,
-        'Access-Control-Allow-Origin': '*'
+        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Disposition": `attachment; filename="${fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}"`,
+        ...corsHeaders(event),
       },
       body: Buffer.from(buffer).toString("base64"),
-      isBase64Encoded: true
+      isBase64Encoded: true,
     };
   } catch (error) {
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ 
-        error: 'Failed to generate DOCX',
-        details: error.message 
-      })
-    };
+    console.error("generate-docx error:", error);
+    return json(503, event, { error: "DOCX generation failed. Please try again." });
   }
-}
+};

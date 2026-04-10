@@ -48,6 +48,7 @@ test('Required files exist', () => {
   const requiredFiles = [
     'package.json',
     'index.html',
+    'audit-defense.html',
     'upload.html',
     'dashboard.html',
     'login.html',
@@ -62,7 +63,9 @@ test('Required files exist', () => {
     'src/main.js',
     'src/components/Auth.js',
     'src/components/UploadForm.js',
-    'netlify/functions/analyze-letter.js',
+    'netlify/functions/analyze-notice.js',
+    'netlify/functions/generate-letter.js',
+    'netlify/functions/_wizardAuth.js',
     'netlify/functions/generate-response.js',
     'netlify/functions/generate-pdf.js',
     'netlify/functions/generate-docx.js',
@@ -136,7 +139,8 @@ test('HTML files have proper structure', () => {
 // Test 5: Netlify Functions
 test('Netlify functions have proper structure', () => {
   const functionFiles = [
-    'netlify/functions/analyze-letter.js',
+    'netlify/functions/analyze-notice.js',
+    'netlify/functions/generate-letter.js',
     'netlify/functions/generate-response.js',
     'netlify/functions/generate-pdf.js',
     'netlify/functions/generate-docx.js',
@@ -150,13 +154,17 @@ test('Netlify functions have proper structure', () => {
   
   functionFiles.forEach(file => {
     const content = fs.readFileSync(file, 'utf8');
-    if (!content.includes('export async function handler')) {
-      throw new Error(`${file} missing handler function`);
+    const hasHandler =
+      content.includes('exports.handler') || content.includes('export async function handler');
+    if (!hasHandler) {
+      throw new Error(`${file} missing handler export`);
     }
     if (!content.includes('statusCode')) {
       throw new Error(`${file} missing statusCode in response`);
     }
-    if (!content.includes('Access-Control-Allow-Origin')) {
+    const hasCors =
+      content.includes('Access-Control-Allow-Origin') || content.includes('corsHeaders');
+    if (!hasCors) {
       throw new Error(`${file} missing CORS headers`);
     }
   });

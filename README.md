@@ -6,6 +6,47 @@ AI-powered IRS audit response letter generator with precision and professionalis
 
 IRS Audit Defense Pro is a specialized AI tool designed to help taxpayers respond to IRS audit notices and CP2000 letters with professional, accurate, and stress-free assistance. Generate precise, factual IRS audit or CP2000 response letters that reference specific notices, explain discrepancies clearly, cite documentation, and maintain a respectful tone requesting case reconsideration.
 
+### IRS Audit Defense — Product Architecture
+
+#### User flow
+
+1. `index.html` or `pricing.html` → `audit-defense.html` (wizard)
+2. Step 1: Paste or upload IRS notice
+3. Step 2: AI analysis (`analyze-notice.js` → GPT-4o)
+4. Step 3: Choose response strategy
+5. Step 4: Generated letter → copy / PDF / DOCX
+
+#### Netlify functions
+
+| Function | Purpose | Auth required |
+| --- | --- | --- |
+| `analyze-notice.js` | Notice analysis via GPT-4o | JWT (paid) |
+| `generate-letter.js` | Letter generation via GPT-4o | JWT (paid) |
+| `generate-pdf.js` | PDF export via pdf-lib | JWT (paid) |
+| `generate-docx.js` | DOCX export via docx | JWT (paid) |
+| `_wizardAuth.js` | Shared CORS + auth + payment check | — |
+| `verify-payment.js` | Stripe payment verification (email lookup) | — |
+
+#### Environment variables
+
+See `.env.example` for all required variables. Set `AUDIT_DEFENSE_BYPASS_PAYMENT=1` in Netlify staging env only.
+
+Client-side analytics: set `GA_MEASUREMENT_ID` at deploy time and inject it into `<meta name="ga-measurement-id" content="...">` on each page (or use a small build/snippet step). `src/analytics.js` loads GA4 only when the meta value matches `G-…`.
+
+#### Local development
+
+```bash
+cd netlify/functions && npm install
+cd ../..
+netlify dev
+```
+
+#### Deleted files
+
+- `audit-response.html` (replaced by `audit-defense.html`)
+- `audit-upload.html` (merged into `audit-defense.html`)
+- `netlify/functions/analyze-letter.js` (replaced by `analyze-notice.js`)
+
 ## Features
 
 - 🔐 **User Authentication** - Secure login/signup with Supabase
@@ -32,10 +73,10 @@ IRS Audit Defense Pro is a specialized AI tool designed to help taxpayers respon
 
 ### 1. Environment Variables
 
-Copy `env.example` to `.env` and fill in your credentials:
+Copy `.env.example` to `.env` and fill in your credentials (never commit `.env`).
 
 ```bash
-cp env.example .env
+cp .env.example .env
 ```
 
 Required environment variables:
@@ -104,7 +145,9 @@ irs-audit-defense-pro/
 │   └── main.js                  # Main application logic
 ├── netlify/
 │   └── functions/
-│       ├── analyze-letter.js    # AI letter analysis
+│       ├── analyze-notice.js    # IRS notice analysis (wizard)
+│       ├── generate-letter.js   # Strategy-based response letter
+│       ├── _wizardAuth.js       # Auth + CORS for wizard functions
 │       ├── generate-response.js # AI response generation
 │       ├── create-checkout-session.js # Stripe checkout
 │       └── generate-pdf.js      # PDF generation
@@ -120,6 +163,7 @@ irs-audit-defense-pro/
 ├── resources.html               # Helpful resources
 ├── login.html                   # Login page
 ├── signup.html                  # Signup page
+├── audit-defense.html           # 4-step IRS notice → letter wizard
 ├── upload.html                  # Document upload
 ├── dashboard.html               # User dashboard
 ├── pricing.html                 # Pricing page
@@ -135,7 +179,8 @@ irs-audit-defense-pro/
 
 ### Netlify Functions
 
-- `/.netlify/functions/analyze-letter` - Analyze uploaded audit letters
+- `/.netlify/functions/analyze-notice` - Analyze IRS notices (auth + paid)
+- `/.netlify/functions/generate-letter` - Generate response letter from analysis
 - `/.netlify/functions/generate-response` - Generate audit response letters
 - `/.netlify/functions/create-checkout-session` - Create Stripe checkout
 - `/.netlify/functions/generate-pdf` - Generate PDF documents

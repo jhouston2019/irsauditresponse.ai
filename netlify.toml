@@ -25,12 +25,11 @@
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# ✅ Allow CORS for Netlify functions
+# Function responses set CORS via _wizardAuth (SITE_URL); do not force wildcard here
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Service-Key"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
 
 # ✅ Long-term caching for assets

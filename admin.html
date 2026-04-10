@@ -19,8 +19,8 @@
       
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-bottom:20px;">
         <a href="/" style="background:#3b82f6; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">🏠 Home</a>
-        <a href="/payment.html" style="background:#22c55e; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">💳 Payment</a>
-        <a href="/upload.html" style="background:#f59e0b; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">📤 Upload</a>
+        <a href="/audit-payment.html" style="background:#22c55e; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">💳 Audit checkout</a>
+        <a href="/audit-defense.html" style="background:#f59e0b; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">🛡️ IRS Defense</a>
         <a href="/resource.html" style="background:#8b5cf6; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">🤖 AI Analysis</a>
         <a href="/pricing.html" style="background:#06b6d4; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">💰 Pricing</a>
         <a href="/thank-you.html" style="background:#10b981; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">✅ Success</a>
@@ -40,7 +40,8 @@
         <h3 style="color:#22c55e; margin-bottom:15px;">🧪 Testing Tools</h3>
         
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:15px;">
-          <button id="testAnalysis" style="background:#dc2626; color:#fff; padding:10px 16px; border-radius:6px; border:none; cursor:pointer;">Test AI Analysis</button>
+          <button id="testAnalysis" style="background:#dc2626; color:#fff; padding:10px 16px; border-radius:6px; border:none; cursor:pointer;">Test analyze notice</button>
+          <button id="testGenerateLetter" style="background:#b91c1c; color:#fff; padding:10px 16px; border-radius:6px; border:none; cursor:pointer;">Test generate letter</button>
           <button id="testPayment" style="background:#dc2626; color:#fff; padding:10px 16px; border-radius:6px; border:none; cursor:pointer;">Test Payment Flow</button>
           <button id="testEmail" style="background:#dc2626; color:#fff; padding:10px 16px; border-radius:6px; border:none; cursor:pointer;">Test Email Function</button>
           <button id="testPDF" style="background:#dc2626; color:#fff; padding:10px 16px; border-radius:6px; border:none; cursor:pointer;">Test PDF Export</button>
@@ -104,23 +105,98 @@
       `;
     };
 
-    // Testing Functions
+    const DEMO_CP2000 = `Department of the Treasury — Internal Revenue Service
+Ogden, UT 84201-0040
+
+Notice: CP2000
+Tax Year: 2022
+Notice Date: March 15, 2024
+Social Security Number: XXX-XX-7291
+Amount Due: $6,284.00
+Response Deadline: April 30, 2024
+
+Dear Taxpayer,
+
+We have information that doesn't match what you reported on your
+2022 federal income tax return. Please review this notice carefully.
+
+Income reported to us but not on your return:
+- Robinhood Markets Inc. (1099-B): $31,200 in proceeds
+- Upwork Global Inc. (1099-NEC): $14,800
+- Coinbase Inc. (1099-MISC): $3,100
+
+Proposed changes to your 2022 Form 1040:
+Additional income: $49,100
+Additional self-employment tax (on $14,800): $2,093
+Additional income tax: $4,191
+Total proposed amount due: $6,284
+
+If we do not receive your response by April 30, 2024, we will
+send a Statutory Notice of Deficiency (CP3219A).
+
+Contact: 1-800-829-8310`;
+
+    const MOCK_ANALYSIS_FOR_LETTER = {
+      noticeType: 'CP2000',
+      taxYear: '2022',
+      plainEnglish: 'The IRS proposes additional tax based on third-party income not fully reported on your return.',
+      keyIssuesToAddress: ['Reconcile 1099-B, 1099-NEC, and 1099-MISC amounts with your return.'],
+      documentationNeeded: ['Brokerage statements', '1099 forms', 'Prior-year return'],
+      irsContactInfo: { phone: '1-800-829-8310', address: 'Ogden, UT 84201-0040', faxNumber: null },
+      recommendedStrategy: 'dispute',
+      discrepancies: [
+        { source: 'Robinhood', type: '1099-B', irsAmount: '$31,200', reportedAmount: '$0', difference: '$31,200' },
+      ],
+    };
+
     document.getElementById('testAnalysis').onclick = async () => {
       testResults.style.display = 'block';
-      testOutput.textContent = 'Testing AI Analysis...';
-      
+      testOutput.textContent = 'POST /.netlify/functions/analyze-notice …';
       try {
-        const res = await fetch('/.netlify/functions/analyze-letter', {
+        const res = await fetch('/.netlify/functions/analyze-notice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            text: 'This is a test CP2000 notice for income discrepancy. Please analyze this letter.' 
-          })
+          body: JSON.stringify({ text: DEMO_CP2000 }),
         });
         const data = await res.json();
-        testOutput.textContent = `AI Analysis Test Result:\n${JSON.stringify(data, null, 2)}`;
+        const usageNote = data.usage
+          ? `\n\nToken usage (from response): ${JSON.stringify(data.usage, null, 2)}`
+          : '\n\nToken usage: see Netlify function logs if not included in body.';
+        testOutput.textContent =
+          `analyze-notice HTTP ${res.status}\n${JSON.stringify(data, null, 2)}${usageNote}\n\n401/403 without Bearer JWT + paid account is expected in production.`;
       } catch (error) {
-        testOutput.textContent = `AI Analysis Test Error: ${error.message}`;
+        testOutput.textContent = `analyze-notice error: ${error.message}`;
+      }
+    };
+
+    document.getElementById('testGenerateLetter').onclick = async () => {
+      testResults.style.display = 'block';
+      testOutput.textContent = 'POST /.netlify/functions/generate-letter …';
+      try {
+        const res = await fetch('/.netlify/functions/generate-letter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            analysis: MOCK_ANALYSIS_FOR_LETTER,
+            strategy: 'dispute',
+            taxpayerName: 'Jane Q. Taxpayer',
+            taxpayerAddress: '123 Main St, Austin, TX 78701',
+            additionalContext: 'Admin test payload',
+          }),
+        });
+        const data = await res.json();
+        const forDisplay = { ...data };
+        if (typeof forDisplay.letter === 'string' && forDisplay.letter.length > 4000) {
+          forDisplay.letter =
+            forDisplay.letter.slice(0, 4000) + '\n\n… [truncated in this view; full text is in the API response]';
+        }
+        const usageNote = data.usage
+          ? `\n\nToken usage (from response): ${JSON.stringify(data.usage, null, 2)}`
+          : '\n\nToken usage: see Netlify function logs if not included in body.';
+        testOutput.textContent =
+          `generate-letter HTTP ${res.status}\n${JSON.stringify(forDisplay, null, 2)}${usageNote}\n\n401/403 without Bearer JWT + paid account is expected in production.`;
+      } catch (error) {
+        testOutput.textContent = `generate-letter error: ${error.message}`;
       }
     };
 
