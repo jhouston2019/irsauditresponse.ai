@@ -383,12 +383,16 @@ Contact: 1-800-829-8310`;
     $('noticeText').addEventListener('input', () => {
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
+      const suppRow = document.getElementById('pdfSuppRow');
+      if (suppRow) suppRow.style.display = 'none';
       updateAnalyzeEnabled();
     });
 
     $('btnDemo').addEventListener('click', () => {
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
+      const suppRow = document.getElementById('pdfSuppRow');
+      if (suppRow) suppRow.style.display = 'none';
       $('noticeText').value = DEMO_CP2000;
       state.fileBase64 = null;
       state.fileType = null;
@@ -476,6 +480,30 @@ Contact: 1-800-829-8310`;
                 'Or paste the notice text directly into the box above.',
               ].join(' ');
               warn.style.display = 'block';
+              let suppRow = document.getElementById('pdfSuppRow');
+              if (!suppRow) {
+                suppRow = document.createElement('div');
+                suppRow.id = 'pdfSuppRow';
+                suppRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.75rem;';
+                suppRow.innerHTML = `
+    <div>
+      <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:0.35rem;">
+        Proposed amount (from notice)
+      </label>
+      <input type="text" id="suppAmount" placeholder="e.g. $4,954.40"
+        style="width:100%;padding:0.6rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;" />
+    </div>
+    <div>
+      <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:0.35rem;">
+        Response deadline (from notice)
+      </label>
+      <input type="text" id="suppDeadline" placeholder="e.g. April 30, 2024"
+        style="width:100%;padding:0.6rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;" />
+    </div>
+  `;
+                warn.parentNode.insertBefore(suppRow, warn.nextSibling);
+              }
+              suppRow.style.display = 'grid';
             } else {
               const warn = document.getElementById('pdfWarn');
               if (warn) warn.style.display = 'none';
@@ -515,7 +543,7 @@ Contact: 1-800-829-8310`;
     $('btnAnalyze').addEventListener('click', async () => {
       $('step1Error').classList.remove('show');
       $('step1Error').textContent = '';
-      const text = $('noticeText').value.trim();
+      let text = $('noticeText').value.trim();
       if (!text && !state.fileBase64) {
         $('step1Error').textContent = 'Paste your notice or upload a file before analyzing.';
         $('step1Error').classList.add('show');
@@ -533,6 +561,15 @@ Contact: 1-800-829-8310`;
       $('step1Loading').classList.add('show');
       $('btnAnalyze').disabled = true;
       try {
+        const suppAmount = document.getElementById('suppAmount');
+        const suppDeadline = document.getElementById('suppDeadline');
+        text = $('noticeText').value.trim();
+        if (suppAmount?.value.trim()) {
+          text += '\nProposed Amount Due: ' + suppAmount.value.trim();
+        }
+        if (suppDeadline?.value.trim()) {
+          text += '\nResponse Deadline: ' + suppDeadline.value.trim();
+        }
         const body = {
           text,
           fileBase64: state.fileBase64 || undefined,
@@ -855,6 +892,8 @@ Contact: 1-800-829-8310`;
       if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
+      const suppRow = document.getElementById('pdfSuppRow');
+      if (suppRow) suppRow.style.display = 'none';
       state.fileBase64 = null;
       state.fileType = null;
       state.analysis = null;
