@@ -169,74 +169,43 @@ async function extractTextFromFile(fileBase64, fileType) {
 }
 
 /**
- * PDF: optional pdf-parse (require inside try); short/empty → GPT-4o vision.
+ * PDF: plain chat completion; base64 sent as text (no image_url / vision MIME).
  */
-async function extractPdfNoticeText(openai, fileBase64, fileType) {
-  let extractedText = "";
-  let extractionMethod = "none";
-  const mime = (fileType && String(fileType).trim()) || "application/pdf";
-
+async function extractPdfNoticeText(openai, fileBase64) {
   try {
-    const pdfParse = require("pdf-parse");
-    const pdfBuffer = Buffer.from(fileBase64, "base64");
-    const pdfData = await pdfParse(pdfBuffer);
-    extractedText = (pdfData.text || "").trim();
-    extractionMethod = "pdf-parse";
-  } catch (pdfErr) {
+    const res = await openai.chat.completions.create({
+      model: "gpt-4o",
+      max_tokens: 2000,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a document text extractor. The user will provide a base64-encoded PDF. Extract and return all text content from it exactly as it appears. Return only the raw text with no commentary.",
+        },
+        {
+          role: "user",
+          content: `Extract all text from this base64-encoded PDF:\n\n${fileBase64}`,
+        },
+      ],
+    });
+    const extractedText = res.choices[0]?.message?.content || "";
     console.log(
       JSON.stringify({
         fn: "analyze-notice",
-        pdfParseError: pdfErr.message,
+        extraction: "gpt4o-text",
+        charCount: extractedText.length,
       })
     );
-    extractedText = "";
+    return extractedText;
+  } catch (err) {
+    console.log(
+      JSON.stringify({
+        fn: "analyze-notice",
+        extractionError: err.message,
+      })
+    );
+    return "";
   }
-
-  if (extractedText.length < 50) {
-    try {
-      const visionRes = await openai.chat.completions.create({
-        model: "gpt-4o",
-        max_tokens: 2000,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mime};base64,${fileBase64}`,
-                },
-              },
-              {
-                type: "text",
-                text: "Extract all text from this IRS notice exactly as it appears. Return only the raw text, no commentary.",
-              },
-            ],
-          },
-        ],
-      });
-      extractedText = (visionRes.choices[0]?.message?.content || "").trim();
-      extractionMethod = "vision";
-    } catch (visionErr) {
-      console.log(
-        JSON.stringify({
-          fn: "analyze-notice",
-          visionError: visionErr.message,
-        })
-      );
-      extractedText = "";
-    }
-  }
-
-  console.log(
-    JSON.stringify({
-      fn: "analyze-notice",
-      extraction: extractionMethod,
-      charCount: extractedText.length,
-    })
-  );
-
-  return extractedText;
 }
 
 async function extractTextWithVision(openai, mimeType, base64) {
@@ -346,7 +315,7 @@ exports.handler = async (event) => {
         });
       }
     } else if (ft.includes("pdf")) {
-      const extracted = await extractPdfNoticeText(openai, fileBase64, ft);
+      const extracted = await extractPdfNoticeText(openai, fileBase64);
       noticeText = [noticeText, extracted].filter(Boolean).join("\n\n");
       if (!extracted.trim()) {
         return json(200, event, {
