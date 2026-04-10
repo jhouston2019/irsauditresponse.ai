@@ -380,9 +380,15 @@ Contact: 1-800-829-8310`;
       $('btnAnalyze').disabled = !ok;
     }
 
-    $('noticeText').addEventListener('input', updateAnalyzeEnabled);
+    $('noticeText').addEventListener('input', () => {
+      const warn = document.getElementById('pdfWarn');
+      if (warn) warn.style.display = 'none';
+      updateAnalyzeEnabled();
+    });
 
     $('btnDemo').addEventListener('click', () => {
+      const warn = document.getElementById('pdfWarn');
+      if (warn) warn.style.display = 'none';
       $('noticeText').value = DEMO_CP2000;
       state.fileBase64 = null;
       state.fileType = null;
@@ -439,6 +445,41 @@ Contact: 1-800-829-8310`;
             $('noticeText').value = fullText;
             state.fileBase64 = null;
             state.fileType = null;
+            if (fullText.length < 300) {
+              let warn = document.getElementById('pdfWarn');
+              if (!warn) {
+                warn = document.createElement('div');
+                warn.id = 'pdfWarn';
+                warn.style.cssText = [
+                  'margin-top: 0.75rem',
+                  'padding: 0.75rem 1rem',
+                  'background: #fffbeb',
+                  'border: 1px solid #fbbf24',
+                  'border-radius: 6px',
+                  'font-size: 0.875rem',
+                  'color: #92400e',
+                  'line-height: 1.5',
+                ].join(';');
+                $('noticeText').parentNode.insertBefore(
+                  warn,
+                  $('noticeText').nextSibling,
+                );
+              }
+              warn.innerHTML = [
+                '<strong>Limited text extracted from your PDF.</strong>',
+                'For the most accurate letter, please also fill in:',
+                '<ul style="margin: 0.35rem 0 0 1.25rem; padding: 0;">',
+                '<li>Notice type (use the dropdown below)</li>',
+                '<li>Tax year (use the field below)</li>',
+                '<li>Any dollar amounts or dates from your notice</li>',
+                '</ul>',
+                'Or paste the notice text directly into the box above.',
+              ].join(' ');
+              warn.style.display = 'block';
+            } else {
+              const warn = document.getElementById('pdfWarn');
+              if (warn) warn.style.display = 'none';
+            }
           } else {
             const r = new FileReader();
             r.onload = () => {
@@ -812,6 +853,8 @@ Contact: 1-800-829-8310`;
 
     $('btnStartOver').addEventListener('click', () => {
       if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
+      const warn = document.getElementById('pdfWarn');
+      if (warn) warn.style.display = 'none';
       state.fileBase64 = null;
       state.fileType = null;
       state.analysis = null;

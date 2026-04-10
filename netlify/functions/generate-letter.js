@@ -34,6 +34,24 @@ FORMAT:
 - Signature block: [TAXPAYER SIGNATURE], [PRINTED NAME], [DATE], [PHONE], [EMAIL]
 - Enclosures list (based on documentationNeeded from analysis)
 
+PLACEHOLDER RULES — CRITICAL:
+If a specific value is not available from the analysis
+(tax year, notice date, IRS address, notice number,
+reference number), do NOT use a generic placeholder.
+Instead write a specific instructional placeholder that
+tells the taxpayer exactly what to find and where:
+
+- Instead of [TAX YEAR] → [TAX YEAR — check line 1 of your notice]
+- Instead of [NOTICE DATE] → [NOTICE DATE — upper right corner of notice]
+- Instead of [IRS ADDRESS FROM NOTICE] → [IRS ADDRESS — copy the return address from the top of your notice]
+- Instead of [NOTICE NUMBER] → [NOTICE NUMBER — e.g. CP90, found at top of notice]
+- Instead of [TAX YEAR] → [TAX YEAR — found near top of notice]
+- Instead of [BRIEF DESCRIPTION OF EVIDENCE OR ISSUES, IF KNOWN] → [DESCRIBE YOUR SPECIFIC SITUATION — e.g. 'the income was already reported on my return' or 'I have receipts for these deductions']
+
+Every placeholder must be actionable. The taxpayer must
+know exactly what to write or where to find the information.
+Never leave a vague bracketed placeholder.
+
 TONE AND STRATEGY INSTRUCTIONS BY TYPE:
 
 For AGREE strategy:
