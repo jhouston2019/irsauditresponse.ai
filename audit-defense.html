@@ -6,6 +6,8 @@
   <title>IRS Audit Defense — Notice Analysis & Response Letter</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <meta name="description" content="Analyze your IRS notice and generate a professional, submission-ready response letter." />
+  <meta name="supabase-url" content="%%SUPABASE_URL%%">
+  <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
   <style>
     :root {
       --navy: #0f1e35;
@@ -266,7 +268,19 @@
   </div>
 
   <script type="module">
-    import { getSession } from './src/components/Auth.js';
+    async function getSession() {
+      try {
+        const url = document.querySelector('meta[name="supabase-url"]')?.content;
+        const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+        if (!url || !key || url.includes('%%')) return null;
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        const supabase = createClient(url, key);
+        const { data } = await supabase.auth.getSession();
+        return data?.session || null;
+      } catch {
+        return null;
+      }
+    }
 
     const DEMO_CP2000 = `Department of the Treasury — Internal Revenue Service
 Ogden, UT 84201-0040
