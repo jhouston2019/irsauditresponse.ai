@@ -169,39 +169,30 @@ async function extractTextFromFile(fileBase64, fileType) {
 }
 
 /**
- * PDF: plain chat completion; base64 sent as text (no image_url / vision MIME).
+ * PDF: pdf-parse via dynamic import (lib entry; no load-time require).
  */
-async function extractPdfNoticeText(openai, fileBase64) {
+async function extractPdfNoticeText(fileBase64) {
   try {
-    const res = await openai.chat.completions.create({
-      model: "gpt-4o",
-      max_tokens: 2000,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a document text extractor. The user will provide a base64-encoded PDF. Extract and return all text content from it exactly as it appears. Return only the raw text with no commentary.",
-        },
-        {
-          role: "user",
-          content: `Extract all text from this base64-encoded PDF:\n\n${fileBase64}`,
-        },
-      ],
-    });
-    const extractedText = res.choices[0]?.message?.content || "";
+    const pdfBuffer = Buffer.from(fileBase64, "base64");
+
+    const pdfParse = await import("pdf-parse/lib/pdf-parse.js");
+    const fn = pdfParse.default || pdfParse;
+    const pdfData = await fn(pdfBuffer, { max: 0 });
+    const text = (pdfData.text || "").trim();
+
     console.log(
       JSON.stringify({
         fn: "analyze-notice",
-        extraction: "gpt4o-text",
-        charCount: extractedText.length,
+        extraction: "pdf-parse",
+        charCount: text.length,
       })
     );
-    return extractedText;
+    return text;
   } catch (err) {
     console.log(
       JSON.stringify({
         fn: "analyze-notice",
-        extractionError: err.message,
+        pdfParseError: err.message,
       })
     );
     return "";
@@ -315,7 +306,7 @@ exports.handler = async (event) => {
         });
       }
     } else if (ft.includes("pdf")) {
-      const extracted = await extractPdfNoticeText(openai, fileBase64);
+      const extracted = await extractPdfNoticeText(fileBase64);
       noticeText = [noticeText, extracted].filter(Boolean).join("\n\n");
       if (!extracted.trim()) {
         return json(200, event, {
