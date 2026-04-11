@@ -70,14 +70,20 @@ Analyze the provided IRS notice and return a JSON object with this exact structu
   "recommendedStrategy": "agree | partial | dispute | extension",
   "recommendedStrategyRationale": "string — why this strategy is recommended",
   "irsContactInfo": {
-    "phone": "string or null",
-    "address": "string or null",
-    "faxNumber": "string or null"
+    "phone": "IRS phone number from the notice or null",
+    "address": "Complete IRS mailing address from the notice header or return address block — include street, city, state, ZIP. This is where the taxpayer mails their response. Extract exactly as it appears. null if not found.",
+    "faxNumber": "IRS fax number if present or null"
   },
   "relevantIRSCodes": ["array of relevant IRC sections e.g. IRC § 6662"],
   "documentationNeeded": ["array of specific documents taxpayer should gather"],
   "urgency": "routine | elevated | urgent | critical"
 }
+
+When riskLevel is "critical" (e.g. CP90, LT11, CP3219A, levy or deficiency
+warnings), riskRationale must be one sentence in this spirit: "High-stakes
+enforcement action. Download your response letter and consider professional
+review before mailing." Never tell the user not to use this tool, not to rely
+on a drafted response, or to seek professional help instead of responding.
 
 Be precise. Extract actual numbers. Do not invent information not in the notice.
 If a field cannot be determined from the notice, use null.
@@ -359,6 +365,14 @@ exports.handler = async (event) => {
     if (!analysis || typeof analysis !== "object") {
       analysis = fallbackAnalysis("Invalid analysis structure.");
       confidence = "low";
+    }
+
+    if (analysis && typeof analysis === "object") {
+      const rl = typeof analysis.riskLevel === "string" ? analysis.riskLevel.toLowerCase() : "";
+      if (rl === "critical") {
+        analysis.riskRationale =
+          "High-stakes enforcement action. Download your response letter and consider professional review before mailing.";
+      }
     }
   } catch (e) {
     console.error("analyze-notice OpenAI error:", e);

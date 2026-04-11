@@ -218,6 +218,18 @@
       <h2 style="margin-bottom:0.5rem;">Response strategy</h2>
       <p style="color:var(--muted);">Select one approach. The recommended option reflects your notice analysis.</p>
       <div class="strategy-grid" id="strategyGrid"></div>
+      <div id="customStrategyWrap" style="display:none; margin-top:1rem;">
+        <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.35rem;">
+          Describe your situation and defense approach
+        </label>
+        <textarea id="customStrategyText"
+          placeholder="e.g. The income was already reported on a different line of my return. I have bank statements showing the payment was a reimbursement, not income. I want to fully dispute the IRS position and request they review my original filing..."
+          style="width:100%;min-height:120px;padding:0.65rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.9rem;font-family:inherit;resize:vertical;"></textarea>
+        <p style="font-size:0.8rem;color:#6b7280;margin-top:0.35rem;">
+          Be specific — the more detail you provide, the stronger
+          your letter will be.
+        </p>
+      </div>
       <div id="strategyDetail" style="margin-top:1.25rem;padding:1rem;background:#f9fafb;border-radius:8px;border:1px solid var(--border);display:none;"></div>
       <div class="toolbar">
         <button type="button" class="btn btn-secondary" id="btnBack3">← Back</button>
@@ -247,6 +259,22 @@
         <div><label>City, State ZIP</label><input type="text" id="fillCity" /></div>
         <div><label>Phone</label><input type="text" id="fillPhone" /></div>
         <div><label>Email</label><input type="email" id="fillEmail" /></div>
+        <div>
+          <label>SSN last 4 digits</label>
+          <input type="text" id="fillSsn" placeholder="e.g. 7291" maxlength="4" />
+        </div>
+        <div>
+          <label>IRS address (from notice)</label>
+          <input type="text" id="fillIrsAddress" placeholder="e.g. IRS, Ogden, UT 84201" />
+        </div>
+        <div>
+          <label>Notice number</label>
+          <input type="text" id="fillNoticeNum" placeholder="e.g. CP14, TX-94409-8" />
+        </div>
+        <div>
+          <label>Notice date</label>
+          <input type="text" id="fillNoticeDate" placeholder="e.g. March 15, 2024" />
+        </div>
       </div>
       <div class="toolbar">
         <button type="button" class="btn btn-primary" id="btnFillPh">Fill placeholders</button>
@@ -634,6 +662,12 @@ Contact: 1-800-829-8310`;
           <div class="metric-value ${m.warn ? 'warn' : ''}">${m.value}</div>
         </div>`).join('');
 
+      const irsAddr = state.analysis?.irsContactInfo?.address;
+      if (irsAddr) {
+        const el = document.getElementById('fillIrsAddress');
+        if (el && !el.value) el.value = irsAddr;
+      }
+
       $('plainEnglish').textContent = a.plainEnglish || '';
       $('whatIfIgnored').textContent = a.whatHappensIfIgnored || '';
 
@@ -670,7 +704,8 @@ Contact: 1-800-829-8310`;
       const cn = $('criticalNote');
       if (risk === 'critical') {
         cn.style.display = 'block';
-        cn.textContent = 'Critical risk: consult a tax attorney or enrolled agent before responding.';
+        cn.textContent =
+          'This is a high-stakes notice. Download your response letter below, then bring it to a tax attorney or enrolled agent for review before mailing. Your letter gives them a strong, structured starting point — saving you time and their billable hours.';
       } else {
         cn.style.display = 'none';
       }
@@ -696,11 +731,18 @@ Contact: 1-800-829-8310`;
       state.strategy = null;
       $('btnGenLetter').disabled = true;
       $('strategyDetail').style.display = 'none';
+      const customWrap = document.getElementById('customStrategyWrap');
+      if (customWrap) customWrap.style.display = 'none';
 
       const byId = {};
       strategies.forEach((s) => { byId[s.id] = s; });
-      ['agree', 'partial', 'dispute', 'extension'].forEach((id) => {
-        const s = byId[id] || { id, title: id, subtitle: '', description: '', recommended: false, risk: 'moderate', outcome: '' };
+      const defaultTitle = (sid) => {
+        if (sid === 'other') return 'Other / custom';
+        if (sid === 'custom') return 'Custom approach';
+        return sid;
+      };
+      ['agree', 'partial', 'dispute', 'extension', 'other', 'custom'].forEach((id) => {
+        const s = byId[id] || { id, title: defaultTitle(id), subtitle: '', description: '', recommended: false, risk: 'moderate', outcome: '' };
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'strategy-card';
@@ -716,6 +758,8 @@ Contact: 1-800-829-8310`;
           card.classList.add('selected');
           state.strategy = id;
           $('btnGenLetter').disabled = false;
+          const wrap = document.getElementById('customStrategyWrap');
+          if (wrap) wrap.style.display = (id === 'other' || id === 'custom') ? 'block' : 'none';
           const detail = $('strategyDetail');
           detail.style.display = 'block';
           const codes = (a.relevantIRSCodes || []).join(', ');
@@ -742,6 +786,7 @@ Contact: 1-800-829-8310`;
       $('step3Loading').classList.add('show');
       $('btnGenLetter').disabled = true;
       try {
+        const customText = document.getElementById('customStrategyText')?.value.trim();
         const res = await fetch(API.letter, {
           method: 'POST',
           headers: authHeaders(),
@@ -750,7 +795,7 @@ Contact: 1-800-829-8310`;
             strategy: state.strategy,
             taxpayerName: $('fillName').value.trim() || undefined,
             taxpayerAddress: [$('fillAddress').value.trim(), $('fillCity').value.trim()].filter(Boolean).join(', ') || undefined,
-            additionalContext: $('context').value || undefined,
+            additionalContext: customText || $('context').value || undefined,
           }),
         });
         const data = await res.json().catch(() => ({}));
@@ -809,6 +854,10 @@ Contact: 1-800-829-8310`;
       const city = $('fillCity').value.trim();
       const phone = $('fillPhone').value.trim();
       const email = $('fillEmail').value.trim();
+      const irsAddr = state.analysis?.irsContactInfo?.address;
+      if (irsAddr && !$('fillIrsAddress').value.trim()) {
+        $('fillIrsAddress').value = irsAddr;
+      }
       const map = [
         [/\[DATE\]/gi, today],
         [/\[TAXPAYER NAME\]/gi, name || '[TAXPAYER NAME]'],
@@ -818,7 +867,12 @@ Contact: 1-800-829-8310`;
         [/\[PHONE\]/gi, phone || '[PHONE]'],
         [/\[EMAIL\]/gi, email || '[EMAIL]'],
         [/\[TAXPAYER SIGNATURE\]/gi, name || '[TAXPAYER SIGNATURE]'],
-        [/\[SSN LAST 4\]/gi, '[SSN LAST 4]'],
+        [/\[SSN LAST 4\]/gi, $('fillSsn').value.trim() || '[SSN LAST 4]'],
+        [/\[IRS ADDRESS[^\]]*\]/gi, $('fillIrsAddress').value.trim() || '[IRS ADDRESS — copy from top of notice]'],
+        [/\[NOTICE NUMBER[^\]]*\]/gi, $('fillNoticeNum').value.trim() || '[NOTICE NUMBER — found at top of notice]'],
+        [/\[NOTICE DATE[^\]]*\]/gi, $('fillNoticeDate').value.trim() || today],
+        [/\[TAX YEAR[^\]]*\]/gi, ($('taxYear')?.value.trim()) || '[TAX YEAR]'],
+        [/\[DESCRIBE YOUR SPECIFIC SITUATION[^\]]*\]/gi, ''],
       ];
       map.forEach(([re, val]) => { t = t.replace(re, val); });
       state.letterRaw = t;
@@ -894,6 +948,8 @@ Contact: 1-800-829-8310`;
       if (warn) warn.style.display = 'none';
       const suppRow = document.getElementById('pdfSuppRow');
       if (suppRow) suppRow.style.display = 'none';
+      document.getElementById('customStrategyText').value = '';
+      document.getElementById('customStrategyWrap').style.display = 'none';
       state.fileBase64 = null;
       state.fileType = null;
       state.analysis = null;
@@ -910,6 +966,10 @@ Contact: 1-800-829-8310`;
       $('fillCity').value = '';
       $('fillPhone').value = '';
       $('fillEmail').value = '';
+      $('fillSsn').value = '';
+      $('fillIrsAddress').value = '';
+      $('fillNoticeNum').value = '';
+      $('fillNoticeDate').value = '';
       $('letterDisplay').innerHTML = '';
       $('letterEdit').value = '';
       $('btnToggleEdit').textContent = 'Edit letter';

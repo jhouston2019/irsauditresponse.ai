@@ -24,7 +24,7 @@ FORMAT:
 - Full formal business letter format
 - Date: [DATE] (placeholder)
 - Taxpayer info block: [TAXPAYER NAME], [ADDRESS], [CITY STATE ZIP], [SSN LAST 4]
-- IRS address block (use address from notice if available)
+- IRS address block: use irsContactInfo.address from the analysis if available. If not available, use [IRS ADDRESS — copy the return address from the top of your notice].
 - Re: line with notice number, tax year, SSN last 4
 - Opening paragraph: clearly state purpose and taxpayer position
 - Body: methodically address each discrepancy/issue
@@ -92,6 +92,34 @@ For EXTENSION strategy:
 - Request IRS acknowledge extension in writing
 - Reference standard IRS extension practice under Rev. Proc. 2005-18
 
+For OTHER / CUSTOM strategy:
+- Read the additionalContext field carefully — it contains
+  the taxpayer's specific situation and desired approach
+- Build the entire letter around that specific context
+- If the context suggests dispute: use dispute-style language,
+  cite relevant IRC sections based on the specific issue described
+- If the context suggests agreement with explanation: use
+  cooperative tone with clear factual explanation
+- If the context describes unreported income that was actually
+  reported elsewhere, missing basis, reimbursements, or
+  personal transfers: address each point specifically
+- Always invoke Taxpayer Bill of Rights
+- Always request specific relief based on the described situation
+- The letter must feel custom-written for this exact situation,
+  not generic
+- IRC citations must match the specific issue described in
+  additionalContext
+
+HIGH-RISK AND CRITICAL NOTICES:
+If the analysis indicates riskLevel is critical and/or the notice is a
+high-stakes type (e.g. CP90, LT11, CP3219A), generate the strongest
+possible letter. Do not discourage the taxpayer from using this response
+or imply they should not mail a timely reply. For critical notices
+(CP90, LT11, CP3219A), at the end of the letter, after the enclosures
+list, add this line:
+
+Note: Given the urgency of this matter, you may wish to have a licensed tax professional or enrolled agent review this letter before mailing. This draft gives them a complete, structured starting point.
+
 OUTPUT: Return ONLY the complete letter text. No JSON wrapper.
 No markdown. Pure text formatted for printing/mailing.
 The letter should be 400-800 words depending on complexity.
@@ -125,8 +153,8 @@ exports.handler = async (event) => {
     return json(400, event, { error: "analysis object is required" });
   }
   const strat = sanitizeString(strategy || "", 32);
-  if (!["agree", "partial", "dispute", "extension"].includes(strat)) {
-    return json(400, event, { error: "strategy must be agree, partial, dispute, or extension" });
+  if (!["agree", "partial", "dispute", "extension", "other", "custom"].includes(strat)) {
+    return json(400, event, { error: "strategy must be agree, partial, dispute, extension, other, or custom" });
   }
 
   let analysisJson;
@@ -137,7 +165,7 @@ exports.handler = async (event) => {
   }
 
   const userMessage = `Analysis: ${analysisJson}
-Strategy selected: ${strat} (agree = Full Agreement; partial = Partial Agreement; dispute = Full Dispute; extension = Request Extension)
+Strategy selected: ${strat} (agree = Full Agreement; partial = Partial Agreement; dispute = Full Dispute; extension = Request Extension; other/custom = follow additionalContext)
 Taxpayer name: ${sanitizeString(taxpayerName || "TAXPAYER NAME", 200)}
 Taxpayer address: ${sanitizeString(taxpayerAddress || "ADDRESS", 500)}
 Additional context: ${sanitizeString(additionalContext || "None provided", 4000)}
