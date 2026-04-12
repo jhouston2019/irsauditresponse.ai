@@ -157,6 +157,16 @@
           <input type="text" id="taxYear" placeholder="e.g. 2022" />
         </div>
       </div>
+      <div class="row2" style="margin-top:1rem;">
+        <div>
+          <label for="suppAmount">Proposed amount (optional)</label>
+          <input type="text" id="suppAmount" placeholder="e.g. $4,954.40" />
+        </div>
+        <div>
+          <label for="suppDeadline">Response deadline (optional)</label>
+          <input type="text" id="suppDeadline" placeholder="e.g. April 30, 2024" />
+        </div>
+      </div>
       <div style="margin-top:1rem;">
         <label for="context">Supporting context</label>
         <select id="context">
@@ -276,6 +286,7 @@
           <input type="text" id="fillNoticeDate" placeholder="e.g. March 15, 2024" />
         </div>
       </div>
+      <input type="hidden" id="fillTaxYear" />
       <div class="toolbar">
         <button type="button" class="btn btn-primary" id="btnFillPh">Fill placeholders</button>
       </div>
@@ -411,16 +422,12 @@ Contact: 1-800-829-8310`;
     $('noticeText').addEventListener('input', () => {
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
-      const suppRow = document.getElementById('pdfSuppRow');
-      if (suppRow) suppRow.style.display = 'none';
       updateAnalyzeEnabled();
     });
 
     $('btnDemo').addEventListener('click', () => {
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
-      const suppRow = document.getElementById('pdfSuppRow');
-      if (suppRow) suppRow.style.display = 'none';
       $('noticeText').value = DEMO_CP2000;
       state.fileBase64 = null;
       state.fileType = null;
@@ -503,35 +510,10 @@ Contact: 1-800-829-8310`;
                 '<ul style="margin: 0.35rem 0 0 1.25rem; padding: 0;">',
                 '<li>Notice type (use the dropdown below)</li>',
                 '<li>Tax year (use the field below)</li>',
-                '<li>Any dollar amounts or dates from your notice</li>',
                 '</ul>',
                 'Or paste the notice text directly into the box above.',
               ].join(' ');
               warn.style.display = 'block';
-              let suppRow = document.getElementById('pdfSuppRow');
-              if (!suppRow) {
-                suppRow = document.createElement('div');
-                suppRow.id = 'pdfSuppRow';
-                suppRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.75rem;';
-                suppRow.innerHTML = `
-    <div>
-      <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:0.35rem;">
-        Proposed amount (from notice)
-      </label>
-      <input type="text" id="suppAmount" placeholder="e.g. $4,954.40"
-        style="width:100%;padding:0.6rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;" />
-    </div>
-    <div>
-      <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:0.35rem;">
-        Response deadline (from notice)
-      </label>
-      <input type="text" id="suppDeadline" placeholder="e.g. April 30, 2024"
-        style="width:100%;padding:0.6rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:1rem;" />
-    </div>
-  `;
-                warn.parentNode.insertBefore(suppRow, warn.nextSibling);
-              }
-              suppRow.style.display = 'grid';
             } else {
               const warn = document.getElementById('pdfWarn');
               if (warn) warn.style.display = 'none';
@@ -666,6 +648,25 @@ Contact: 1-800-829-8310`;
       if (irsAddr) {
         const el = document.getElementById('fillIrsAddress');
         if (el && !el.value) el.value = irsAddr;
+      }
+
+      const taxYearEl = document.getElementById('fillTaxYear');
+      if (taxYearEl && state.analysis?.taxYear) {
+        taxYearEl.value = state.analysis.taxYear;
+      }
+
+      const amountEl = document.getElementById('suppAmount');
+      if (amountEl && !amountEl.value &&
+          state.analysis?.irsProposedAmount &&
+          state.analysis.irsProposedAmount !== 'Not specified') {
+        amountEl.value = state.analysis.irsProposedAmount;
+      }
+
+      const deadlineEl = document.getElementById('suppDeadline');
+      if (deadlineEl && !deadlineEl.value &&
+          state.analysis?.deadline &&
+          state.analysis.deadline !== 'Not specified') {
+        deadlineEl.value = state.analysis.deadline;
       }
 
       $('plainEnglish').textContent = a.plainEnglish || '';
@@ -867,11 +868,11 @@ Contact: 1-800-829-8310`;
         [/\[PHONE\]/gi, phone || '[PHONE]'],
         [/\[EMAIL\]/gi, email || '[EMAIL]'],
         [/\[TAXPAYER SIGNATURE\]/gi, name || '[TAXPAYER SIGNATURE]'],
-        [/\[SSN LAST 4\]/gi, $('fillSsn').value.trim() || '[SSN LAST 4]'],
+        [/\[SSN LAST 4[^\]]*\]/gi, $('fillSsn').value.trim() || '[SSN LAST 4]'],
         [/\[IRS ADDRESS[^\]]*\]/gi, $('fillIrsAddress').value.trim() || '[IRS ADDRESS — copy from top of notice]'],
         [/\[NOTICE NUMBER[^\]]*\]/gi, $('fillNoticeNum').value.trim() || '[NOTICE NUMBER — found at top of notice]'],
         [/\[NOTICE DATE[^\]]*\]/gi, $('fillNoticeDate').value.trim() || today],
-        [/\[TAX YEAR[^\]]*\]/gi, ($('taxYear')?.value.trim()) || '[TAX YEAR]'],
+        [/\[TAX YEAR[^\]]*\]/gi, $('fillTaxYear')?.value?.trim() || state.analysis?.taxYear || $('taxYear')?.value.trim() || '[TAX YEAR]'],
         [/\[DESCRIBE YOUR SPECIFIC SITUATION[^\]]*\]/gi, ''],
       ];
       map.forEach(([re, val]) => { t = t.replace(re, val); });
@@ -946,8 +947,6 @@ Contact: 1-800-829-8310`;
       if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
-      const suppRow = document.getElementById('pdfSuppRow');
-      if (suppRow) suppRow.style.display = 'none';
       document.getElementById('customStrategyText').value = '';
       document.getElementById('customStrategyWrap').style.display = 'none';
       state.fileBase64 = null;
@@ -960,6 +959,8 @@ Contact: 1-800-829-8310`;
       $('fileLabel').textContent = '';
       $('noticeType').value = '';
       $('taxYear').value = '';
+      $('suppAmount').value = '';
+      $('suppDeadline').value = '';
       $('context').value = '';
       $('fillName').value = '';
       $('fillAddress').value = '';
@@ -970,6 +971,7 @@ Contact: 1-800-829-8310`;
       $('fillIrsAddress').value = '';
       $('fillNoticeNum').value = '';
       $('fillNoticeDate').value = '';
+      $('fillTaxYear').value = '';
       $('letterDisplay').innerHTML = '';
       $('letterEdit').value = '';
       $('btnToggleEdit').textContent = 'Edit letter';
