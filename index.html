@@ -60,13 +60,15 @@
       background: transparent;
       border-radius: 0;
       overflow: hidden;
-      line-height: 0;
+      line-height: 1.45;
     }
     #demo .screenshot-container img {
       display: block;
       width: 100%;
       max-width: 100%;
       height: auto;
+      line-height: 0;
+      vertical-align: top;
     }
     #demo .platform-preview-callouts {
       margin-top: 2rem;
@@ -136,21 +138,21 @@
             <div class="dashboard-visual-wrap">
                 <div class="screenshot-container" style="background:#0f172a; border:1px solid #334155; border-radius:12px; padding:1.5rem; min-height:280px;">
                     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:1.25rem;">
-                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin-bottom:0.4rem;font-weight:600;">Notice type</div>
-                            <div style="font-size:1.1rem;font-weight:700;color:#fff;">CP2000</div>
+                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;display:flex;flex-direction:column;gap:0.35rem;line-height:1.35;">
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;font-weight:600;">Notice type</div>
+                            <div style="font-size:1.1rem;font-weight:700;color:#fff;line-height:1.25;">CP2000</div>
                         </div>
-                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin-bottom:0.4rem;font-weight:600;">Tax year</div>
-                            <div style="font-size:1.1rem;font-weight:700;color:#fff;">2022</div>
+                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;display:flex;flex-direction:column;gap:0.35rem;line-height:1.35;">
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;font-weight:600;">Tax year</div>
+                            <div style="font-size:1.1rem;font-weight:700;color:#fff;line-height:1.25;">2022</div>
                         </div>
-                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin-bottom:0.4rem;font-weight:600;">Proposed amount</div>
-                            <div style="font-size:1.1rem;font-weight:700;color:#fca5a5;">$6,284.00</div>
+                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;display:flex;flex-direction:column;gap:0.35rem;line-height:1.35;">
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;font-weight:600;">Proposed amount</div>
+                            <div style="font-size:1.1rem;font-weight:700;color:#fca5a5;line-height:1.25;">$6,284.00</div>
                         </div>
-                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;margin-bottom:0.4rem;font-weight:600;">Response deadline</div>
-                            <div style="font-size:1.1rem;font-weight:700;color:#fbbf24;">Apr 30, 2024</div>
+                        <div style="background:#1e3a5f;border-radius:8px;padding:0.85rem 1rem;display:flex;flex-direction:column;gap:0.35rem;line-height:1.35;">
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;font-weight:600;">Response deadline</div>
+                            <div style="font-size:1.1rem;font-weight:700;color:#fbbf24;line-height:1.25;">Apr 30, 2024</div>
                         </div>
                     </div>
                     <div style="background:#0a0f1a; border-radius:8px; padding:1rem; color:#cbd5e1; font-size:0.9rem; line-height:1.5; border:1px solid #334155;">
