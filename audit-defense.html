@@ -875,6 +875,12 @@ Contact: 1-800-829-8310`;
         $('fillIrsAddress').value = irsAddr;
       }
       const map = [
+        [/\bTAXPAYER NAME\b/g, $('fillName').value.trim() || 'TAXPAYER NAME'],
+        [/\bADDRESS\b/g, $('fillAddress').value.trim() || 'ADDRESS'],
+        [/\bCITY STATE ZIP\b/g, $('fillCity').value.trim() || 'CITY STATE ZIP'],
+        [/\bSSN LAST 4\b/g, $('fillSsn').value.trim() || 'SSN LAST 4'],
+        [/\bSSN: SSN LAST 4\b/g, 'SSN: ' + ($('fillSsn').value.trim() || 'SSN LAST 4')],
+        [/SSN:\s*\[?SSN LAST 4[^\]]*\]?/gi, 'SSN: ' + ($('fillSsn').value.trim() || '[SSN LAST 4]')],
         [/\[DATE\]/gi, today],
         [/\[TAXPAYER NAME\]/gi, name || '[TAXPAYER NAME]'],
         [/\[PRINTED NAME\]/gi, name || '[PRINTED NAME]'],
