@@ -875,21 +875,22 @@ Contact: 1-800-829-8310`;
         $('fillIrsAddress').value = irsAddr;
       }
       const map = [
+        [/^SSN:?\s*$/gm, ''],
         [/\bTAXPAYER NAME\b/g, $('fillName').value.trim() || 'TAXPAYER NAME'],
         [/\bADDRESS\b/g, $('fillAddress').value.trim() || 'ADDRESS'],
         [/\bCITY STATE ZIP\b/g, $('fillCity').value.trim() || 'CITY STATE ZIP'],
-        [/\bSSN LAST 4\b/g, $('fillSsn').value.trim() || 'SSN LAST 4'],
-        [/\bSSN: SSN LAST 4\b/g, 'SSN: ' + ($('fillSsn').value.trim() || 'SSN LAST 4')],
-        [/SSN:\s*\[?SSN LAST 4[^\]]*\]?/gi, 'SSN: ' + ($('fillSsn').value.trim() || '[SSN LAST 4]')],
+        [/\bCITY,?\s*STATE,?\s*ZIP\b/gi, $('fillCity').value.trim() || 'CITY, STATE ZIP'],
+        [/\[SSN LAST 4[^\]]*\]/gi, $('fillSsn').value.trim()],
+        [/\bSSN LAST 4\b/g, $('fillSsn').value.trim()],
         [/\[DATE\]/gi, today],
         [/\[TAXPAYER NAME\]/gi, name || '[TAXPAYER NAME]'],
-        [/\[PRINTED NAME\]/gi, name || '[PRINTED NAME]'],
+        [/\n?\[PRINTED NAME\]/gi, ''],
+        [/\nPRINTED NAME\n/gi, '\n'],
         [/\[ADDRESS\]/gi, addr || '[ADDRESS]'],
         [/\[CITY STATE ZIP\]/gi, city || '[CITY STATE ZIP]'],
         [/\[PHONE\]/gi, phone || '[PHONE]'],
         [/\[EMAIL\]/gi, email || '[EMAIL]'],
-        [/\[TAXPAYER SIGNATURE\]/gi, name || '[TAXPAYER SIGNATURE]'],
-        [/\[SSN LAST 4[^\]]*\]/gi, $('fillSsn').value.trim() || '[SSN LAST 4]'],
+        [/\[TAXPAYER SIGNATURE\]/gi, $('fillName').value.trim() || '[TAXPAYER SIGNATURE]'],
         [/\[IRS ADDRESS[^\]]*\]/gi, $('fillIrsAddress').value.trim() || '[IRS ADDRESS — copy from top of notice]'],
         [/\[NOTICE NUMBER[^\]]*\]/gi, $('fillNoticeNum').value.trim() || '[NOTICE NUMBER — found at top of notice]'],
         [/\[NOTICE DATE[^\]]*\]/gi, $('fillNoticeDate').value.trim() || today],
@@ -897,6 +898,7 @@ Contact: 1-800-829-8310`;
         [/\[DESCRIBE YOUR SPECIFIC SITUATION[^\]]*\]/gi, ''],
       ];
       map.forEach(([re, val]) => { t = t.replace(re, val); });
+      t = t.replace(/\n{3,}/g, '\n\n').trim();
       state.letterRaw = t;
       if (state.editing) $('letterEdit').value = t;
       renderLetterDisplay();
