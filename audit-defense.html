@@ -669,6 +669,21 @@ Contact: 1-800-829-8310`;
         deadlineEl.value = state.analysis.deadline;
       }
 
+      const noticeNumEl = document.getElementById('fillNoticeNum');
+      if (noticeNumEl && !noticeNumEl.value && state.analysis?.noticeNumber) {
+        noticeNumEl.value = state.analysis.noticeNumber;
+      }
+      if (noticeNumEl && !noticeNumEl.value && state.analysis?.noticeType) {
+        noticeNumEl.value = state.analysis.noticeType;
+      }
+
+      const noticeDateEl = document.getElementById('fillNoticeDate');
+      if (noticeDateEl && !noticeDateEl.value &&
+          state.analysis?.deadline &&
+          state.analysis.deadline !== 'Not specified') {
+        noticeDateEl.value = state.analysis.deadline;
+      }
+
       $('plainEnglish').textContent = a.plainEnglish || '';
       $('whatIfIgnored').textContent = a.whatHappensIfIgnored || '';
 
