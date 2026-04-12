@@ -754,10 +754,9 @@ Contact: 1-800-829-8310`;
       strategies.forEach((s) => { byId[s.id] = s; });
       const defaultTitle = (sid) => {
         if (sid === 'other') return 'Other / custom';
-        if (sid === 'custom') return 'Custom approach';
         return sid;
       };
-      ['agree', 'partial', 'dispute', 'extension', 'other', 'custom'].forEach((id) => {
+      ['agree', 'partial', 'dispute', 'extension', 'other'].forEach((id) => {
         const s = byId[id] || { id, title: defaultTitle(id), subtitle: '', description: '', recommended: false, risk: 'moderate', outcome: '' };
         const card = document.createElement('button');
         card.type = 'button';
@@ -775,7 +774,7 @@ Contact: 1-800-829-8310`;
           state.strategy = id;
           $('btnGenLetter').disabled = false;
           const wrap = document.getElementById('customStrategyWrap');
-          if (wrap) wrap.style.display = (id === 'other' || id === 'custom') ? 'block' : 'none';
+          if (wrap) wrap.style.display = id === 'other' ? 'block' : 'none';
           const detail = $('strategyDetail');
           detail.style.display = 'block';
           const codes = (a.relevantIRSCodes || []).join(', ');
