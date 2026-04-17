@@ -1,5 +1,4 @@
 import Stripe from "stripe";
-import { buffer } from "micro";
 import { getSupabaseAdmin } from "./_supabase.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -20,17 +19,53 @@ export async function handler(event) {
 
     if (evt.type === "checkout.session.completed") {
       const session = evt.data.object;
+      const supabase = getSupabaseAdmin();
       const recordId = session.metadata?.recordId || null;
 
       if (recordId) {
-        const supabase = getSupabaseAdmin();
         await supabase
           .from("tlh_letters")
           .update({
             stripe_session_id: session.id,
-            stripe_payment_status: session.payment_status,
+            stripe_payment_status: session.payment_status || "paid",
           })
           .eq("id", recordId);
+      } else {
+        const isAuditFlow =
+          session.metadata?.flow === "audit" ||
+          (typeof session.success_url === "string" && session.success_url.includes("audit-success"));
+
+        if (isAuditFlow) {
+          const { data: existing } = await supabase
+            .from("audit_responses")
+            .select("id")
+            .eq("stripe_session_id", session.id)
+            .maybeSingle();
+
+          if (!existing) {
+            const email =
+              session.customer_email ||
+              session.customer_details?.email ||
+              session.metadata?.user_email ||
+              null;
+            const amountPaid = session.amount_total != null ? session.amount_total : 4900;
+            const payStatus = session.payment_status === "paid" ? "paid" : session.payment_status || "paid";
+
+            await supabase.from("audit_responses").insert({
+              user_email: email,
+              stripe_session_id: session.id,
+              stripe_payment_status: payStatus,
+              amount_paid: amountPaid,
+              price_id: "irs_audit_defense_49",
+              audit_type: session.metadata?.audit_type || "irs_audit_response",
+              status: "uploaded",
+              metadata: {
+                flow: "audit",
+                payment_intent: session.payment_intent || null,
+              },
+            });
+          }
+        }
       }
     }
 

@@ -66,7 +66,7 @@ async function userHasPaid(user) {
     .from("audit_responses")
     .select("id")
     .eq("user_email", email)
-    .eq("payment_status", "paid")
+    .eq("stripe_payment_status", "paid")
     .limit(1);
   return !!(auditResponses && auditResponses.length > 0);
 }

@@ -10,7 +10,7 @@ export async function handler(event) {
     if (!recordId || !to) return { statusCode: 400, body: 'Missing params' };
 
     const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase.from('ara_letters').select('ai_response').eq('id', recordId).single();
+    const { data, error } = await supabase.from('tlh_letters').select('ai_response').eq('id', recordId).single();
     if (error || !data) throw error || new Error('No record');
 
     // Generate PDF buffer

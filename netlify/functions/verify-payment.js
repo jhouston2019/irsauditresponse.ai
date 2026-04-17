@@ -40,9 +40,9 @@ exports.handler = async (event) => {
     
     const { data: auditResponses, error: auditError } = await supabase
       .from('audit_responses')
-      .select('id, payment_status')
+      .select('id, stripe_payment_status')
       .eq('user_email', email)
-      .eq('payment_status', 'paid')
+      .eq('stripe_payment_status', 'paid')
       .limit(1);
 
     const hasPaid = (tlhLetters && tlhLetters.length > 0) || (auditResponses && auditResponses.length > 0);

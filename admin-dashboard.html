@@ -250,18 +250,18 @@
   </div>
 
   <script>
-    // Check admin authentication
-    if (sessionStorage.getItem('adminAuth') !== 'true') {
-      window.location.href = '/audit-defense.html';
-    }
+    (function () {
+      const t = sessionStorage.getItem('adminToken');
+      if (!t || !String(t).trim()) {
+        window.location.href = '/index.html';
+      }
+    })();
 
-    // Check admin authentication on page load
     document.addEventListener('DOMContentLoaded', () => {
       const adminToken = sessionStorage.getItem('adminToken');
       const adminUser = sessionStorage.getItem('adminUser');
       
-      if (!adminToken || !adminUser) {
-        alert('Admin access required. Please login first.');
+      if (!adminToken || !String(adminToken).trim() || !adminUser) {
         window.location.href = '/index.html';
         return;
       }
@@ -273,7 +273,6 @@
     document.getElementById('logoutBtn').addEventListener('click', () => {
       sessionStorage.removeItem('adminToken');
       sessionStorage.removeItem('adminUser');
-      sessionStorage.removeItem('adminAuth');
       window.location.href = '/index.html';
     });
 

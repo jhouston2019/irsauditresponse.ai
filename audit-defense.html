@@ -21,8 +21,10 @@
       --green: #15803d;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: var(--text); background: #f3f4f6; line-height: 1.55; }
+    html { min-height: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: var(--text); background: var(--navy); line-height: 1.55; min-height: 100%; }
     h1, h2, h3, h4 { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #0f172a; }
+    .card, .progress-wrap { color: var(--text); }
     .top-bar { background: var(--navy); color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
     .top-bar a { color: #cbd5e1; text-decoration: none; font-size: 0.9rem; }
     .top-bar a:hover { color: #fff; text-decoration: underline; }
@@ -92,7 +94,9 @@
     .fill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
     @media (max-width: 640px) { .fill-grid { grid-template-columns: 1fr; } }
     .gate-banner { background: #fef3c7; border: 1px solid #fbbf24; color: #78350f; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.95rem; }
-    .disclaimer-foot { font-size: 0.8rem; color: var(--muted); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .disclaimer-foot { font-size: 0.8rem; color: #94a3b8; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(148, 163, 184, 0.35); }
+    .disclaimer-foot a { color: #93c5fd; }
+    .disclaimer-foot a:hover { color: #bfdbfe; }
     .dc-legal { font-size: 11px; line-height: 1.45; color: var(--muted); margin-top: 0.75rem; max-width: 52rem; }
   </style>
 </head>

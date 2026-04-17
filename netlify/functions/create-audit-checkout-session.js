@@ -66,6 +66,7 @@ exports.handler = async (event) => {
       success_url: `${returnUrl}/audit-success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${returnUrl}/audit-cancel.html`,
       metadata: {
+        flow: 'audit',
         product_type: 'irs_audit_response',
         audit_type: auditType,
         user_email: userEmail,

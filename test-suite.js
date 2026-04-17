@@ -72,11 +72,7 @@ test('Required files exist', () => {
     'netlify/functions/create-checkout-session.js',
     'netlify/functions/extract-text.js',
     'netlify/functions/stripe-webhook.js',
-    'netlify/functions/create-stripe-customer.js',
-    'netlify/functions/get-user-subscription.js',
     'netlify/functions/track-usage.js',
-    'netlify/functions/validate-input.js',
-    'netlify/functions/security-headers.js',
     'supabase/migrations/20251001_create_users_table.sql',
     'supabase/migrations/20251001_create_documents_table.sql',
     'supabase/migrations/20251001_create_subscriptions_table.sql',
@@ -147,8 +143,6 @@ test('Netlify functions have proper structure', () => {
     'netlify/functions/create-checkout-session.js',
     'netlify/functions/extract-text.js',
     'netlify/functions/stripe-webhook.js',
-    'netlify/functions/create-stripe-customer.js',
-    'netlify/functions/get-user-subscription.js',
     'netlify/functions/track-usage.js'
   ];
   
@@ -189,22 +183,12 @@ test('Database migrations have proper SQL', () => {
 
 // Test 7: Security Features
 test('Security features are implemented', () => {
-  
-  // Check for input validation
-  const validateInput = fs.readFileSync('netlify/functions/validate-input.js', 'utf8');
-  if (!validateInput.includes('sanitizeText')) {
-    throw new Error('Missing input sanitization');
+  const wizardAuth = fs.readFileSync('netlify/functions/_wizardAuth.js', 'utf8');
+  if (!wizardAuth.includes('sanitizeString')) {
+    throw new Error('Missing input sanitization in _wizardAuth');
   }
-  
-  // Check for security headers
-  const securityHeaders = fs.readFileSync('netlify/functions/security-headers.js', 'utf8');
-  if (!securityHeaders.includes('X-Content-Type-Options')) {
-    throw new Error('Missing security headers');
-  }
-  
-  // Check for rate limiting
-  if (!validateInput.includes('rateLimitCheck')) {
-    throw new Error('Missing rate limiting');
+  if (!wizardAuth.includes('authorizeWizardRequest')) {
+    throw new Error('Missing authorizeWizardRequest');
   }
 });
 

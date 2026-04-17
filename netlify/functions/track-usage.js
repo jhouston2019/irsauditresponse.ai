@@ -6,6 +6,18 @@ const supabase = createClient(
 );
 
 export async function handler(event) {
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      },
+      body: '',
+    };
+  }
+
   try {
     const { userId, actionType, documentId } = JSON.parse(event.body);
     
