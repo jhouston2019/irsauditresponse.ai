@@ -5,7 +5,73 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# ✅ Redirects all routes to index.html (for single-page apps)
+# --- Clean URLs + API proxy (must be before SPA fallback) ---
+[[redirects]]
+  from = "/success"
+  to = "/success.html"
+  status = 200
+
+[[redirects]]
+  from = "/pricing"
+  to = "/pricing.html"
+  status = 200
+
+[[redirects]]
+  from = "/app"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/recover"
+  to = "/recover.html"
+  status = 200
+
+[[redirects]]
+  from = "/cancel"
+  to = "/cancel.html"
+  status = 200
+
+[[redirects]]
+  from = "/upload"
+  to = "/upload.html"
+  status = 200
+
+[[redirects]]
+  from = "/api/verify-payment"
+  to = "/.netlify/functions/verify-payment"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/create-session-from-stripe"
+  to = "/.netlify/functions/auth-create-session-from-stripe"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/me"
+  to = "/.netlify/functions/auth-me"
+  status = 200
+
+[[redirects]]
+  from = "/api/billing-status"
+  to = "/.netlify/functions/billing-status"
+  status = 200
+
+[[redirects]]
+  from = "/api/usage"
+  to = "/.netlify/functions/usage"
+  status = 200
+
+[[redirects]]
+  from = "/api/recover-payment-state"
+  to = "/.netlify/functions/recover-payment-state"
+  status = 200
+
+[[redirects]]
+  from = "/api/send-receipt"
+  to = "/.netlify/functions/send-receipt"
+  status = 200
+
+# ✅ SPA fallback (static files still win over this when present on disk)
 [[redirects]]
   from = "/*"
   to = "/index.html"

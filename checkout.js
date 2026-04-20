@@ -2,11 +2,15 @@
  * Handles Stripe checkout process for different subscription plans
  * @param {string} plan - The plan name (STANDARD, COMPLEX, STARTER, PRO, PROPLUS)
  */
-async function startCheckout(plan) {
+async function startCheckout(plan, email) {
   try {
     // Validate plan parameter
     if (!plan) {
       throw new Error('Plan parameter is required');
+    }
+    const userEmail = (email || '').trim();
+    if (!userEmail || !userEmail.includes('@')) {
+      throw new Error('A valid email is required for checkout');
     }
 
     // Make POST request to Netlify function
@@ -15,7 +19,7 @@ async function startCheckout(plan) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ plan })
+      body: JSON.stringify({ plan, userEmail })
     });
 
     // Check if request was successful

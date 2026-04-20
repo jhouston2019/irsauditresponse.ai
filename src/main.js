@@ -22,7 +22,7 @@ function updateNavigationForLoggedInUser(user) {
     nav.innerHTML = `
       <a href="/payment.html">Upload</a> |
       <a href="/dashboard.html">Dashboard</a> |
-      <a href="/pricing.html">Pricing</a> |
+      <a href="/pricing">Pricing</a> |
       <span>Welcome, ${user.email}</span> |
       <a href="#" id="logout">Logout</a>
     `;
@@ -43,7 +43,7 @@ function updateNavigationForGuest() {
     nav.innerHTML = `
       <a href="/payment.html">Upload</a> |
       <a href="/dashboard.html">Dashboard</a> |
-      <a href="/pricing.html">Pricing</a> |
+      <a href="/pricing">Pricing</a> |
       <a href="/login.html">Login</a>
     `;
   }
@@ -71,14 +71,19 @@ window.startCheckout = async function(plan) {
     if (user && user.email) {
       userEmail = user.email;
     }
-    
+    if (!userEmail || !userEmail.includes('@')) {
+      alert('Please sign in so we can attach your purchase to your account email, or use the Pricing page.');
+      button.textContent = originalText;
+      button.disabled = false;
+      return;
+    }
+    let supabase_user_id = user?.id || null;
+    const payload = { userEmail: userEmail, plan };
+    if (supabase_user_id) payload.supabase_user_id = supabase_user_id;
     const response = await fetch('/.netlify/functions/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        plan: plan,
-        customerEmail: userEmail
-      })
+      body: JSON.stringify(payload)
     });
     
     // Check if response is ok before parsing

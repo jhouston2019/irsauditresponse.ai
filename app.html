@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opening app… | IRS Audit Defense Pro</title>
+  <meta name="supabase-url" content="%%SUPABASE_URL%%" />
+  <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+    .box { text-align: center; max-width: 420px; padding: 1.5rem; }
+    a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <p id="msg">Checking your account…</p>
+    <p id="extra" style="font-size:0.9rem;color:#94a3b8;margin-top:1rem;"></p>
+  </div>
+
+  <script type="module">
+    const msg = document.getElementById('msg');
+    const extra = document.getElementById('extra');
+
+    async function getSupabase() {
+      const url = document.querySelector('meta[name="supabase-url"]')?.content;
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+      if (!url || !key || url.includes('%%')) throw new Error('Configuration error');
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      return createClient(url, key);
+    }
+
+    const qs = new URLSearchParams(window.location.search);
+    const recoverSessionId = qs.get('session_id');
+
+    try {
+      const supabase = await getSupabase();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        const next = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace('/login.html?next=' + next);
+        return;
+      }
+
+      if (recoverSessionId) {
+        await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + session.access_token,
+          },
+          body: JSON.stringify({ session_id: recoverSessionId }),
+        });
+      }
+
+      const r = await fetch('/api/billing-status', {
+        headers: { Authorization: 'Bearer ' + session.access_token },
+      });
+      const billing = await r.json().catch(() => ({}));
+
+      if (billing.paid !== true) {
+        msg.textContent = 'Active purchase required';
+        extra.innerHTML = '<a href="/pricing">View pricing</a>';
+        return;
+      }
+
+      const plan = (billing.plan_type || 'single').toLowerCase();
+      if (plan === 'single') {
+        window.location.replace('/upload.html');
+        return;
+      }
+      window.location.replace('/dashboard.html');
+    } catch (e) {
+      msg.textContent = 'Something went wrong';
+      extra.textContent = e.message || '';
+    }
+  </script>
+</body>
+</html>

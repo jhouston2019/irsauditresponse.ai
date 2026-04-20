@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="supabase-url" content="%%SUPABASE_URL%%">
+    <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
     <title>Pricing – Simple, One-Time Fee | IRS Audit Defense Pro</title>
     <meta name="description" content="IRS Audit Defense Pro: AI notice analysis, strategy options, and a professional draft response letter for a simple one-time fee. No subscriptions.">
     <meta name="ga-measurement-id" content="" />
     <script src="/src/analytics.js" defer></script>
-    <link rel="canonical" href="https://irsauditresponseai.netlify.app/pricing.html">
+    <link rel="canonical" href="https://irsauditresponseai.netlify.app/pricing">
     <meta property="og:title" content="Simple $49 IRS Letter Help – No Subscription Needed">
     <meta property="og:description" content="Open the wizard, paste or upload your IRS notice, and walk through analysis, strategy, and your draft letter.">
     <meta property="og:image" content="https://irsauditresponseai.netlify.app/images/pricing-og.jpg">
-    <meta property="og:url" content="https://irsauditresponseai.netlify.app/pricing.html">
+    <meta property="og:url" content="https://irsauditresponseai.netlify.app/pricing">
     <meta property="og:type" content="product">
 </head>
 <body style="background:#f9fafb; color:#111827; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
@@ -20,7 +22,7 @@
         <div>
             <a href="/audit-defense.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">IRS Defense</a> |
             <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Dashboard</a> |
-            <a href="/pricing.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Pricing</a> |
+            <a href="/pricing" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Pricing</a> |
             <a href="/login.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Login</a>
         </div>
     </nav>
@@ -44,7 +46,12 @@
                 <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ PDF and Word download</li>
                 <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ Placeholder fill tool</li>
             </ul>
-            <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; text-decoration:none; border-radius:10px; background:linear-gradient(180deg, #3b82f6, #1e40af); color:#ffffff; box-shadow:0 6px 18px rgba(30, 64, 175, 0.35); transition:transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;">Start IRS Audit Defense →</a>
+            <p style="text-align:left; color:#334155; font-weight:600; margin:0 0 8px;">Checkout</p>
+            <label for="checkoutEmail" style="display:block; text-align:left; font-size:0.9rem; color:#475569; margin-bottom:6px;">Email (for receipt &amp; account)</label>
+            <input id="checkoutEmail" type="email" required placeholder="you@example.com" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:1rem; margin-bottom:12px; box-sizing:border-box;">
+            <button type="button" id="checkoutBtn" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; border:none; cursor:pointer; border-radius:10px; background:linear-gradient(180deg, #3b82f6, #1e40af); color:#ffffff; box-shadow:0 6px 18px rgba(30, 64, 175, 0.35);">Pay securely with Stripe — $49</button>
+            <p id="checkoutErr" style="color:#b91c1c; font-size:0.9rem; margin-top:10px; min-height:1.2em;"></p>
+            <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; margin-top:14px; padding:12px 22px; font-weight:600; text-decoration:none; border-radius:10px; border:2px solid #3b82f6; color:#1e40af;">Open wizard (after purchase)</a>
         </div>
 
         <p style="color:#64748b; margin-top:1.5rem;">
@@ -54,5 +61,43 @@
         <p style="font-size:11px; color:#64748b; max-width:720px; margin:2rem auto 0; line-height:1.5; text-align:center;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
         </div>
     </section>
+    <script type="module">
+      import { getSession } from '/src/components/Auth.js';
+      document.getElementById('checkoutBtn').addEventListener('click', async function () {
+        const email = document.getElementById('checkoutEmail').value.trim();
+        const err = document.getElementById('checkoutErr');
+        err.textContent = '';
+        if (!email) {
+          err.textContent = 'Enter your email.';
+          return;
+        }
+        this.disabled = true;
+        this.textContent = 'Redirecting to Stripe…';
+        try {
+          let supabase_user_id = null;
+          try {
+            const s = await getSession();
+            if (s?.user?.id) supabase_user_id = s.user.id;
+          } catch (_) { /* not logged in */ }
+          const payload = { userEmail: email };
+          if (supabase_user_id) payload.supabase_user_id = supabase_user_id;
+          const res = await fetch('/.netlify/functions/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (data.url) {
+            window.location.href = data.url;
+            return;
+          }
+          throw new Error(data.details || data.error || 'Checkout failed');
+        } catch (e) {
+          err.textContent = e.message || 'Checkout failed';
+          this.disabled = false;
+          this.textContent = 'Pay securely with Stripe — $49';
+        }
+      });
+    </script>
 </body>
 </html>

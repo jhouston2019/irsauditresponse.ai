@@ -3,6 +3,7 @@
  */
 const { createClient } = require("@supabase/supabase-js");
 const { getSupabaseAdmin } = require("./_supabase.js");
+const { getBillingSnapshot, shouldBlockWizard } = require("./_billing.js");
 
 function getAllowedOrigins() {
   const site = (process.env.SITE_URL || "https://irsauditresponseai.netlify.app").replace(/\/$/, "");
@@ -52,49 +53,16 @@ function sanitizeString(s, maxLen = 150000) {
 }
 
 async function userHasPaid(user) {
-  if (!user || !user.email) return false;
-  const email = user.email;
-  const supabase = getSupabaseAdmin();
-  const { data: tlhLetters } = await supabase
-    .from("tlh_letters")
-    .select("id")
-    .eq("user_email", email)
-    .eq("stripe_payment_status", "paid")
-    .limit(1);
-  if (tlhLetters && tlhLetters.length > 0) return true;
-  const { data: auditResponses } = await supabase
-    .from("audit_responses")
-    .select("id")
-    .eq("user_email", email)
-    .eq("stripe_payment_status", "paid")
-    .limit(1);
-  return !!(auditResponses && auditResponses.length > 0);
+  if (!user || !user.id) return false;
+  const snap = await getBillingSnapshot(user.id, user.email);
+  return snap.paid === true;
 }
 
 /**
- * Requires Bearer JWT (Supabase) and paid record, unless:
- * - AUDIT_DEFENSE_BYPASS_PAYMENT=1 (dev/staging), or
+ * Requires Bearer JWT (Supabase) and verified paid entitlement, unless:
  * - X-Service-Key matches AUDIT_DEFENSE_SERVICE_KEY (server-side only; never expose in client HTML)
  */
 async function authorizeWizardRequest(event) {
-  const BYPASS = process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "1";
-
-  if (BYPASS) {
-    const authHeader =
-      event.headers["authorization"] ||
-      event.headers["Authorization"] ||
-      "";
-    if (authHeader === "Bearer bypass") {
-      return {
-        authorized: true,
-        user: { id: "bypass", email: "bypass" },
-        ok: true,
-        email: "bypass",
-        userId: "bypass",
-      };
-    }
-  }
-
   const serviceKey = process.env.AUDIT_DEFENSE_SERVICE_KEY;
   const providedService = event.headers["x-service-key"] || event.headers["X-Service-Key"];
   if (serviceKey && providedService === serviceKey) {
@@ -127,21 +95,18 @@ async function authorizeWizardRequest(event) {
     return { ok: false, response: json(401, event, { error: "Invalid or expired session" }) };
   }
 
-  const bypass = process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "1" || process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "true";
-  if (!bypass) {
-    const paid = await userHasPaid(user);
-    if (!paid) {
-      return {
-        ok: false,
-        response: json(402, event, {
-          error: "Active purchase required",
-          code: "payment_required",
-        }),
-      };
-    }
+  const snap = await getBillingSnapshot(user.id, user.email);
+  if (shouldBlockWizard(snap)) {
+    return {
+      ok: false,
+      response: json(402, event, {
+        error: "Active purchase required",
+        code: "payment_required",
+      }),
+    };
   }
 
-  return { ok: true, email: user.email, userId: user.id };
+  return { ok: true, email: user.email, userId: user.id, user };
 }
 
 module.exports = {

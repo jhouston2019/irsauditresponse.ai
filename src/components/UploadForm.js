@@ -1,14 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+import { getSupabase } from './Auth.js';
 
 export async function uploadFile(file, userId) {
+  const supabase = getSupabase();
   const { data, error } = await supabase.storage.from('letters').upload(`${userId}/${file.name}`, file);
   if (error) throw error;
   return data.path;
 }
 
 export async function saveDocumentToDatabase(userId, fileName, filePath) {
+  const supabase = getSupabase();
   const { data, error } = await supabase
     .from('documents')
     .insert([
@@ -25,6 +25,7 @@ export async function saveDocumentToDatabase(userId, fileName, filePath) {
 }
 
 export async function getUserDocuments(userId) {
+  const supabase = getSupabase();
   const { data, error } = await supabase
     .from('documents')
     .select('*')

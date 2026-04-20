@@ -1,75 +1,140 @@
+import { createRequire } from "module";
 import Stripe from "stripe";
+
+const require = createRequire(import.meta.url);
+const { getSupabaseAdmin } = require("./_supabase.js");
+const { insertPaymentAudit } = require("./_paymentReconcile.js");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+const SITE = () => (process.env.SITE_URL || "").replace(/\/$/, "");
+
+function logEvent(name, payload) {
+  console.log(JSON.stringify({ [name]: true, ...payload }));
+}
+
 export async function handler(event) {
   try {
-    const { recordId = null, customerEmail = null } = JSON.parse(event.body || "{}");
-    const priceId = process.env.STRIPE_PRICE_RESPONSE || process.env.STRIPE_PRICE_ID || "price_49USD_single";
-    
-    // Validate required environment variables
+    const body = JSON.parse(event.body || "{}");
+    const recordId = body.recordId ?? null;
+    const userEmail = (body.userEmail || body.customerEmail || "").trim() || null;
+    const supabaseUserId = (body.supabase_user_id || body.supabaseUserId || "").trim() || null;
+
     if (!process.env.SITE_URL) {
-      throw new Error('SITE_URL environment variable is not set');
+      throw new Error("SITE_URL environment variable is not set");
     }
     if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+      throw new Error("STRIPE_SECRET_KEY environment variable is not set");
     }
 
-    let session;
-    try {
-      const sessionParams = {
-        payment_method_types: ['card'],
-        line_items: [{ 
-          price: priceId, 
-          quantity: 1 
-        }],
-        mode: 'payment',
-        success_url: `${process.env.SITE_URL}/thank-you.html`,
-        cancel_url: `${process.env.SITE_URL}/pricing.html`,
-        metadata: recordId ? { recordId } : { plan: 'single' }
+    if (!userEmail || !userEmail.includes("@")) {
+      return {
+        statusCode: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          error: "customer_email_required",
+          details: "A valid email is required for checkout.",
+        }),
       };
-      
-      // Pre-fill customer email if provided, or use default business email
-      if (customerEmail) {
-        sessionParams.customer_email = customerEmail;
-      } else if (process.env.DEFAULT_CHECKOUT_EMAIL) {
-        // Use default business email if no user email provided
-        sessionParams.customer_email = process.env.DEFAULT_CHECKOUT_EMAIL;
-      }
-      
-      session = await stripe.checkout.sessions.create(sessionParams);
-    } catch (stripeError) {
-      // Provide more helpful error messages
-      if (stripeError.type === 'StripeInvalidRequestError') {
-        if (stripeError.message.includes('No such price')) {
-          throw new Error(`Invalid Stripe price ID: ${priceId}. Please check your STRIPE_PRICE_RESPONSE or STRIPE_PRICE_ID environment variable.`);
-        }
-        throw new Error(`Stripe error: ${stripeError.message}`);
-      }
-      throw stripeError;
+    }
+
+    const priceId = process.env.STRIPE_PRICE_RESPONSE || process.env.STRIPE_PRICE_ID || null;
+
+    const successUrl = `${SITE()}/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${SITE()}/pricing`;
+
+    const baseMeta = recordId
+      ? { recordId, flow: "tlh", user_email: userEmail }
+      : {
+          flow: "audit",
+          plan_type: "single",
+          product_type: "irs_audit_response",
+          user_email: userEmail,
+        };
+
+    if (supabaseUserId) {
+      baseMeta.supabase_user_id = supabaseUserId;
+    }
+
+    const sessionParams = {
+      payment_method_types: ["card"],
+      mode: "payment",
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      customer_email: userEmail,
+      metadata: baseMeta,
+    };
+
+    if (supabaseUserId) {
+      sessionParams.client_reference_id = supabaseUserId;
+    }
+
+    if (priceId) {
+      sessionParams.line_items = [{ price: priceId, quantity: 1 }];
+    } else {
+      sessionParams.line_items = [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "IRS Audit Defense Pro",
+              description:
+                "One-time preparation guidance for IRS audits using a constrained, risk-aware system.",
+              metadata: {
+                product_type: "irs_audit_response",
+                pricing_model: "one_time",
+              },
+            },
+            unit_amount: 4900,
+          },
+          quantity: 1,
+        },
+      ];
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
+
+    logEvent("PAYMENT_SESSION_CREATED", {
+      sessionId: session.id,
+      hasClientRef: !!supabaseUserId,
+    });
+
+    try {
+      const supabase = getSupabaseAdmin();
+      await insertPaymentAudit(supabase, {
+        session_id: session.id,
+        user_id: supabaseUserId || null,
+        event_type: "SESSION_CREATED",
+        metadata: { flow: recordId ? "tlh" : "audit", hasClientRef: !!supabaseUserId },
+      });
+    } catch (auditErr) {
+      console.error("SESSION_CREATED audit log failed", auditErr.message);
     }
 
     return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
       },
-      body: JSON.stringify({ url: session.url })
+      body: JSON.stringify({ url: session.url, sessionId: session.id }),
     };
   } catch (error) {
     return {
       statusCode: 500,
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify({ 
-        error: 'Failed to create checkout session',
-        details: error.message 
-      })
+      body: JSON.stringify({
+        error: "Failed to create checkout session",
+        details: error.message,
+      }),
     };
   }
 }

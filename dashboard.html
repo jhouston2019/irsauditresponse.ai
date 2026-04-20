@@ -4,27 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Dashboard | IRS Audit Defense Pro</title>
-    <meta name="description" content="Access your IRS Audit Defense Pro dashboard to view your IRS letter analyses, response letters, and account information.">
+    <meta name="description" content="Access your IRS Audit Defense Pro dashboard.">
+    <meta name="supabase-url" content="%%SUPABASE_URL%%">
+    <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
     <link rel="canonical" href="https://irsauditresponseai.netlify.app/dashboard.html">
-    <meta property="og:title" content="Your Dashboard | IRS Audit Defense Pro">
-    <meta property="og:description" content="Access your IRS Audit Defense Pro dashboard to view your IRS letter analyses, response letters, and account information.">
-    <meta property="og:image" content="https://irsauditresponseai.netlify.app/images/og-image.jpg">
-    <meta property="og:url" content="https://irsauditresponseai.netlify.app/dashboard.html">
-    <meta property="og:type" content="website">
 </head>
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
     <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155;">
         <div style="color: #f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
         <div>
-            <a href="/audit-defense.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">IRS Defense</a> |
-            <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Dashboard</a> |
-            <a href="/pricing.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Pricing</a> |
-            <a href="/login.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Login</a>
+            <a href="/app" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">App</a> |
+            <a href="/audit-defense.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Wizard</a> |
+            <a href="/pricing" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Pricing</a> |
+            <a href="/login.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Login</a>
         </div>
     </nav>
 
     <div style="width:min(1120px, 92%); margin-inline:auto; padding:2rem 0;">
-        <h1 style="color:#ffffff; font-size:2.5rem; margin-bottom:2rem;">Your Dashboard</h1>
+        <a href="/upload.html" style="display:block; text-align:center; padding:1.1rem 1.5rem; margin-bottom:1.75rem; background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; font-weight:800; font-size:1.15rem; text-decoration:none; border-radius:12px; box-shadow:0 10px 28px rgba(220,38,38,0.35); letter-spacing:0.02em;">
+            Start New Estimate Review →
+        </a>
+
+        <h1 style="color:#ffffff; font-size:2.5rem; margin-bottom:1rem;">Your Dashboard</h1>
+
+        <div id="billingPanel" style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; color:#e2e8f0;">
+            <p style="margin:0; color:#94a3b8;">Loading plan &amp; usage…</p>
+        </div>
         
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:2rem; margin:2rem 0;">
             <div style="background:#ffffff; padding:2rem; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); color:#2d3748; border:1px solid #e2e8f0;">
@@ -32,21 +37,14 @@
                 <div id="recentLetters">
                     <p style="color:#4a5568;">Loading your letters...</p>
                 </div>
-                <a href="/audit-defense.html" style="background:#334155; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; display:inline-block; margin-top:1rem;">New IRS defense</a>
             </div>
             
             <div style="background:#ffffff; padding:2rem; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); color:#2d3748; border:1px solid #e2e8f0;">
-                <h3 style="color:#2d3748; font-size:1.5rem; margin-bottom:1rem;">Quick Actions</h3>
+                <h3 style="color:#2d3748; font-size:1.5rem; margin-bottom:1rem;">Quick actions</h3>
                 <div style="display:flex; flex-direction:column; gap:1rem;">
-                    <a href="/audit-defense.html" style="background:#334155; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; display:inline-block; text-align:center;">Open wizard</a>
-                    <a href="/pricing.html" style="background:#6c757d; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; transition:all 0.3s ease; text-transform:uppercase; letter-spacing:0.5px; text-decoration:none; display:inline-block; text-align:center;">Upgrade Plan</a>
-                </div>
-            </div>
-            
-            <div style="background:#ffffff; padding:2rem; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); color:#2d3748; border:1px solid #e2e8f0;">
-                <h3 style="color:#2d3748; font-size:1.5rem; margin-bottom:1rem;">Account Status</h3>
-                <div id="accountStatus">
-                    <p style="color:#4a5568;">Loading account information...</p>
+                    <a href="/upload.html" style="background:#334155; color:white; padding:14px 28px; border-radius:10px; font-weight:600; text-decoration:none; display:inline-block; text-align:center;">New estimate review</a>
+                    <a href="/audit-defense.html" style="background:#475569; color:white; padding:14px 28px; border-radius:10px; font-weight:600; text-decoration:none; display:inline-block; text-align:center;">Full IRS defense wizard</a>
+                    <a href="/pricing" style="background:#6c757d; color:white; padding:14px 28px; border-radius:10px; font-weight:600; text-decoration:none; display:inline-block; text-align:center;">Upgrade plan</a>
                 </div>
             </div>
         </div>
@@ -54,25 +52,66 @@
 
     <script type="module">
         import { getUserDocuments } from './src/components/UploadForm.js';
-        import { getCurrentUser } from './src/components/Auth.js';
+        import { getCurrentUser, getSession } from './src/components/Auth.js';
         
         let currentUser = null;
         
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Check if user has paid
-            const hasPaid = localStorage.getItem('paid') === 'true';
-            if (!hasPaid) {
-                alert('Payment required to access dashboard features. Redirecting to payment page...');
-                window.location.href = '/audit-defense.html';
+        function renderBilling(snap) {
+            const el = document.getElementById('billingPanel');
+            if (!snap) {
+                el.innerHTML = '<p style="margin:0;color:#fca5a5;">Could not load billing.</p>';
                 return;
             }
-            
+            const lim = snap.usage?.limit;
+            const used = snap.usage?.used ?? 0;
+            const limLabel = lim === -1 ? '∞' : String(lim);
+            const renewal = snap.renewal_at
+                ? new Date(snap.renewal_at).toLocaleDateString()
+                : '— (one-time / not scheduled)';
+            el.innerHTML = `
+                <div style="display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <p style="margin:0 0 0.35rem;font-size:0.8rem;text-transform:uppercase;color:#94a3b8;letter-spacing:0.06em;">Plan</p>
+                        <p style="margin:0;font-size:1.25rem;font-weight:700;">${snap.plan_type || 'single'}</p>
+                        <p style="margin:0.35rem 0 0;font-size:0.9rem;color:#94a3b8;">Status: <strong style="color:#e2e8f0;">${snap.active ? 'active' : 'inactive'}</strong></p>
+                    </div>
+                    <div>
+                        <p style="margin:0 0 0.35rem;font-size:0.8rem;text-transform:uppercase;color:#94a3b8;letter-spacing:0.06em;">Usage</p>
+                        <p style="margin:0;font-size:1.25rem;font-weight:700;">${used} of ${limLabel} reviews</p>
+                    </div>
+                    <div>
+                        <p style="margin:0 0 0.35rem;font-size:0.8rem;text-transform:uppercase;color:#94a3b8;letter-spacing:0.06em;">Renewal</p>
+                        <p style="margin:0;font-size:1rem;">${renewal}</p>
+                    </div>
+                </div>
+                <a href="/pricing" style="display:inline-block;margin-top:1rem;color:#93c5fd;font-weight:600;">Upgrade →</a>
+            `;
+        }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
             currentUser = await getCurrentUser();
             
             if (!currentUser) {
-                alert('Please login to access your dashboard');
-                window.location.href = '/login.html';
+                window.location.href = '/login.html?next=' + encodeURIComponent('/dashboard.html');
                 return;
+            }
+
+            const session = await getSession();
+            const token = session?.access_token;
+            if (token) {
+                const br = await fetch('/api/billing-status', {
+                    headers: { Authorization: 'Bearer ' + token },
+                });
+                if (!br.ok) {
+                    window.location.href = '/pricing';
+                    return;
+                }
+                const snap = await br.json();
+                renderBilling(snap);
+                if (snap.paid !== true) {
+                    window.location.href = '/pricing';
+                    return;
+                }
             }
             
             await loadUserData();
@@ -80,13 +119,8 @@
         
         async function loadUserData() {
             try {
-                // Load user documents
                 const documents = await getUserDocuments(currentUser.id);
                 displayRecentLetters(documents);
-                
-                // Update account status
-                updateAccountStatus();
-                
             } catch (error) {
                 console.error('Failed to load user data:', error);
                 document.getElementById('recentLetters').innerHTML = '<p>Failed to load letters</p>';
@@ -97,7 +131,7 @@
             const container = document.getElementById('recentLetters');
             
             if (documents.length === 0) {
-                container.innerHTML = '<p>No letters yet. <a href="/audit-defense.html">Start IRS Audit Defense</a></p>';
+                container.innerHTML = '<p>No letters yet. <a href="/upload.html">Start a new estimate review</a></p>';
                 return;
             }
             
@@ -110,15 +144,6 @@
             `).join('');
             
             container.innerHTML = lettersHtml;
-        }
-        
-        function updateAccountStatus() {
-            const statusDiv = document.getElementById('accountStatus');
-            statusDiv.innerHTML = `
-                <p><strong>Email:</strong> ${currentUser.email}</p>
-                <p><strong>Member since:</strong> ${new Date(currentUser.created_at).toLocaleDateString()}</p>
-                <p><strong>Plan:</strong> Free</p>
-            `;
         }
     </script>
 </body>

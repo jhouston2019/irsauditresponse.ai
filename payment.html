@@ -15,7 +15,7 @@
         <div>
             <a href="/audit-defense.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">IRS Defense</a> |
             <a href="/dashboard.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Dashboard</a> |
-            <a href="/pricing.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Pricing</a> |
+            <a href="/pricing" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Pricing</a> |
             <a href="/login.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Login</a>
         </div>
     </nav>
@@ -47,6 +47,8 @@
                     </ul>
                 </div>
 
+                <label for="payEmail" style="display:block; text-align:left; font-weight:600; color:#1e293b; margin-bottom:0.5rem;">Email for receipt &amp; account</label>
+                <input id="payEmail" type="email" required placeholder="you@example.com" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:1rem; margin-bottom:1rem; box-sizing:border-box;">
                 <button id="payButton" style="display:block; width:100%; background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:white; padding:1.2rem 2rem; border:none; border-radius:12px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.3s ease; box-shadow:0 6px 20px rgba(59, 130, 246, 0.3); text-decoration:none; text-align:center;">
                     Pay & Unlock My AI Letter Analysis
                 </button>
@@ -160,6 +162,11 @@
         document.getElementById('payButton').addEventListener('click', async function() {
             const button = this;
             const loading = document.getElementById('loading');
+            const payEmail = document.getElementById('payEmail').value.trim();
+            if (!payEmail || !payEmail.includes('@')) {
+                alert('Please enter a valid email address.');
+                return;
+            }
             
             // Show loading state
             button.disabled = true;
@@ -174,7 +181,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        customerEmail: null
+                        userEmail: payEmail
                     })
                 });
                 

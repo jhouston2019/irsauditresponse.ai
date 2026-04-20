@@ -72,7 +72,8 @@ test('Required files exist', () => {
     'netlify/functions/create-checkout-session.js',
     'netlify/functions/extract-text.js',
     'netlify/functions/stripe-webhook.js',
-    'netlify/functions/track-usage.js',
+    'netlify/functions/verify-payment.js',
+    'netlify/functions/_billing.js',
     'supabase/migrations/20251001_create_users_table.sql',
     'supabase/migrations/20251001_create_documents_table.sql',
     'supabase/migrations/20251001_create_subscriptions_table.sql',
@@ -143,7 +144,7 @@ test('Netlify functions have proper structure', () => {
     'netlify/functions/create-checkout-session.js',
     'netlify/functions/extract-text.js',
     'netlify/functions/stripe-webhook.js',
-    'netlify/functions/track-usage.js'
+    'netlify/functions/verify-payment.js'
   ];
   
   functionFiles.forEach(file => {

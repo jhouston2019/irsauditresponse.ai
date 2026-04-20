@@ -1,5 +1,6 @@
 const OpenAI = require("openai");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
+const { getBillingSnapshot, incrementReviewUsage } = require("./_billing.js");
 
 const ANALYSIS_SYSTEM_PROMPT = `You are an expert IRS correspondence analyst with 20 years of experience
 in tax controversy, audit defense, and IRS notice resolution.
@@ -268,6 +269,18 @@ exports.handler = async (event) => {
   const auth = await authorizeWizardRequest(event);
   if (!auth.ok) return auth.response;
 
+  if (!auth.internal) {
+    const snap = await getBillingSnapshot(auth.userId, auth.email);
+    const lim = snap.usage.limit;
+    if (lim !== -1 && snap.usage.used >= lim) {
+      return json(403, event, {
+        error: "Review limit reached for your plan",
+        code: "usage_exceeded",
+        usage: snap.usage,
+      });
+    }
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     return json(503, event, { error: "Analysis service is not configured." });
   }
@@ -384,5 +397,14 @@ exports.handler = async (event) => {
 
   const payload = { analysis, confidence };
   if (lastUsage) payload.usage = lastUsage;
+
+  if (!auth.internal && !BYPASS_USAGE && auth.userId) {
+    try {
+      await incrementReviewUsage(auth.userId);
+    } catch (e) {
+      console.error("analyze-notice increment usage", e.message);
+    }
+  }
+
   return json(200, event, payload);
 };

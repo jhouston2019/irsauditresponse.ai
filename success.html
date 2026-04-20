@@ -1,81 +1,215 @@
 <!DOCTYPE html>
 <html lang="en" data-ga-purchase="1">
 <head>
-    <meta http-equiv="refresh" content="0;url=/audit-success.html">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful - IRS Audit Defense Pro</title>
-    <meta name="ga-measurement-id" content="" />
-    <script src="/src/analytics.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirming payment… | IRS Audit Defense Pro</title>
+  <meta name="supabase-url" content="%%SUPABASE_URL%%" />
+  <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%" />
+  <meta name="ga-measurement-id" content="" />
+  <script src="/src/analytics.js" defer></script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .card {
+      max-width: 520px;
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 { font-size: 1.35rem; margin-bottom: 0.75rem; color: #fff; }
+    p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0.75rem; }
+    .err { color: #fca5a5; }
+    #log { font-size: 0.8rem; color: #64748b; margin-top: 1rem; text-align: left; white-space: pre-wrap; }
+    a.btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.25rem;
+      background: #dc2626;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
 </head>
+<body>
+  <div class="card">
+    <h1 id="headline">Confirming your payment</h1>
+    <p id="sub">Please wait — we are unlocking your account.</p>
+    <p id="errLine" class="err" style="display:none;"></p>
+    <div id="log"></div>
+    <a class="btn" href="/pricing" id="pricingLink" style="display:none;">Return to pricing</a>
+  </div>
 
-<body style="background:#f8fafc; color:#0f172a; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
-    <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom:2px solid #334155; align-items:center;">
-        <div style="color:#f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
-        <div>
-            <a href="/audit-defense.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">IRS Defense</a> |
-            <a href="/dashboard.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Dashboard</a> |
-            <a href="/pricing.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Pricing</a> |
-            <a href="/login.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Login</a>
-        </div>
-    </nav>
+  <script type="module">
+    const logEl = document.getElementById('log');
+    const errLine = document.getElementById('errLine');
+    const headline = document.getElementById('headline');
+    const sub = document.getElementById('sub');
+    const pricingLink = document.getElementById('pricingLink');
 
-    <main>
-        <div style="width:min(1120px, 92%); margin-inline:auto; padding:2rem 0;">
-            <div style="text-align:center; padding:4rem 0; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; margin-bottom:3rem; border-radius:12px;">
-                <span style="font-size:4rem; margin-bottom:1rem; display:block;">✅</span>
-                <h1 style="font-size:3rem; margin-bottom:1rem; font-weight:700;">Payment Successful!</h1>
-                <p style="font-size:1.3rem; opacity:0.95; max-width:600px; margin:0 auto;">Your access to the AI Tax Response Center is now unlocked.</p>
-            </div>
+    function log(msg) {
+      logEl.textContent += msg + '\n';
+    }
 
-            <div style="max-width:600px; margin:0 auto; background:white; border-radius:16px; padding:2.5rem; box-shadow:0 20px 40px rgba(0,0,0,0.1); border:1px solid #e2e8f0; text-align:center;">
-                <div style="color:#2d3748; margin-bottom:2rem;">
-                    <h2 style="font-size:1.8rem; margin-bottom:1rem; color:#1e293b;">🎉 Welcome to IRS Audit Defense Pro!</h2>
-                    <p style="color:#4a5568; line-height:1.6; margin-bottom:1.5rem;">Thank you for your payment. You now have full access to our AI-powered tax letter analysis system.</p>
-                </div>
+    async function getSupabase() {
+      const url = document.querySelector('meta[name="supabase-url"]')?.content;
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+      if (!url || !key || url.includes('%%')) {
+        throw new Error('App configuration missing (Supabase).');
+      }
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      return createClient(url, key);
+    }
 
-                <div style="background:linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border:2px solid #10b981; border-radius:12px; padding:1.5rem; margin:2rem 0; text-align:center;">
-                    <h3 style="color:#065f46; margin-bottom:0.5rem; font-size:1.3rem;">🔓 Access Unlocked</h3>
-                    <p style="color:#047857; margin:0; font-weight:500;">Open the IRS Audit Defense wizard to analyze your notice and generate your draft letter</p>
-                </div>
+    async function apiAuthMe(supabase) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return null;
+      const r = await fetch('/api/auth/me', {
+        headers: { Authorization: 'Bearer ' + session.access_token },
+      });
+      if (!r.ok) return null;
+      return r.json();
+    }
 
-                <div style="background:#f8fafc; border-radius:12px; padding:1.5rem; margin:2rem 0; border-left:4px solid #10b981;">
-                    <h3 style="color:#1e293b; margin-bottom:1rem; font-size:1.3rem;">What's Next?</h3>
-                    <ul style="list-style:none; padding:0; text-align:left;">
-                        <li style="padding:0.5rem 0; color:#4a5568; display:flex; align-items:center;">→ Paste or upload your IRS notice in the wizard</li>
-                        <li style="padding:0.5rem 0; color:#4a5568; display:flex; align-items:center;">→ Get instant AI analysis and explanation</li>
-                        <li style="padding:0.5rem 0; color:#4a5568; display:flex; align-items:center;">→ Download your professional response letter</li>
-                        <li style="padding:0.5rem 0; color:#4a5568; display:flex; align-items:center;">→ Mail your response to the IRS</li>
-                    </ul>
-                </div>
+    async function postCreateSession(supabase, sessionId, refreshMagicLink) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = 'Bearer ' + session.access_token;
+      }
+      return fetch('/api/auth/create-session-from-stripe', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          session_id: sessionId,
+          ...(refreshMagicLink ? { refresh_magic_link: true } : {}),
+        }),
+      });
+    }
 
-                <div style="display:flex; gap:1rem; justify-content:center; margin-top:2rem;">
-                    <a href="/audit-defense.html" style="background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:white; padding:1rem 2rem; border:none; border-radius:12px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.3s ease; box-shadow:0 6px 20px rgba(59, 130, 246, 0.3); text-decoration:none; display:inline-block;">Start IRS Audit Defense →</a>
-                    <a href="/dashboard.html" style="background:#6c757d; color:white; padding:1rem 2rem; border:none; border-radius:12px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.3s ease; text-decoration:none; display:inline-block;">Go to Dashboard</a>
-                </div>
-            </div>
-        </div>
-    </main>
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
 
-    <footer style="padding:28px 0; background:#0b1220; color:#cbd5e1; text-align:center; margin-top:3rem;">
-        <div style="width:min(1120px, 92%); margin-inline:auto;">
-            <p>&copy; 2026 IRS Audit Defense Pro. <a href="/privacy.html" style="color:#93c5fd; text-decoration:none;">Privacy Policy</a> | <a href="/terms.html" style="color:#93c5fd; text-decoration:none;">Terms</a> | <a href="/disclaimer.html" style="color:#93c5fd; text-decoration:none;">Disclaimer</a></p>
-        </div>
-    </footer>
+    if (!sessionId) {
+      headline.textContent = 'Missing checkout session';
+      sub.textContent = 'Use the link from Stripe after payment, or return to pricing to try again.';
+      pricingLink.style.display = 'inline-block';
+      throw new Error('no_session_id');
+    }
 
-    <script>
-        // Set the payment flag in localStorage
-        localStorage.setItem("paid", "true");
-        
-        // Optional: Track successful payment
-        console.log('Payment successful - access granted');
-        
-        // Optional: Redirect to upload page after 5 seconds if user doesn't click
-        setTimeout(() => {
-            if (confirm('Ready to start IRS Audit Defense? Click OK to open the wizard.')) {
-                window.location.href = '/audit-defense.html';
-            }
-        }, 5000);
-    </script>
+    try {
+      const supabase = await getSupabase();
+
+      let cre = await postCreateSession(supabase, sessionId, false);
+      let creJson = await cre.json();
+
+      if (cre.status === 403 && creJson.code === 'session_already_finalized') {
+        const { data: { session: existing } } = await supabase.auth.getSession();
+        if (existing) {
+          creJson = { finalized: true };
+          log('Session already finalized; using existing browser session.');
+        } else {
+          cre = await postCreateSession(supabase, sessionId, true);
+          creJson = await cre.json();
+          if (!cre.ok) {
+            throw new Error(creJson.error || 'Could not refresh login');
+          }
+        }
+      } else if (!cre.ok) {
+        throw new Error(creJson.error || 'Finalize failed');
+      }
+
+      if (creJson.finalized && !creJson.hashed_token) {
+        const { data: { session: existing } } = await supabase.auth.getSession();
+        if (!existing) {
+          cre = await postCreateSession(supabase, sessionId, true);
+          creJson = await cre.json();
+          if (!cre.ok) {
+            throw new Error(creJson.error || 'Could not refresh login');
+          }
+        }
+      }
+
+      if (creJson.hashed_token && creJson.email) {
+        const { error: otpErr } = await supabase.auth.verifyOtp({
+          token_hash: creJson.hashed_token,
+          type: 'email',
+          email: creJson.email,
+        });
+        if (otpErr) {
+          log('Magic link verify: ' + otpErr.message);
+        }
+      }
+
+      let me = await apiAuthMe(supabase);
+      if (!me?.authenticated || me.billing?.paid !== true) {
+        headline.textContent = 'Could not start session';
+        sub.textContent = 'Try signing in from the link we emailed, or use Recover.';
+        errLine.style.display = 'block';
+        errLine.textContent = 'Session not established or entitlement not active.';
+        pricingLink.style.display = 'inline-block';
+        throw new Error('no_auth');
+      }
+      log('Session OK for ' + (me.user?.email || ''));
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const authHeader = session?.access_token ? { Authorization: 'Bearer ' + session.access_token } : {};
+
+      let pending = true;
+      for (let i = 0; i < 5; i++) {
+        const vr = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeader },
+          body: JSON.stringify({ session_id: sessionId }),
+        });
+        const vj = await vr.json().catch(() => ({}));
+        log('verify-payment attempt ' + (i + 1) + ': ' + JSON.stringify(vj));
+        if (vj.success && !vj.pending) {
+          pending = false;
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+
+      me = await apiAuthMe(supabase);
+      if (me?.billing?.paid !== true) {
+        headline.textContent = 'Payment not fully verified';
+        sub.textContent = 'Contact support with your receipt, or try Recover.';
+        errLine.style.display = 'block';
+        errLine.textContent = 'Entitlement not active.';
+        pricingLink.style.display = 'inline-block';
+        throw new Error('entitlement_inactive');
+      }
+
+      headline.textContent = pending ? 'Payment processing' : 'All set';
+      sub.textContent = pending
+        ? 'Sync finishing; continuing to the app.'
+        : 'Redirecting to your workspace…';
+
+      window.location.replace('/app');
+    } catch (e) {
+      if (e.message !== 'no_session_id' && e.message !== 'no_auth' && e.message !== 'entitlement_inactive') {
+        errLine.style.display = 'block';
+        errLine.textContent = e.message || 'Something went wrong.';
+        pricingLink.style.display = 'inline-block';
+      }
+    }
+  </script>
 </body>
 </html>

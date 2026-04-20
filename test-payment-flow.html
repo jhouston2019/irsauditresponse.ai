@@ -133,7 +133,7 @@
                 const response = await fetch('/.netlify/functions/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({ userEmail: 'test-flow@example.com' })
                 });
                 
                 // Check if response is ok before parsing

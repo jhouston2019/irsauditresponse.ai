@@ -22,7 +22,7 @@
         <a href="/audit-payment.html" style="background:#22c55e; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">💳 Audit checkout</a>
         <a href="/audit-defense.html" style="background:#f59e0b; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">🛡️ IRS Defense</a>
         <a href="/resource.html" style="background:#8b5cf6; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">🤖 AI Analysis</a>
-        <a href="/pricing.html" style="background:#06b6d4; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">💰 Pricing</a>
+        <a href="/pricing" style="background:#06b6d4; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">💰 Pricing</a>
         <a href="/thank-you.html" style="background:#10b981; color:#fff; padding:12px 16px; border-radius:6px; text-decoration:none; text-align:center;">✅ Success</a>
       </div>
 
@@ -208,7 +208,7 @@ Contact: 1-800-829-8310`;
         const res = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({})
+          body: JSON.stringify({ userEmail: 'admin-test@example.com' })
         });
         const data = await res.json();
         testOutput.textContent = `Payment Test Result:\n${JSON.stringify(data, null, 2)}`;
