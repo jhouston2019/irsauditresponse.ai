@@ -33,7 +33,12 @@ export function getSupabase() {
   return _client;
 }
 
-/** Magic link (passwordless) — primary sign-in */
+export async function signInWithPassword(email, password) {
+  const supabase = getSupabase();
+  return supabase.auth.signInWithPassword({ email, password });
+}
+
+/** Magic link (passwordless) — optional; not used in primary checkout flow */
 export async function signInWithMagicLink(email, redirectTo) {
   const supabase = getSupabase();
   return supabase.auth.signInWithOtp({

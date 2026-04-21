@@ -62,7 +62,6 @@
     .cta-button:hover {
       background: #b91c1c;
     }
-    .status-note { font-size: 0.9rem; color: #94a3b8; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -70,15 +69,8 @@
     <div class="success-box">
       <div class="checkmark">✓</div>
       <h1>Payment Successful</h1>
-      <p>Your payment of $49 has been processed successfully.</p>
-      <p>You now have access to the full IRS Audit Defense wizard.</p>
-      <p id="verifyLine" class="status-note" style="display:none;"></p>
-      <p id="redirectMsg" class="status-note" style="margin-top:1rem;">
-        Redirecting to your workspace in <span id="countdown">5</span> seconds…
-      </p>
-
-      <a href="/audit-defense.html" class="cta-button" id="primaryCta">Start My IRS Defense →</a>
-
+      <p>Your payment has been processed. Create your account to access the wizard.</p>
+      <a href="/pricing" class="cta-button" id="primaryCta">Continue</a>
       <p style="margin-top: 2rem; font-size: 0.9rem; color: #94a3b8;">
         A receipt has been sent to your email address.
       </p>
@@ -89,57 +81,10 @@
     const p = new URLSearchParams(window.location.search);
     const sid = p.get('session_id');
     if (sid) {
-      window.location.replace('/success?session_id=' + encodeURIComponent(sid));
+      window.location.replace('/register?session_id=' + encodeURIComponent(sid));
     } else {
-
-    async function getSession() {
-      try {
-        const url = document.querySelector('meta[name="supabase-url"]')?.content;
-        const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-        if (!url || !key || url.includes('%%')) return null;
-        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-        const supabase = createClient(url, key);
-        const { data } = await supabase.auth.getSession();
-        return data?.session || null;
-      } catch {
-        return null;
-      }
-    }
-
-    const verifyLine = document.getElementById('verifyLine');
-    try {
-      const session = await getSession();
-      const email = session?.user?.email;
-      if (email) {
-        const res = await fetch('/api/verify-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json().catch(() => ({}));
-        verifyLine.style.display = 'block';
-        if (data.hasPaid || (data.success && !data.pending)) {
-          verifyLine.textContent = 'Payment verified for your account.';
-        } else {
-          verifyLine.textContent =
-            'If you just paid, your record may take a moment to sync. Use the same email you used at checkout.';
-        }
-      }
-    } catch (_) {
-      /* non-blocking */
-    }
-
-    let sec = 5;
-    const cd = document.getElementById('countdown');
-    const t = setInterval(() => {
-      sec -= 1;
-      if (cd) cd.textContent = String(Math.max(0, sec));
-      if (sec <= 0) clearInterval(t);
-    }, 1000);
-
-    setTimeout(() => {
-      window.location.href = '/audit-defense.html';
-    }, 5000);
+      const a = document.getElementById('primaryCta');
+      if (a) a.setAttribute('href', '/register');
     }
   </script>
 </body>

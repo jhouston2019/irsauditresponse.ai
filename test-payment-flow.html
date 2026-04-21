@@ -64,7 +64,7 @@
         <h2>3. Test Navigation Flow</h2>
         <button class="test-button" onclick="window.location.href='/index.html'">Go to Homepage</button>
         <button class="test-button" onclick="window.location.href='/audit-payment.html'">Go to Payment Page</button>
-        <button class="test-button" onclick="window.location.href='/success.html'">Go to Success Page</button>
+        <button class="test-button" onclick="window.location.href='/register'">Go to Register Page</button>
         <button class="test-button" onclick="window.location.href='/audit-defense.html'">Test IRS Defense wizard (Should Redirect if Unpaid)</button>
         <button class="test-button" onclick="window.location.href='/dashboard.html'">Test Dashboard (Should Redirect if Unpaid)</button>
     </div>
@@ -133,7 +133,7 @@
                 const response = await fetch('/.netlify/functions/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userEmail: 'test-flow@example.com' })
+                    body: JSON.stringify({ priceId: window.STRIPE_PRICE_ID || 'price_REPLACE_WITH_REAL_ID' })
                 });
                 
                 // Check if response is ok before parsing

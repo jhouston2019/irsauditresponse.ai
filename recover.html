@@ -4,68 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recover access | IRS Audit Defense Pro</title>
-  <meta name="supabase-url" content="%%SUPABASE_URL%%" />
-  <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%" />
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <style>
     body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 2rem; }
     .card { max-width: 480px; margin: 2rem auto; background: #1e293b; padding: 2rem; border-radius: 12px; border: 1px solid #334155; }
-    label { display: block; margin: 0.75rem 0 0.35rem; font-weight: 600; }
-    input { width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; }
-    button { margin-top: 1rem; padding: 0.75rem 1.25rem; background: #dc2626; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
-    p.note { font-size: 0.9rem; color: #94a3b8; margin-top: 1rem; }
+    p.note { font-size: 0.95rem; color: #94a3b8; margin: 0.75rem 0; line-height: 1.5; }
     a { color: #93c5fd; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Recover payment / access</h1>
-    <p class="note">If checkout was interrupted, paste your Stripe checkout session ID (from the success URL) or sign in and we will route you.</p>
-    <label for="sid">Checkout session ID (optional)</label>
-    <input id="sid" type="text" placeholder="cs_live_..." autocomplete="off" />
-    <button type="button" id="go">Continue</button>
-    <p class="note" id="out"></p>
-    <p class="note"><a href="/pricing">Pricing</a> · <a href="/login.html">Login</a></p>
+    <h1>Need help?</h1>
+    <p class="note">After paying with Stripe, use the link on the confirmation page to <strong>create your account</strong>. If that link expired, start from <a href="/pricing">pricing</a> or <a href="/login">log in</a> if you already registered.</p>
+    <p class="note"><a href="/pricing">Pricing</a> · <a href="/login">Log in</a></p>
   </div>
-
-  <script type="module">
-    async function getSupabase() {
-      const url = document.querySelector('meta[name="supabase-url"]')?.content;
-      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-      if (!url || !key || url.includes('%%')) return null;
-      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-      return createClient(url, key);
-    }
-
-    document.getElementById('go').addEventListener('click', async () => {
-      const out = document.getElementById('out');
-      out.textContent = '';
-      const sessionId = document.getElementById('sid').value.trim();
-      const supabase = await getSupabase();
-      let authHeader = {};
-      if (supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-          authHeader = { Authorization: 'Bearer ' + session.access_token };
-        }
-      }
-      const r = await fetch('/api/recover-payment-state', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeader },
-        body: JSON.stringify({ session_id: sessionId || undefined }),
-      });
-      const j = await r.json();
-      if (j.state === 'paid') {
-        window.location.href = j.redirect || '/app.html';
-        return;
-      }
-      if (j.state === 'processing' && j.redirect) {
-        const q = j.query ? '?' + new URLSearchParams(j.query).toString() : '';
-        window.location.href = j.redirect + q;
-        return;
-      }
-      window.location.href = j.redirect || '/pricing';
-    });
-  </script>
 </body>
 </html>

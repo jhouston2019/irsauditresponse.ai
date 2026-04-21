@@ -54,7 +54,7 @@ test('Required files exist', () => {
     'login.html',
     'signup.html',
     'pricing.html',
-    'success.html',
+    'register.html',
     'cancel.html',
     'privacy.html',
     'terms.html',
@@ -72,8 +72,8 @@ test('Required files exist', () => {
     'netlify/functions/create-checkout-session.js',
     'netlify/functions/extract-text.js',
     'netlify/functions/stripe-webhook.js',
-    'netlify/functions/verify-payment.js',
-    'netlify/functions/_billing.js',
+    'netlify/functions/verify-session.js',
+    'netlify/functions/record-purchase.js',
     'supabase/migrations/20251001_create_users_table.sql',
     'supabase/migrations/20251001_create_documents_table.sql',
     'supabase/migrations/20251001_create_subscriptions_table.sql',
@@ -144,7 +144,8 @@ test('Netlify functions have proper structure', () => {
     'netlify/functions/create-checkout-session.js',
     'netlify/functions/extract-text.js',
     'netlify/functions/stripe-webhook.js',
-    'netlify/functions/verify-payment.js'
+    'netlify/functions/verify-session.js',
+    'netlify/functions/record-purchase.js'
   ];
   
   functionFiles.forEach(file => {

@@ -8,7 +8,22 @@
 # --- Clean URLs + API proxy (must be before SPA fallback) ---
 [[redirects]]
   from = "/success"
-  to = "/success.html"
+  to = "/register"
+  status = 301
+
+[[redirects]]
+  from = "/register"
+  to = "/register.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard.html"
   status = 200
 
 [[redirects]]
@@ -34,36 +49,6 @@
 [[redirects]]
   from = "/upload"
   to = "/upload.html"
-  status = 200
-
-[[redirects]]
-  from = "/api/verify-payment"
-  to = "/.netlify/functions/verify-payment"
-  status = 200
-
-[[redirects]]
-  from = "/api/auth/create-session-from-stripe"
-  to = "/.netlify/functions/auth-create-session-from-stripe"
-  status = 200
-
-[[redirects]]
-  from = "/api/auth/me"
-  to = "/.netlify/functions/auth-me"
-  status = 200
-
-[[redirects]]
-  from = "/api/billing-status"
-  to = "/.netlify/functions/billing-status"
-  status = 200
-
-[[redirects]]
-  from = "/api/usage"
-  to = "/.netlify/functions/usage"
-  status = 200
-
-[[redirects]]
-  from = "/api/recover-payment-state"
-  to = "/.netlify/functions/recover-payment-state"
   status = 200
 
 [[redirects]]

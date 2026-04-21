@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Your Account | IRS Audit Defense Pro</title>
+    <title>Get started | IRS Audit Defense Pro</title>
     <meta name="supabase-url" content="%%SUPABASE_URL%%">
     <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
     <link rel="canonical" href="https://irsauditresponseai.netlify.app/signup.html">
@@ -13,40 +13,21 @@
         <div style="color: #f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
         <div>
             <a href="/pricing" style="color: #f5f5f5; text-decoration: none; margin: 0 10px;">Pricing</a> |
-            <a href="/login.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px;">Login</a>
+            <a href="/login" style="color: #f5f5f5; text-decoration: none; margin: 0 10px;">Log in</a>
         </div>
     </nav>
 
     <div style="width:min(1120px, 92%); margin-inline:auto; padding:2rem 0;">
         <div style="max-width:500px; margin:2rem auto; padding:2rem; background:#ffffff; border-radius:12px; color:#2d3748; border:1px solid #e2e8f0;">
             <h2 style="text-align:center; margin-bottom:0.5rem;">Get started</h2>
-            <p style="text-align:center; color:#64748b; font-size:0.95rem; margin-bottom:1.5rem;">Enter your email — we will send a secure link to sign in (same as login).</p>
-            <form id="signupForm">
-                <label for="email" style="display:block; margin-bottom:0.5rem; font-weight:bold;">Email</label>
-                <input type="email" id="email" required style="width:100%; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:1rem;">
-                <button type="submit" style="margin-top:1rem; background:#334155; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-weight:600; width:100%;">Email me a link</button>
-            </form>
-            <p id="msg" style="text-align:center; margin-top:1rem;"></p>
-            <p style="text-align:center; margin-top:1rem;">
-                <a href="/login.html" style="color:#2563eb;">Already have an account?</a>
+            <p style="text-align:center; color:#64748b; font-size:0.95rem; margin-bottom:1.5rem;">Choose a plan on the pricing page and complete checkout. After payment, you will create your account with email and password.</p>
+            <p style="text-align:center;">
+                <a href="/pricing" style="display:inline-block; background:#334155; color:white; padding:14px 28px; border-radius:10px; text-decoration:none; font-weight:600;">Go to pricing</a>
+            </p>
+            <p style="text-align:center; margin-top:1.25rem;">
+                <a href="/login" style="color:#2563eb;">Already have an account? Log in</a>
             </p>
         </div>
     </div>
-
-    <script type="module">
-        import { signInWithMagicLink } from './src/components/Auth.js';
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            const msg = document.getElementById('msg');
-            msg.textContent = 'Sending…';
-            const { error } = await signInWithMagicLink(email);
-            if (error) {
-                msg.textContent = error.message;
-                return;
-            }
-            msg.textContent = 'Check your email to continue.';
-        });
-    </script>
 </body>
 </html>

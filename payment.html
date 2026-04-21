@@ -6,6 +6,7 @@
     <title>Secure Payment – Unlock AI Tax Letter Analysis</title>
     
     <meta name="ga-measurement-id" content="" />
+    <meta name="stripe-price-id" content="%%STRIPE_PRICE_ID%%" />
     <script src="/src/analytics.js" defer></script>
 </head>
 
@@ -47,8 +48,6 @@
                     </ul>
                 </div>
 
-                <label for="payEmail" style="display:block; text-align:left; font-weight:600; color:#1e293b; margin-bottom:0.5rem;">Email for receipt &amp; account</label>
-                <input id="payEmail" type="email" required placeholder="you@example.com" style="width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:1rem; margin-bottom:1rem; box-sizing:border-box;">
                 <button id="payButton" style="display:block; width:100%; background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:white; padding:1.2rem 2rem; border:none; border-radius:12px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.3s ease; box-shadow:0 6px 20px rgba(59, 130, 246, 0.3); text-decoration:none; text-align:center;">
                     Pay & Unlock My AI Letter Analysis
                 </button>
@@ -162,9 +161,9 @@
         document.getElementById('payButton').addEventListener('click', async function() {
             const button = this;
             const loading = document.getElementById('loading');
-            const payEmail = document.getElementById('payEmail').value.trim();
-            if (!payEmail || !payEmail.includes('@')) {
-                alert('Please enter a valid email address.');
+            const priceId = document.querySelector('meta[name="stripe-price-id"]')?.content?.trim();
+            if (!priceId || priceId.includes('%%')) {
+                alert('Pricing is not configured (missing Stripe price ID).');
                 return;
             }
             
@@ -181,7 +180,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        userEmail: payEmail
+                        priceId
                     })
                 });
                 

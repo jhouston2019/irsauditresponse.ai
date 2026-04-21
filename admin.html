@@ -194,7 +194,7 @@ Contact: 1-800-829-8310`;
           ? `\n\nToken usage (from response): ${JSON.stringify(data.usage, null, 2)}`
           : '\n\nToken usage: see Netlify function logs if not included in body.';
         testOutput.textContent =
-          `generate-letter HTTP ${res.status}\n${JSON.stringify(forDisplay, null, 2)}${usageNote}\n\n401/403 without Bearer JWT + paid account is expected in production.`;
+          `generate-letter HTTP ${res.status}\n${JSON.stringify(forDisplay, null, 2)}${usageNote}\n\n401 without Bearer JWT is expected when unauthenticated.`;
       } catch (error) {
         testOutput.textContent = `generate-letter error: ${error.message}`;
       }
@@ -208,7 +208,7 @@ Contact: 1-800-829-8310`;
         const res = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userEmail: 'admin-test@example.com' })
+          body: JSON.stringify({ priceId: window.STRIPE_PRICE_ID || 'set_window_STRIPE_PRICE_ID' })
         });
         const data = await res.json();
         testOutput.textContent = `Payment Test Result:\n${JSON.stringify(data, null, 2)}`;

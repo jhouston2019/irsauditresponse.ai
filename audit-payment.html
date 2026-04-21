@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="supabase-url" content="%%SUPABASE_URL%%">
   <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
+  <meta name="stripe-price-id" content="%%STRIPE_PRICE_ID%%">
   <title>Payment - IRS Audit Defense Pro</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   
@@ -181,17 +182,6 @@
       <div id="statusMessage" class="status-message"></div>
 
       <form id="paymentForm">
-        <div class="form-group">
-          <label for="email">Email Address *</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            required 
-            placeholder="your@email.com"
-          />
-        </div>
-
         <button type="submit" id="checkoutButton" class="checkout-button">
           Proceed to Secure Checkout
         </button>
@@ -210,18 +200,17 @@
   </footer>
 
   <script type="module">
-    import { getSession } from '/src/components/Auth.js';
     document.getElementById('paymentForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const email = document.getElementById('email').value.trim();
       const button = document.getElementById('checkoutButton');
       const statusMessage = document.getElementById('statusMessage');
-      
-      if (!email || !email.includes('@')) {
+      const priceId = document.querySelector('meta[name="stripe-price-id"]')?.content?.trim();
+
+      if (!priceId || priceId.includes('%%')) {
         statusMessage.className = 'status-message status-error';
         statusMessage.style.display = 'block';
-        statusMessage.textContent = 'Error: A valid email is required.';
+        statusMessage.textContent = 'Error: Pricing is not configured.';
         return;
       }
       
@@ -229,17 +218,10 @@
       button.textContent = 'Creating checkout session...';
       
       try {
-        let supabase_user_id = null;
-        try {
-          const s = await getSession();
-          if (s?.user?.id) supabase_user_id = s.user.id;
-        } catch (_) { /* */ }
-        const payload = { userEmail: email, auditType: 'irs_audit_response' };
-        if (supabase_user_id) payload.supabase_user_id = supabase_user_id;
         const response = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ priceId }),
         });
         
         const data = await response.json();

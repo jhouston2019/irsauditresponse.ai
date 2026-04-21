@@ -29,58 +29,19 @@
   </div>
 
   <script type="module">
+    import { getSupabase } from '/src/components/Auth.js';
+
     const msg = document.getElementById('msg');
     const extra = document.getElementById('extra');
 
-    async function getSupabase() {
-      const url = document.querySelector('meta[name="supabase-url"]')?.content;
-      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-      if (!url || !key || url.includes('%%')) throw new Error('Configuration error');
-      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-      return createClient(url, key);
-    }
-
-    const qs = new URLSearchParams(window.location.search);
-    const recoverSessionId = qs.get('session_id');
-
     try {
-      const supabase = await getSupabase();
+      const supabase = getSupabase();
       const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        const next = encodeURIComponent(window.location.pathname + window.location.search);
-        window.location.replace('/login.html?next=' + next);
-        return;
+      if (!session) {
+        window.location.href = '/pricing';
+      } else {
+        window.location.replace('/audit-defense.html');
       }
-
-      if (recoverSessionId) {
-        await fetch('/api/verify-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + session.access_token,
-          },
-          body: JSON.stringify({ session_id: recoverSessionId }),
-        });
-      }
-
-      const r = await fetch('/api/billing-status', {
-        headers: { Authorization: 'Bearer ' + session.access_token },
-      });
-      const billing = await r.json().catch(() => ({}));
-
-      if (billing.paid !== true) {
-        msg.textContent = 'Active purchase required';
-        extra.innerHTML = '<a href="/pricing">View pricing</a>';
-        return;
-      }
-
-      const plan = (billing.plan_type || 'single').toLowerCase();
-      if (plan === 'single') {
-        window.location.replace('/upload.html');
-        return;
-      }
-      window.location.replace('/dashboard.html');
     } catch (e) {
       msg.textContent = 'Something went wrong';
       extra.textContent = e.message || '';

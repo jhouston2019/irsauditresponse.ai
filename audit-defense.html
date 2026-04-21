@@ -106,16 +106,15 @@
     <nav>
       <a href="/index.html">Home</a> ·
       <a href="/pricing">Pricing</a> ·
-      <a href="/login.html">Sign in</a> ·
-      <a href="/audit-payment.html">Purchase access</a>
+      <a href="/dashboard">Dashboard</a> ·
+      <a href="/login">Sign in</a>
     </nav>
   </header>
 
   <div class="shell">
     <div id="authGate" class="gate-banner" style="display: none;">
-      You need an account and an active purchase to use this tool.
-      <a href="/login.html">Sign in</a> or <a href="/audit-payment.html">complete checkout</a>.
-      For staging, your administrator can set <code>AUDIT_DEFENSE_BYPASS_PAYMENT</code> on Netlify.
+      Sign in to use the wizard.
+      <a href="/pricing">Get access</a> or <a href="/login">Log in</a>.
     </div>
 
     <div class="progress-wrap">
@@ -419,7 +418,7 @@ Contact: 1-800-829-8310`;
 
     function updateAnalyzeEnabled() {
       const text = $('noticeText').value.trim();
-      const ok = text.length > 0 || !!state.fileBase64;
+      const ok = (text.length > 0 || !!state.fileBase64) && !!state.accessToken;
       $('btnAnalyze').disabled = !ok;
     }
 
@@ -825,6 +824,20 @@ Contact: 1-800-829-8310`;
         const a = state.analysis;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
         showStep(4);
+        try {
+          const { getSupabase } = await import('/src/components/Auth.js');
+          const supabase = getSupabase();
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const noticeTypeVal = a?.noticeType || $('noticeType').value || null;
+            const letterText = state.letterRaw || '';
+            await supabase.from('documents').insert({
+              user_id: session.user.id,
+              notice_type: noticeTypeVal,
+              letter_html: letterText,
+            });
+          }
+        } catch (_) {}
       } catch (e) {
         alert(e.message || 'Letter generation failed');
       } finally {
@@ -1011,8 +1024,8 @@ Contact: 1-800-829-8310`;
         state.accessToken = session.access_token;
         $('authGate').style.display = 'none';
       } else {
-        state.accessToken = 'bypass';
-        $('authGate').style.display = 'none';
+        state.accessToken = null;
+        $('authGate').style.display = 'block';
       }
       updateAnalyzeEnabled();
     }

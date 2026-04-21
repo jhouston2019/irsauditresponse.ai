@@ -2,8 +2,6 @@
  * Shared CORS, auth, and access control for IRS Audit Defense wizard functions.
  */
 const { createClient } = require("@supabase/supabase-js");
-const { getSupabaseAdmin } = require("./_supabase.js");
-const { getBillingSnapshot, shouldBlockWizard } = require("./_billing.js");
 
 function getAllowedOrigins() {
   const site = (process.env.SITE_URL || "https://irsauditresponseai.netlify.app").replace(/\/$/, "");
@@ -52,14 +50,8 @@ function sanitizeString(s, maxLen = 150000) {
   return str.length > maxLen ? str.slice(0, maxLen) : str;
 }
 
-async function userHasPaid(user) {
-  if (!user || !user.id) return false;
-  const snap = await getBillingSnapshot(user.id, user.email);
-  return snap.paid === true;
-}
-
 /**
- * Requires Bearer JWT (Supabase) and verified paid entitlement, unless:
+ * Requires Bearer JWT (Supabase), unless:
  * - X-Service-Key matches AUDIT_DEFENSE_SERVICE_KEY (server-side only; never expose in client HTML)
  */
 async function authorizeWizardRequest(event) {
@@ -95,17 +87,6 @@ async function authorizeWizardRequest(event) {
     return { ok: false, response: json(401, event, { error: "Invalid or expired session" }) };
   }
 
-  const snap = await getBillingSnapshot(user.id, user.email);
-  if (shouldBlockWizard(snap)) {
-    return {
-      ok: false,
-      response: json(402, event, {
-        error: "Active purchase required",
-        code: "payment_required",
-      }),
-    };
-  }
-
   return { ok: true, email: user.email, userId: user.id, user };
 }
 
@@ -114,5 +95,4 @@ module.exports = {
   json,
   sanitizeString,
   authorizeWizardRequest,
-  userHasPaid,
 };
