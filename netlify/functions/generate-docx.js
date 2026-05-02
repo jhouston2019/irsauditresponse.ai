@@ -1,5 +1,7 @@
 const { Document, Packer, Paragraph, TextRun } = require("docx");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
+const { getSupabaseAdmin } = require("./_supabase.js");
+const { enforcePaidAuditJob } = require("./_auditJobs.js");
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
@@ -12,16 +14,26 @@ exports.handler = async (event) => {
 
   const auth = await authorizeWizardRequest(event);
   if (!auth.ok) return auth.response;
+  if (!auth.user?.id) {
+    return json(403, event, { error: "Forbidden" });
+  }
 
-  let text;
-  let fileName = "irs-response-letter.docx";
+  let body;
   try {
-    const body = JSON.parse(event.body || "{}");
-    text = sanitizeString(body.text || "", 200000);
-    fileName = sanitizeString(body.fileName || fileName, 120) || "irs-response-letter.docx";
+    body = JSON.parse(event.body || "{}");
   } catch {
     return json(400, event, { error: "Invalid JSON body" });
   }
+
+  const jobIdTrim = typeof body.job_id === "string" ? body.job_id.trim() : "";
+  if (!jobIdTrim) return json(400, event, { error: "job_id is required" });
+
+  const admin = getSupabaseAdmin();
+  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, jobIdTrim);
+  if (payDenied) return payDenied;
+
+  const text = sanitizeString(body.text || "", 200000);
+  const fileName = sanitizeString(body.fileName || "irs-response-letter.docx", 120) || "irs-response-letter.docx";
 
   if (!text) {
     return json(400, event, { error: "No text provided for DOCX generation" });

@@ -51,8 +51,7 @@ function sanitizeString(s, maxLen = 150000) {
 }
 
 /**
- * Requires Bearer JWT (Supabase), unless:
- * - X-Service-Key matches AUDIT_DEFENSE_SERVICE_KEY (server-side only; never expose in client HTML)
+ * Requires Bearer JWT (Supabase). Matching X-Service-Key alone is rejected.
  */
 async function authorizeWizardRequest(event) {
   if (process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "true") {
@@ -62,7 +61,7 @@ async function authorizeWizardRequest(event) {
   const serviceKey = process.env.AUDIT_DEFENSE_SERVICE_KEY;
   const providedService = event.headers["x-service-key"] || event.headers["X-Service-Key"];
   if (serviceKey && providedService === serviceKey) {
-    return { ok: true, email: "service@internal", internal: true };
+    return { ok: false, response: json(403, event, { error: "Forbidden" }) };
   }
 
   const auth =

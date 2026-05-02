@@ -56,9 +56,7 @@ exports.handler = async (event) => {
     if (bearer) {
       const auth = await authorizeWizardRequest(event);
       if (!auth.ok) return auth.response;
-      if (auth.internal) {
-        return json(403, event, { error: "Forbidden" });
-      }
+      if (!auth.user?.id) return json(403, event, { error: "Forbidden" });
       if (!jobId) {
         const ins = await admin.from("audit_jobs").insert({ user_id: auth.user.id }).select("id").single();
         if (ins.error || !ins.data?.id) {

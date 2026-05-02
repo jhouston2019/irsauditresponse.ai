@@ -138,7 +138,7 @@ exports.handler = async (event) => {
 
   const auth = await authorizeWizardRequest(event);
   if (!auth.ok) return auth.response;
-  if (auth.internal || !auth.user?.id) {
+  if (!auth.user?.id) {
     return json(403, event, { error: "Forbidden" });
   }
 
@@ -153,14 +153,30 @@ exports.handler = async (event) => {
     return json(400, event, { error: "Invalid JSON body" });
   }
 
-  const { analysis, strategy, taxpayerName, taxpayerAddress, additionalContext, job_id } = body;
-  if (!analysis || typeof analysis !== "object") {
-    return json(400, event, { error: "analysis object is required" });
+  const { strategy, taxpayerName, taxpayerAddress, additionalContext, job_id } = body;
+
+  const jobIdTrim = typeof job_id === "string" ? job_id.trim() : "";
+  const admin = getSupabaseAdmin();
+  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, jobIdTrim);
+  if (payDenied) return payDenied;
+
+  const row = await admin.from("audit_jobs").select("letter_full").eq("id", jobIdTrim).eq("user_id", auth.user.id).maybeSingle();
+
+  if (row.error || !row.data?.letter_full?.trim()) {
+    return json(400, event, { error: "Run notice analysis before generating a letter." });
   }
 
-  const admin = getSupabaseAdmin();
-  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, typeof job_id === "string" ? job_id.trim() : "");
-  if (payDenied) return payDenied;
+  let analysis;
+  try {
+    analysis = JSON.parse(row.data.letter_full);
+  } catch {
+    return json(400, event, { error: "Stored analysis is invalid; run Analyze again." });
+  }
+
+  if (!analysis || typeof analysis !== "object") {
+    return json(400, event, { error: "Stored analysis is missing structured fields." });
+  }
+
   const strat = sanitizeString(strategy || "", 32);
   if (!["agree", "partial", "dispute", "extension", "other", "custom"].includes(strat)) {
     return json(400, event, { error: "strategy must be agree, partial, dispute, extension, other, or custom" });

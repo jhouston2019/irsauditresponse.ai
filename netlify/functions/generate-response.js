@@ -17,10 +17,34 @@ exports.handler = async (event) => {
 
   const auth = await authorizeWizardRequest(event);
   if (!auth.ok) return auth.response;
+  if (!auth.user?.id) return json(403, event, { error: "Forbidden" });
+
+  const supabase = getSupabaseAdmin();
+  let body;
+  try {
+    body = JSON.parse(event.body || "{}");
+  } catch {
+    return json(400, event, { error: "Invalid JSON body" });
+  }
+
+  const jobId = typeof body.job_id === "string" ? body.job_id.trim() : "";
+  if (!jobId) {
+    return json(400, event, { error: "job_id is required" });
+  }
+
+  const { data: job, error: jobErr } = await supabase
+    .from("audit_jobs")
+    .select("paid, is_unlocked")
+    .eq("id", jobId)
+    .eq("user_id", auth.user.id)
+    .single();
+
+  if (jobErr || !job || (!job.paid && !job.is_unlocked)) {
+    return json(402, event, { error: "Payment required" });
+  }
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   try {
-    const body = JSON.parse(event.body || "{}");
     const { summary, recordId = null, tone = "professional", approach = "cooperative", style = "detailed" } = body;
     if (!summary) return json(400, event, { error: "Missing summary" });
 
@@ -109,7 +133,6 @@ Apply these modifiers while maintaining the formal structure above.`,
     const letter = completion.choices?.[0]?.message?.content?.trim() || "";
 
     if (recordId) {
-      const supabase = getSupabaseAdmin();
       const { error } = await supabase.from("ara_letters").update({ ai_response: letter, status: "responded" }).eq("id", recordId);
       if (error) throw error;
     }

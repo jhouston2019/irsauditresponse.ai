@@ -402,7 +402,6 @@ Contact: 1-800-829-8310`;
       fileBase64: null,
       fileType: null,
       analysis: null,
-      confidence: null,
       strategy: null,
       letterRaw: '',
       editing: false,
@@ -639,8 +638,30 @@ Contact: 1-800-829-8310`;
           }
           throw new Error(data.error || 'Analysis failed');
         }
-        state.analysis = data.analysis;
-        state.confidence = data.confidence;
+        if (!data.recordId || typeof data.preview_text !== 'string') {
+          throw new Error(data.error || 'Analysis response missing saved record.');
+        }
+        state.jobId = data.recordId;
+        const supUrl = document.querySelector('meta[name="supabase-url"]')?.content;
+        const supKey = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+        if (!supUrl || supUrl.includes('%%') || !supKey || supKey.includes('%%')) {
+          throw new Error('Supabase not configured.');
+        }
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        const supHydrate = createClient(supUrl, supKey);
+        const { data: aj, error: ajErr } = await supHydrate
+          .from('audit_jobs')
+          .select('letter_full')
+          .eq('id', data.recordId)
+          .single();
+        if (ajErr || !aj?.letter_full) {
+          throw new Error('Could not load saved analysis.');
+        }
+        try {
+          state.analysis = JSON.parse(aj.letter_full);
+        } catch {
+          throw new Error('Saved analysis format error.');
+        }
         renderStep2();
         showStep(2);
       } catch (e) {
@@ -844,7 +865,6 @@ Contact: 1-800-829-8310`;
           method: 'POST',
           headers: authHeaders(),
           body: JSON.stringify({
-            analysis: state.analysis,
             strategy: state.strategy,
             job_id: state.jobId,
             taxpayerName: $('fillName').value.trim() || undefined,
@@ -1001,7 +1021,11 @@ Contact: 1-800-829-8310`;
       $('step4Loading').classList.add('show');
       try {
         const text = state.editing ? $('letterEdit').value : state.letterRaw;
-        await downloadBinary(API.pdf, { text, fileName: 'irs-response-letter.pdf' }, 'irs-response-letter.pdf');
+        await downloadBinary(API.pdf, {
+          text,
+          job_id: state.jobId,
+          fileName: 'irs-response-letter.pdf',
+        }, 'irs-response-letter.pdf');
       } catch (e) {
         $('step4Error').textContent = e.message;
         $('step4Error').classList.add('show');
@@ -1015,7 +1039,11 @@ Contact: 1-800-829-8310`;
       $('step4Loading').classList.add('show');
       try {
         const text = state.editing ? $('letterEdit').value : state.letterRaw;
-        await downloadBinary(API.docx, { text, fileName: 'irs-response-letter.docx' }, 'irs-response-letter.docx');
+        await downloadBinary(API.docx, {
+          text,
+          job_id: state.jobId,
+          fileName: 'irs-response-letter.docx',
+        }, 'irs-response-letter.docx');
       } catch (e) {
         $('step4Error').textContent = e.message;
         $('step4Error').classList.add('show');
