@@ -1,5 +1,7 @@
 const OpenAI = require("openai");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
+const { getSupabaseAdmin } = require("./_supabase.js");
+const { enforcePaidAuditJob } = require("./_auditJobs.js");
 
 const ANALYSIS_SYSTEM_PROMPT = `You are an expert IRS correspondence analyst with 20 years of experience
 in tax controversy, audit defense, and IRS notice resolution.
@@ -267,6 +269,9 @@ exports.handler = async (event) => {
 
   const auth = await authorizeWizardRequest(event);
   if (!auth.ok) return auth.response;
+  if (auth.internal || !auth.user?.id) {
+    return json(403, event, { error: "Forbidden" });
+  }
 
   if (!process.env.OPENAI_API_KEY) {
     return json(503, event, { error: "Analysis service is not configured." });
@@ -286,7 +291,12 @@ exports.handler = async (event) => {
     noticeType,
     taxYear,
     context,
+    job_id,
   } = body;
+
+  const admin = getSupabaseAdmin();
+  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, typeof job_id === "string" ? job_id.trim() : "");
+  if (payDenied) return payDenied;
 
   const text = sanitizeString(rawText || "");
   let fileBase64 = typeof rawB64 === "string" ? rawB64.replace(/^data:[^;]+;base64,/, "") : "";

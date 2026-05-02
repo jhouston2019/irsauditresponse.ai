@@ -1,5 +1,7 @@
 const OpenAI = require("openai");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
+const { getSupabaseAdmin } = require("./_supabase.js");
+const { enforcePaidAuditJob } = require("./_auditJobs.js");
 
 const LETTER_SYSTEM_PROMPT = `You are a senior tax attorney and IRS correspondence specialist with 25 years
 of experience handling IRS audits, CP2000 notices, deficiency notices, and
@@ -136,6 +138,9 @@ exports.handler = async (event) => {
 
   const auth = await authorizeWizardRequest(event);
   if (!auth.ok) return auth.response;
+  if (auth.internal || !auth.user?.id) {
+    return json(403, event, { error: "Forbidden" });
+  }
 
   if (!process.env.OPENAI_API_KEY) {
     return json(503, event, { error: "Letter generation is not configured." });
@@ -148,10 +153,14 @@ exports.handler = async (event) => {
     return json(400, event, { error: "Invalid JSON body" });
   }
 
-  const { analysis, strategy, taxpayerName, taxpayerAddress, additionalContext } = body;
+  const { analysis, strategy, taxpayerName, taxpayerAddress, additionalContext, job_id } = body;
   if (!analysis || typeof analysis !== "object") {
     return json(400, event, { error: "analysis object is required" });
   }
+
+  const admin = getSupabaseAdmin();
+  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, typeof job_id === "string" ? job_id.trim() : "");
+  if (payDenied) return payDenied;
   const strat = sanitizeString(strategy || "", 32);
   if (!["agree", "partial", "dispute", "extension", "other", "custom"].includes(strat)) {
     return json(400, event, { error: "strategy must be agree, partial, dispute, extension, other, or custom" });

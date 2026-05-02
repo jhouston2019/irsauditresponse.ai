@@ -311,17 +311,49 @@
   </div>
 
   <script type="module">
-    async function getSession() {
+    async function bootstrapAuthGate() {
       try {
         const url = document.querySelector('meta[name="supabase-url"]')?.content;
         const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-        if (!url || !key || url.includes('%%')) return null;
+        if (!url || !key || url.includes('%%')) {
+          state.accessToken = null;
+          state.jobId = null;
+          return;
+        }
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
         const supabase = createClient(url, key);
-        const { data } = await supabase.auth.getSession();
-        return data?.session || null;
+        const {
+          data: { user },
+          error: userErr,
+        } = await supabase.auth.getUser();
+        if (userErr || !user) {
+          state.accessToken = null;
+          state.jobId = null;
+          return;
+        }
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        state.accessToken = session?.access_token ?? null;
+
+        let { data: job } = await supabase
+          .from('audit_jobs')
+          .select('id,paid,is_unlocked')
+          .eq('user_id', user.id)
+          .order('paid', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!job?.id) {
+          const ins = await supabase.from('audit_jobs').insert({ user_id: user.id }).select('id').single();
+          if (!ins.error && ins.data?.id) {
+            job = ins.data;
+          }
+        }
+        state.jobId = job?.id ?? null;
       } catch {
-        return null;
+        state.accessToken = null;
+        state.jobId = null;
       }
     }
 
@@ -366,6 +398,7 @@ Contact: 1-800-829-8310`;
     const state = {
       step: 1,
       accessToken: null,
+      jobId: null,
       fileBase64: null,
       fileType: null,
       analysis: null,
@@ -410,10 +443,11 @@ Contact: 1-800-829-8310`;
     }
 
     function authHeaders() {
-      return {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${state.accessToken}`,
-      };
+      const h = { 'Content-Type': 'application/json' };
+      if (state.accessToken) {
+        h.Authorization = `Bearer ${state.accessToken}`;
+      }
+      return h;
     }
 
     function updateAnalyzeEnabled() {
@@ -585,6 +619,7 @@ Contact: 1-800-829-8310`;
         }
         const body = {
           text,
+          job_id: state.jobId,
           fileBase64: state.fileBase64 || undefined,
           fileType: state.fileType || undefined,
           noticeType: $('noticeType').value || undefined,
@@ -811,6 +846,7 @@ Contact: 1-800-829-8310`;
           body: JSON.stringify({
             analysis: state.analysis,
             strategy: state.strategy,
+            job_id: state.jobId,
             taxpayerName: $('fillName').value.trim() || undefined,
             taxpayerAddress: [$('fillAddress').value.trim(), $('fillCity').value.trim()].filter(Boolean).join(', ') || undefined,
             additionalContext: customText || $('context').value || undefined,
@@ -825,17 +861,23 @@ Contact: 1-800-829-8310`;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
         showStep(4);
         try {
-          const { getSupabase } = await import('/src/components/Auth.js');
-          const supabase = getSupabase();
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            const noticeTypeVal = a?.noticeType || $('noticeType').value || null;
-            const letterText = state.letterRaw || '';
-            await supabase.from('documents').insert({
-              user_id: session.user.id,
-              notice_type: noticeTypeVal,
-              letter_html: letterText,
-            });
+          const url = document.querySelector('meta[name="supabase-url"]')?.content;
+          const anon = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+          if (!url?.includes?.('%%') && anon && !anon.includes?.('%%')) {
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+            const supabase = createClient(url, anon);
+            const {
+              data: { user },
+            } = await supabase.auth.getUser();
+            if (user) {
+              const noticeTypeVal = a?.noticeType || $('noticeType').value || null;
+              const letterText = state.letterRaw || '';
+              await supabase.from('documents').insert({
+                user_id: user.id,
+                notice_type: noticeTypeVal,
+                letter_html: letterText,
+              });
+            }
           }
         } catch (_) {}
       } catch (e) {
@@ -1019,12 +1061,10 @@ Contact: 1-800-829-8310`;
     });
 
     async function boot() {
-      const session = await getSession();
-      if (session && session.access_token) {
-        state.accessToken = session.access_token;
+      await bootstrapAuthGate();
+      if (state.accessToken) {
         $('authGate').style.display = 'none';
       } else {
-        state.accessToken = null;
         $('authGate').style.display = 'block';
       }
       updateAnalyzeEnabled();

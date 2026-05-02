@@ -29,7 +29,7 @@ IRS Audit Defense Pro is a specialized AI tool designed to help taxpayers respon
 
 #### Environment variables
 
-See `.env.example` for all required variables. Set `AUDIT_DEFENSE_BYPASS_PAYMENT=1` in Netlify staging env only.
+See `.env.example` for all required variables. Do **not** set `AUDIT_DEFENSE_BYPASS_PAYMENT=true`; it aborts guarded functions by design.
 
 Client-side analytics: set `GA_MEASUREMENT_ID` at deploy time and inject it into `<meta name="ga-measurement-id" content="...">` on each page (or use a small build/snippet step). `src/analytics.js` loads GA4 only when the meta value matches `G-…`.
 

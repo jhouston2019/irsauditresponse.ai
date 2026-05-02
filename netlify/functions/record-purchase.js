@@ -39,6 +39,11 @@ exports.handler = async (event) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
 
+    const { error: upJob } = await supabase.from("audit_jobs").update({ user_id }).eq("stripe_session_id", session_id);
+    if (upJob) {
+      console.error("audit_jobs stripe_session attach error:", upJob.message);
+    }
+
     const { error: insErr } = await supabase.from("purchases").insert({
       user_id,
       stripe_session_id: session_id,

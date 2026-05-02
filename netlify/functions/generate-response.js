@@ -1,33 +1,36 @@
 const OpenAI = require("openai");
+const { authorizeWizardRequest, corsHeaders, json } = require("./_wizardAuth.js");
 const { getSupabaseAdmin } = require("./_supabase.js");
 
 exports.handler = async (event) => {
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
+  if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
+      headers: { ...corsHeaders(event), "Access-Control-Allow-Methods": "POST, OPTIONS" },
+      body: "",
     };
   }
 
-  // Initialize OpenAI client
+  if (event.httpMethod !== "POST") {
+    return json(405, event, { error: "Method not allowed" });
+  }
+
+  const auth = await authorizeWizardRequest(event);
+  if (!auth.ok) return auth.response;
+
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   try {
-    const { summary, recordId = null, tone = 'professional', approach = 'cooperative', style = 'detailed' } = JSON.parse(event.body || "{}");
-    if (!summary) return { statusCode: 400, body: JSON.stringify({ error: "Missing summary" }) };
+    const body = JSON.parse(event.body || "{}");
+    const { summary, recordId = null, tone = "professional", approach = "cooperative", style = "detailed" } = body;
+    if (!summary) return json(400, event, { error: "Missing summary" });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.7,
       top_p: 0.85,
       messages: [
-        { 
-          role: "system", 
+        {
+          role: "system",
           content: `You are generating a formal IRS response letter that matches the structure used in professional tax correspondence.
 
 CRITICAL: Follow this EXACT structure for ALL responses:
@@ -94,32 +97,25 @@ MUST NOT READ LIKE: AI-generated conversational text
 **APPROACH MODIFIER: ${approach}**
 **STYLE MODIFIER: ${style}**
 
-Apply these modifiers while maintaining the formal structure above.` 
+Apply these modifiers while maintaining the formal structure above.`,
         },
-        { 
-          role: "user", 
-          content: `Based on this IRS letter analysis, generate a formal response letter following the exact structure provided:\n\n${summary}\n\nUse proper IRS correspondence format. No casual language. No AI tone. Format as professional tax correspondence.` 
-        }
+        {
+          role: "user",
+          content: `Based on this IRS letter analysis, generate a formal response letter following the exact structure provided:\n\n${summary}\n\nUse proper IRS correspondence format. No casual language. No AI tone. Format as professional tax correspondence.`,
+        },
       ],
     });
 
     const letter = completion.choices?.[0]?.message?.content?.trim() || "";
 
-    // Update the existing record (if provided)
     if (recordId) {
       const supabase = getSupabaseAdmin();
-      const { error } = await supabase
-        .from("ara_letters")
-        .update({ ai_response: letter, status: "responded" })
-        .eq("id", recordId);
+      const { error } = await supabase.from("ara_letters").update({ ai_response: letter, status: "responded" }).eq("id", recordId);
       if (error) throw error;
     }
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ letter }),
-    };
+    return json(200, event, { letter });
   } catch (error) {
-    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+    return json(500, event, { error: error.message });
   }
-}
+};

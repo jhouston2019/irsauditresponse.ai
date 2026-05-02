@@ -61,6 +61,9 @@ export async function getCurrentUser() {
 }
 
 export async function getSession() {
-  const { data: { session } } = await getSupabase().auth.getSession();
-  return session;
+  const supabase = getSupabase();
+  const { data: uh, error: userErr } = await supabase.auth.getUser();
+  if (userErr || !uh.user) return null;
+  const { data: sessWrap } = await supabase.auth.getSession();
+  return sessWrap.session ?? null;
 }
