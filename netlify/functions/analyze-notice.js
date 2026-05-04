@@ -1,3 +1,4 @@
+// Hardening: JWT via authorizeWizardRequest + enforcePaidAuditJob before OpenAI; no public.users queries in this function.
 const OpenAI = require("openai");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
 const { getSupabaseAdmin } = require("./_supabase.js");

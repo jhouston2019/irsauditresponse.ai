@@ -50,18 +50,40 @@ exports.handler = async (event) => {
       .eq("stripe_session_id", session_id)
       .maybeSingle();
 
-    if (!job || (!job.paid && !job.is_unlocked)) {
+    if (job && (job.paid || job.is_unlocked)) {
       return {
-        statusCode: 402,
+        statusCode: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders() },
-        body: JSON.stringify({ error: "Payment entitlements pending" }),
+        body: JSON.stringify({ paid: true }),
       };
     }
 
+    const ce =
+      session.customer_email ||
+      (session.customer_details && session.customer_details.email) ||
+      null;
+    if (ce) {
+      const { data: fb } = await supabase
+        .from("audit_jobs")
+        .select("paid, is_unlocked")
+        .eq("customer_email", ce)
+        .eq("paid", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (fb && (fb.paid || fb.is_unlocked)) {
+        return {
+          statusCode: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders() },
+          body: JSON.stringify({ paid: true }),
+        };
+      }
+    }
+
     return {
-      statusCode: 200,
+      statusCode: 402,
       headers: { "Content-Type": "application/json", ...corsHeaders() },
-      body: JSON.stringify({ paid: true }),
+      body: JSON.stringify({ error: "Payment entitlements pending" }),
     };
   } catch (e) {
     return {

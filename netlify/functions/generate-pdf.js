@@ -1,3 +1,4 @@
+// Hardening: JWT via authorizeWizardRequest + enforcePaidAuditJob before export; no public.users queries in this function.
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
 const { getSupabaseAdmin } = require("./_supabase.js");

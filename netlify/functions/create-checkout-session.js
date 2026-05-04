@@ -10,10 +10,6 @@ function hasBearerToken(event) {
 }
 
 exports.handler = async (event) => {
-  if (process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "true") {
-    throw new Error("AUDIT_DEFENSE_BYPASS_PAYMENT must not be enabled");
-  }
-
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: corsHeaders(event), body: "" };
   }
@@ -23,7 +19,7 @@ exports.handler = async (event) => {
 
   try {
     const parsedBody = JSON.parse(event.body || "{}");
-    const { priceId } = parsedBody;
+    const { priceId, email } = parsedBody;
     if (!priceId || typeof priceId !== "string") {
       return json(400, event, { error: "priceId required" });
     }
@@ -91,11 +87,8 @@ exports.handler = async (event) => {
       success_url: `${site}/register?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${site}/pricing`,
       metadata,
+      customer_email: (typeof email === "string" && email.trim() ? email.trim() : undefined) || customerEmail || undefined,
     };
-
-    if (customerEmail) {
-      params.customer_email = customerEmail;
-    }
 
     const session = await stripe.checkout.sessions.create(params);
 

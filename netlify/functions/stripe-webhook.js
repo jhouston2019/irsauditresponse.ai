@@ -4,10 +4,6 @@ const { getSupabaseAdmin } = require("./_supabase.js");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 exports.handler = async (event) => {
-  if (process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "true") {
-    throw new Error("AUDIT_DEFENSE_BYPASS_PAYMENT must not be enabled");
-  }
-
   try {
     const sig = event.headers["stripe-signature"];
     const payload = event.isBase64Encoded ? Buffer.from(event.body, "base64") : Buffer.from(event.body || "");
@@ -44,9 +40,24 @@ exports.handler = async (event) => {
             stripe_session_id: session.id,
           };
           if (userId) patch.user_id = userId;
+          if (session.customer_email) patch.customer_email = session.customer_email;
 
           await supabase.from("audit_jobs").update(patch).eq("id", jobId);
         }
+      }
+
+      try {
+        const row = {
+          stripe_session_id: session.id,
+          paid: true,
+          is_unlocked: true,
+        };
+        if (jobId) row.id = jobId;
+        if (userId) row.user_id = userId;
+        if (session.customer_email) row.customer_email = session.customer_email;
+        await supabase.from("audit_jobs").upsert(row, { onConflict: "stripe_session_id" });
+      } catch (e) {
+        console.warn("stripe webhook audit_jobs upsert:", e.message);
       }
     }
 

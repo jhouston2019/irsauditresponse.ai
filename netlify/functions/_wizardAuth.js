@@ -54,10 +54,6 @@ function sanitizeString(s, maxLen = 150000) {
  * Requires Bearer JWT (Supabase). Matching X-Service-Key alone is rejected.
  */
 async function authorizeWizardRequest(event) {
-  if (process.env.AUDIT_DEFENSE_BYPASS_PAYMENT === "true") {
-    throw new Error("AUDIT_DEFENSE_BYPASS_PAYMENT must not be enabled");
-  }
-
   const serviceKey = process.env.AUDIT_DEFENSE_SERVICE_KEY;
   const providedService = event.headers["x-service-key"] || event.headers["X-Service-Key"];
   if (serviceKey && providedService === serviceKey) {

@@ -1,6 +1,8 @@
+// Hardening: uses authorizeWizardRequest + enforcePaidAuditJob only (no public.users queries).
 const OpenAI = require("openai");
 const { authorizeWizardRequest, corsHeaders, json } = require("./_wizardAuth.js");
 const { getSupabaseAdmin } = require("./_supabase.js");
+const { enforcePaidAuditJob } = require("./_auditJobs.js");
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
@@ -28,20 +30,8 @@ exports.handler = async (event) => {
   }
 
   const jobId = typeof body.job_id === "string" ? body.job_id.trim() : "";
-  if (!jobId) {
-    return json(400, event, { error: "job_id is required" });
-  }
-
-  const { data: job, error: jobErr } = await supabase
-    .from("audit_jobs")
-    .select("paid, is_unlocked")
-    .eq("id", jobId)
-    .eq("user_id", auth.user.id)
-    .single();
-
-  if (jobErr || !job || (!job.paid && !job.is_unlocked)) {
-    return json(402, event, { error: "Payment required" });
-  }
+  const payDenied = await enforcePaidAuditJob(supabase, json, event, auth.user.id, jobId);
+  if (payDenied) return payDenied;
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   try {

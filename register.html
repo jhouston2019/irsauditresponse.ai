@@ -63,21 +63,31 @@
       goPricing();
     } else {
       (async () => {
-        try {
-          const res = await fetch('/.netlify/functions/verify-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session_id: sessionId }),
-          });
-          if (!res.ok) {
-            goPricing();
-            return;
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        let ok = false;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          verifyMsg.textContent = 'Confirming your payment…';
+          try {
+            const res = await fetch('/.netlify/functions/verify-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ session_id: sessionId }),
+            });
+            if (res.ok) {
+              ok = true;
+              break;
+            }
+          } catch {
+            /* retry */
           }
-          verifyPanel.style.display = 'none';
-          formPanel.style.display = 'block';
-        } catch {
-          goPricing();
+          if (attempt < 3) await sleep(1500);
         }
+        if (!ok) {
+          goPricing();
+          return;
+        }
+        verifyPanel.style.display = 'none';
+        formPanel.style.display = 'block';
       })();
     }
 
