@@ -46,6 +46,22 @@
   to = "/cancel.html"
   status = 200
 
+# Single checkout UX (Tax Letter Defense + IRS Audit Defense)
+[[redirects]]
+  from = "/payment.html"
+  to = "/pricing"
+  status = 301
+
+[[redirects]]
+  from = "/payment"
+  to = "/pricing"
+  status = 301
+
+[[redirects]]
+  from = "/audit-payment.html"
+  to = "/pricing"
+  status = 301
+
 [[redirects]]
   from = "/resource"
   to = "/audit-defense.html"

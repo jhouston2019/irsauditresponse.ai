@@ -28,15 +28,24 @@
         </div>
     </nav>
 
-    <section style="padding:84px 0; background:linear-gradient(180deg, #f8fafc, #eef2ff); border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; text-align:center;" id="pricing">
+    <main>
+    <section style="padding:0 0 1.25rem; text-align:center;">
+        <div style="width:min(1120px, 92%); margin-inline:auto; padding:3rem 0 2rem; background:linear-gradient(135deg, #1e293b 0%, #334155 100%); color:white; border-radius:12px; margin-top:1.5rem;">
+            <h1 style="font-size:clamp(1.5rem, 3vw, 2.25rem); margin:0 0 0.5rem; font-weight:700;">Secure checkout — Tax Letter Defense</h1>
+            <p style="font-size:1.05rem; opacity:0.92; max-width:640px; margin:0 auto; line-height:1.5;">Same wizard and letter flow as IRS Audit Defense: unlock AI notice analysis and a professional draft response in minutes.</p>
+        </div>
+    </section>
+
+    <section style="padding:0 0 84px; background:linear-gradient(180deg, #f8fafc, #eef2ff); border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; text-align:center;" id="pricing">
         <div style="width:min(1120px, 92%); margin-inline:auto;">
-        <h2 style="font-size:clamp(1.6rem, 3vw, 2.2rem); margin-bottom:0.5rem; color:#2d3748;">Choose Your Plan</h2>
+        <h2 style="font-size:clamp(1.6rem, 3vw, 2.2rem); margin-bottom:0.5rem; color:#2d3748;">Choose your plan</h2>
         <p style="color:#64748b; margin-bottom:2rem;">
-            Most CPAs charge $300–$600 per letter. Our guided wizard analyzes your notice and drafts your response for <strong>$49</strong> (one-time).
+            Start in the <a href="/audit-defense.html" style="color:#2563eb; font-weight:600;">wizard</a> anytime, then return here to pay. Most CPAs charge $300–$600 per letter — we’re <strong>$49</strong> one-time.
         </p>
 
         <div style="width:min(760px, 92%); margin:28px auto 10px; background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:3px solid #3b82f6; border-radius:16px; padding:clamp(18px, 3vw, 28px); box-shadow:0 20px 40px rgba(0, 0, 0, 0.1); position:relative; overflow:hidden;">
-            <h3 style="font-size:1.6rem; margin:0 0 10px; color:#000000;">IRS Audit Defense Package</h3>
+            <h3 style="font-size:1.6rem; margin:0 0 10px; color:#000000;">Tax Letter Defense · IRS Audit Defense</h3>
+            <p style="color:#475569; font-size:0.95rem; margin:0 0 1rem; text-align:left;">Includes CP2000, common correspondence, and audit-style notices.</p>
             <p style="font-size:2rem; font-weight:800; margin:0 0 10px; letter-spacing:0.2px; color:#000000;">$49 <span style="font-size:1rem; color:#64748b; font-weight:500;">one-time</span></p>
             <ul style="list-style:none; padding:0; margin:20px 0; display:block;">
                 <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ AI-powered notice analysis</li>
@@ -47,19 +56,31 @@
                 <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ PDF and Word download</li>
                 <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ Placeholder fill tool</li>
             </ul>
+            <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; margin-bottom:1rem; padding:12px 22px; font-weight:600; text-decoration:none; border-radius:10px; border:2px solid #3b82f6; color:#1e40af;">Open wizard first (recommended)</a>
             <p style="text-align:left; color:#334155; font-weight:600; margin:0 0 8px;">Checkout</p>
-            <button type="button" id="checkoutBtn" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; border:none; cursor:pointer; border-radius:10px; background:linear-gradient(180deg, #3b82f6, #1e40af); color:#ffffff; box-shadow:0 6px 18px rgba(30, 64, 175, 0.35);">Pay securely with Stripe — $49</button>
+            <button type="button" id="checkoutBtn" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; border:none; cursor:pointer; border-radius:10px; background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:#ffffff; box-shadow:0 6px 20px rgba(59, 130, 246, 0.3);">Pay &amp; unlock my AI letter analysis</button>
             <p id="checkoutErr" style="color:#b91c1c; font-size:0.9rem; margin-top:10px; min-height:1.2em;"></p>
-            <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; margin-top:14px; padding:12px 22px; font-weight:600; text-decoration:none; border-radius:10px; border:2px solid #3b82f6; color:#1e40af;">Open wizard (after purchase)</a>
+            <div style="display:flex; justify-content:center; gap:2rem; margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid #e2e8f0; flex-wrap:wrap;">
+                <span style="display:flex; align-items:center; gap:0.5rem; color:#64748b; font-size:0.9rem;"><span>🔒</span> SSL encrypted</span>
+                <span style="display:flex; align-items:center; gap:0.5rem; color:#64748b; font-size:0.9rem;"><span>💳</span> Stripe secure</span>
+                <span style="display:flex; align-items:center; gap:0.5rem; color:#64748b; font-size:0.9rem;"><span>🛡️</span> PCI compliant</span>
+            </div>
         </div>
 
         <p style="color:#64748b; margin-top:1.5rem;">
-            One-time payment. No subscriptions or hidden fees. Checkout may be required before full letter generation, depending on your account.
+            One-time payment. No subscriptions or hidden fees. Stripe returns you to account setup, then back into the wizard on the same site.
         </p>
 
         <p style="font-size:11px; color:#64748b; max-width:720px; margin:2rem auto 0; line-height:1.5; text-align:center;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
         </div>
     </section>
+    </main>
+
+    <footer style="padding:28px 0; background:#0b1220; color:#cbd5e1; text-align:center; margin-top:0;">
+        <div style="width:min(1120px, 92%); margin-inline:auto;">
+            <p style="margin:0;">© 2026 IRS Audit Defense Pro. <a href="/privacy.html" style="color:#93c5fd; text-decoration:none;">Privacy Policy</a> | <a href="/terms.html" style="color:#93c5fd; text-decoration:none;">Terms</a> | <a href="/disclaimer.html" style="color:#93c5fd; text-decoration:none;">Disclaimer</a></p>
+        </div>
+    </footer>
     <script type="module">
       document.getElementById('checkoutBtn').addEventListener('click', async function () {
         const err = document.getElementById('checkoutErr');
@@ -86,7 +107,7 @@
         } catch (e) {
           err.textContent = e.message || 'Checkout failed';
           this.disabled = false;
-          this.textContent = 'Pay securely with Stripe — $49';
+          this.textContent = 'Pay & unlock my AI letter analysis';
         }
       });
     </script>
