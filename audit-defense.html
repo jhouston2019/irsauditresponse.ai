@@ -93,7 +93,12 @@
     .letter-edit { width: 100%; min-height: 420px; font-family: 'Courier New', monospace; font-size: 0.82rem; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; }
     .fill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
     @media (max-width: 640px) { .fill-grid { grid-template-columns: 1fr; } }
-    .gate-banner { background: #fef3c7; border: 1px solid #fbbf24; color: #78350f; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.95rem; }
+    .unlock-panel { display: none; margin-top: 1.25rem; padding: 1.25rem; border: 1px solid var(--border); border-radius: 10px; background: #f8fafc; border-left: 4px solid var(--navy2); }
+    .unlock-panel.show { display: block; }
+    .unlock-panel-title { font-weight: 700; font-size: 1.05rem; margin: 0 0 0.5rem; color: #0f172a; }
+    .unlock-panel-text { font-size: 0.925rem; color: var(--muted); margin: 0 0 1rem; line-height: 1.55; }
+    .unlock-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+    .unlock-actions a.btn { text-decoration: none; }
     .disclaimer-foot { font-size: 0.8rem; color: #94a3b8; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(148, 163, 184, 0.35); }
     .disclaimer-foot a { color: #93c5fd; }
     .disclaimer-foot a:hover { color: #bfdbfe; }
@@ -112,13 +117,6 @@
   </header>
 
   <div class="shell">
-    <div id="authGate" class="gate-banner" style="display: none;">
-      <strong>Wizard preview:</strong> load the demo or paste your notice. For the full deliverable (AI analysis, strategy, and letter), checkout then sign in.
-      <a href="/pricing">Unlock full deliverable — $49</a>
-      ·
-      <a href="/login?next=/audit-defense.html">Already paid? Sign in</a>
-    </div>
-
     <div class="progress-wrap">
       <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">After checkout you get the full deliverable: AI analysis, strategy selection, and a submission-ready letter with PDF/Word export.</p>
       <div class="progress-steps" id="progressSteps">
@@ -191,8 +189,16 @@
         <button type="button" class="btn btn-primary" id="btnAnalyze" disabled>Analyze My Notice</button>
         <button type="button" class="btn btn-outline" id="btnBack1" style="display:none;">Back</button>
       </div>
-      <p class="dc-legal">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
       <div id="step1Error" class="error-inline"></div>
+      <div id="unlockPanel" class="unlock-panel" aria-live="polite">
+        <p class="unlock-panel-title">Ready to analyze this notice?</p>
+        <p class="unlock-panel-text">AI analysis runs after a one-time checkout ($49), then sign in with the account you create. Already paid? Sign in—the wizard keeps your pasted notice and uploads.</p>
+        <div class="unlock-actions">
+          <a class="btn btn-primary" href="/pricing">Checkout — $49</a>
+          <a class="btn btn-outline" href="/login?next=/audit-defense.html">I already paid — Sign in</a>
+        </div>
+      </div>
+      <p class="dc-legal">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
       <div id="step1Loading" class="loading-overlay">
         <div class="spinner"></div>
         <span id="step1LoadingText">Analyzing notice…</span>
@@ -599,13 +605,13 @@ Contact: 1-800-829-8310`;
         return;
       }
       if (!state.accessToken) {
-        $('authGate').style.display = 'block';
-        $('authGate').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        $('step1Error').textContent =
-          'Sign in after checkout to run analysis—or log in now if you already have access.';
-        $('step1Error').classList.add('show');
+        $('step1Error').classList.remove('show');
+        $('step1Error').textContent = '';
+        $('unlockPanel').classList.add('show');
+        $('unlockPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         return;
       }
+      $('unlockPanel').classList.remove('show');
 
       const controller = new AbortController();
       const t = setTimeout(() => controller.abort(), 30000);
@@ -1061,6 +1067,9 @@ Contact: 1-800-829-8310`;
       if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
+      $('unlockPanel').classList.remove('show');
+      $('step1Error').classList.remove('show');
+      $('step1Error').textContent = '';
       document.getElementById('customStrategyText').value = '';
       document.getElementById('customStrategyWrap').style.display = 'none';
       state.fileBase64 = null;
@@ -1095,11 +1104,7 @@ Contact: 1-800-829-8310`;
 
     async function boot() {
       await bootstrapAuthGate();
-      if (state.accessToken) {
-        $('authGate').style.display = 'none';
-      } else {
-        $('authGate').style.display = 'block';
-      }
+      $('unlockPanel').classList.remove('show');
       updateAnalyzeEnabled();
     }
     if (document.readyState === 'loading') {
