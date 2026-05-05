@@ -454,8 +454,8 @@ Contact: 1-800-829-8310`;
 
     function updateAnalyzeEnabled() {
       const text = $('noticeText').value.trim();
-      const ok = (text.length > 0 || !!state.fileBase64) && !!state.accessToken;
-      $('btnAnalyze').disabled = !ok;
+      const hasInput = text.length > 0 || !!state.fileBase64;
+      $('btnAnalyze').disabled = !hasInput;
     }
 
     $('noticeText').addEventListener('input', () => {
@@ -598,9 +598,11 @@ Contact: 1-800-829-8310`;
         $('step1Error').classList.add('show');
         return;
       }
-      if (state.accessToken === null) {
+      if (!state.accessToken) {
         $('authGate').style.display = 'block';
-        $('step1Error').textContent = 'Please sign in to continue.';
+        $('authGate').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('step1Error').textContent =
+          'Sign in after checkout to run analysis—or log in now if you already have access.';
         $('step1Error').classList.add('show');
         return;
       }
