@@ -137,12 +137,6 @@ exports.handler = async (event) => {
     return json(405, event, { error: "Method not allowed" });
   }
 
-  const auth = await authorizeWizardRequest(event);
-  if (!auth.ok) return auth.response;
-  if (!auth.user?.id) {
-    return json(403, event, { error: "Forbidden" });
-  }
-
   if (!process.env.OPENAI_API_KEY) {
     return json(503, event, { error: "Letter generation is not configured." });
   }
@@ -154,24 +148,50 @@ exports.handler = async (event) => {
     return json(400, event, { error: "Invalid JSON body" });
   }
 
-  const { strategy, taxpayerName, taxpayerAddress, additionalContext, job_id } = body;
+  const wizardPreview = body.wizard_preview === true;
+
+  let authUser = null;
+  if (!wizardPreview) {
+    const auth = await authorizeWizardRequest(event);
+    if (!auth.ok) return auth.response;
+    if (!auth.user?.id) {
+      return json(403, event, { error: "Forbidden" });
+    }
+    authUser = auth.user;
+  } else if (process.env.DISABLE_WIZARD_PREVIEW === "true") {
+    return json(403, event, { error: "Wizard preview is disabled.", code: "preview_disabled" });
+  }
+
+  const { strategy, taxpayerName, taxpayerAddress, additionalContext, job_id, analysis: analysisBody } = body;
 
   const jobIdTrim = typeof job_id === "string" ? job_id.trim() : "";
   const admin = getSupabaseAdmin();
-  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, jobIdTrim);
-  if (payDenied) return payDenied;
-
-  const row = await admin.from("audit_jobs").select("letter_full").eq("id", jobIdTrim).eq("user_id", auth.user.id).maybeSingle();
-
-  if (row.error || !row.data?.letter_full?.trim()) {
-    return json(400, event, { error: "Run notice analysis before generating a letter." });
-  }
 
   let analysis;
-  try {
-    analysis = JSON.parse(row.data.letter_full);
-  } catch {
-    return json(400, event, { error: "Stored analysis is invalid; run Analyze again." });
+
+  if (wizardPreview) {
+    analysis = analysisBody;
+    if (!analysis || typeof analysis !== "object") {
+      return json(400, event, {
+        error: "wizard_preview requires an analysis object in the request body (copy from Analyze step)",
+      });
+    }
+  } else {
+    const userId = authUser.id;
+    const payDenied = await enforcePaidAuditJob(admin, json, event, userId, jobIdTrim);
+    if (payDenied) return payDenied;
+
+    const row = await admin.from("audit_jobs").select("letter_full").eq("id", jobIdTrim).eq("user_id", userId).maybeSingle();
+
+    if (row.error || !row.data?.letter_full?.trim()) {
+      return json(400, event, { error: "Run notice analysis before generating a letter." });
+    }
+
+    try {
+      analysis = JSON.parse(row.data.letter_full);
+    } catch {
+      return json(400, event, { error: "Stored analysis is invalid; run Analyze again." });
+    }
   }
 
   if (!analysis || typeof analysis !== "object") {
@@ -220,6 +240,7 @@ Generate the complete response letter now.`;
     }
 
     const payload = { letter };
+    if (wizardPreview) payload.wizard_preview_only = true;
     if (usage) payload.usage = usage;
     return json(200, event, payload);
   } catch (e) {

@@ -99,6 +99,7 @@
     .unlock-panel-text { font-size: 0.925rem; color: var(--muted); margin: 0 0 1rem; line-height: 1.55; }
     .unlock-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
     .unlock-actions a.btn { text-decoration: none; }
+    .wizard-blur-root.blur-locked { filter: blur(5px); opacity: 0.5; user-select: none; }
     .disclaimer-foot { font-size: 0.8rem; color: #94a3b8; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(148, 163, 184, 0.35); }
     .disclaimer-foot a { color: #93c5fd; }
     .disclaimer-foot a:hover { color: #bfdbfe; }
@@ -118,7 +119,7 @@
 
   <div class="shell">
     <div class="progress-wrap">
-      <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">After checkout you get the full deliverable: AI analysis, strategy selection, and a submission-ready letter with PDF/Word export.</p>
+      <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. Analysis, strategy, and letter outputs are blurred until checkout; use the prompts on step 4 to unlock the full deliverable.</p>
       <div class="progress-steps" id="progressSteps">
         <div class="step-pill active" data-step="1">1. Input</div>
         <div class="step-pill" data-step="2">2. Analysis</div>
@@ -190,14 +191,6 @@
         <button type="button" class="btn btn-outline" id="btnBack1" style="display:none;">Back</button>
       </div>
       <div id="step1Error" class="error-inline"></div>
-      <div id="unlockPanel" class="unlock-panel" aria-live="polite">
-        <p class="unlock-panel-title">Ready to analyze this notice?</p>
-        <p class="unlock-panel-text">AI analysis runs after a one-time checkout ($49), then sign in with the account you create. Already paid? Sign in—the wizard keeps your pasted notice and uploads.</p>
-        <div class="unlock-actions">
-          <a class="btn btn-primary" href="/pricing">Checkout — $49</a>
-          <a class="btn btn-outline" href="/login?next=/audit-defense.html">I already paid — Sign in</a>
-        </div>
-      </div>
       <p class="dc-legal">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
       <div id="step1Loading" class="loading-overlay">
         <div class="spinner"></div>
@@ -207,6 +200,7 @@
 
     <!-- Step 2 -->
     <div id="step2" class="card step-panel">
+      <div id="step2BlurWrap" class="wizard-blur-root">
       <div class="analysis-header">
         <div>
           <span style="opacity:0.85;font-size:0.85rem;">Notice</span>
@@ -228,6 +222,7 @@
       <ul class="doc-list" id="docNeeded"></ul>
       <div id="criticalNote" style="display:none;margin-top:1rem;padding:0.75rem;border:2px solid #dc2626;border-radius:8px;background:#fef2f2;color:#991b1b;font-weight:600;"></div>
       <p class="dc-legal" style="margin-top:1rem;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
+      </div>
       <div class="toolbar">
         <button type="button" class="btn btn-secondary" id="btnBack2">← Back</button>
         <button type="button" class="btn btn-primary" id="btnToStrategy">Choose Your Response Strategy →</button>
@@ -237,6 +232,7 @@
 
     <!-- Step 3 -->
     <div id="step3" class="card step-panel">
+      <div id="step3BlurWrap" class="wizard-blur-root">
       <h2 style="margin-bottom:0.5rem;">Response strategy</h2>
       <p style="color:var(--muted);">Select one approach. The recommended option reflects your notice analysis.</p>
       <div class="strategy-grid" id="strategyGrid"></div>
@@ -253,6 +249,7 @@
         </p>
       </div>
       <div id="strategyDetail" style="margin-top:1.25rem;padding:1rem;background:#f9fafb;border-radius:8px;border:1px solid var(--border);display:none;"></div>
+      </div>
       <div class="toolbar">
         <button type="button" class="btn btn-secondary" id="btnBack3">← Back</button>
         <button type="button" class="btn btn-primary" id="btnGenLetter" disabled>Generate My Response Letter →</button>
@@ -262,6 +259,7 @@
 
     <!-- Step 4 -->
     <div id="step4" class="card step-panel">
+      <div id="step4BlurWrap" class="wizard-blur-root">
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0.75rem;margin-bottom:1rem;">
         <h2 id="letterTitleBar" style="margin:0;font-size:1.1rem;">Your IRS Response Letter</h2>
         <div>
@@ -307,6 +305,17 @@
         <button type="button" class="btn btn-primary" id="btnCopy">Copy letter</button>
         <button type="button" class="btn btn-primary" id="btnPdf">Download PDF</button>
         <button type="button" class="btn btn-primary" id="btnDocx">Download Word</button>
+      </div>
+      </div>
+      <div id="unlockPanel" class="unlock-panel" aria-live="polite">
+        <p class="unlock-panel-title">Unlock your full deliverable</p>
+        <p class="unlock-panel-text">Checkout once ($49), then sign in. You’ll see this letter and all analysis screens in full clarity, with PDF/Word downloads and unlimited copy.</p>
+        <div class="unlock-actions">
+          <a class="btn btn-primary" href="/pricing">Checkout — $49</a>
+          <a class="btn btn-outline" href="/login?next=/audit-defense.html">I already paid — Sign in</a>
+        </div>
+      </div>
+      <div class="toolbar">
         <button type="button" class="btn btn-danger" id="btnStartOver">Start over</button>
       </div>
       <div id="step4Error" class="error-inline"></div>
@@ -327,6 +336,7 @@
         if (!url || !key || url.includes('%%')) {
           state.accessToken = null;
           state.jobId = null;
+          state.jobPaid = false;
           return;
         }
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
@@ -338,6 +348,7 @@
         if (userErr || !user) {
           state.accessToken = null;
           state.jobId = null;
+          state.jobPaid = false;
           return;
         }
         const {
@@ -360,9 +371,12 @@
           }
         }
         state.jobId = job?.id ?? null;
+        state.jobPaid = !!(job?.paid || job?.is_unlocked);
+        if (state.jobPaid) state.previewMode = false;
       } catch {
         state.accessToken = null;
         state.jobId = null;
+        state.jobPaid = false;
       }
     }
 
@@ -408,6 +422,8 @@ Contact: 1-800-829-8310`;
       step: 1,
       accessToken: null,
       jobId: null,
+      jobPaid: false,
+      previewMode: false,
       fileBase64: null,
       fileType: null,
       analysis: null,
@@ -417,6 +433,16 @@ Contact: 1-800-829-8310`;
     };
 
     const $ = (id) => document.getElementById(id);
+
+    function applyWizardBlur() {
+      document.querySelectorAll('.wizard-blur-root').forEach((el) => {
+        el.classList.toggle('blur-locked', state.previewMode === true);
+      });
+      const te = $('btnToggleEdit');
+      if (te) te.style.display = state.previewMode ? 'none' : '';
+      const up = $('unlockPanel');
+      if (up) up.classList.toggle('show', state.previewMode === true && state.step === 4);
+    }
 
     function showStep(n) {
       state.step = n;
@@ -428,6 +454,7 @@ Contact: 1-800-829-8310`;
         if (s === n) pill.classList.add('active');
         else if (s < n) pill.classList.add('done');
       });
+      applyWizardBlur();
     }
 
     function parseMoney(amt) {
@@ -595,6 +622,18 @@ Contact: 1-800-829-8310`;
       r.readAsDataURL(file);
     }
 
+    function useWizardPreview() {
+      return !(state.accessToken && state.jobPaid);
+    }
+
+    function wizardRequestHeaders() {
+      const h = { 'Content-Type': 'application/json' };
+      if (!useWizardPreview() && state.accessToken) {
+        h.Authorization = `Bearer ${state.accessToken}`;
+      }
+      return h;
+    }
+
     $('btnAnalyze').addEventListener('click', async () => {
       $('step1Error').classList.remove('show');
       $('step1Error').textContent = '';
@@ -604,19 +643,12 @@ Contact: 1-800-829-8310`;
         $('step1Error').classList.add('show');
         return;
       }
-      if (!state.accessToken) {
-        $('step1Error').classList.remove('show');
-        $('step1Error').textContent = '';
-        $('unlockPanel').classList.add('show');
-        $('unlockPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        return;
-      }
-      $('unlockPanel').classList.remove('show');
 
       const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), 30000);
+      const t = setTimeout(() => controller.abort(), 60000);
       $('step1Loading').classList.add('show');
       $('btnAnalyze').disabled = true;
+      const preview = useWizardPreview();
       try {
         const suppAmount = document.getElementById('suppAmount');
         const suppDeadline = document.getElementById('suppDeadline');
@@ -629,7 +661,8 @@ Contact: 1-800-829-8310`;
         }
         const body = {
           text,
-          job_id: state.jobId,
+          wizard_preview: preview,
+          job_id: preview ? undefined : state.jobId,
           fileBase64: state.fileBase64 || undefined,
           fileType: state.fileType || undefined,
           noticeType: $('noticeType').value || undefined,
@@ -638,7 +671,7 @@ Contact: 1-800-829-8310`;
         };
         const res = await fetch(API.analyze, {
           method: 'POST',
-          headers: authHeaders(),
+          headers: wizardRequestHeaders(),
           body: JSON.stringify(body),
           signal: controller.signal,
         });
@@ -647,8 +680,21 @@ Contact: 1-800-829-8310`;
           if (data.code === 'payment_required') {
             throw new Error('Purchase required. Complete checkout to unlock analysis.');
           }
+          if (data.code === 'preview_disabled') {
+            throw new Error(data.error || 'Wizard preview is unavailable.');
+          }
           throw new Error(data.error || 'Analysis failed');
         }
+
+        if (data.wizard_preview_only === true && data.analysis && typeof data.analysis === 'object') {
+          state.previewMode = true;
+          state.analysis = data.analysis;
+          renderStep2();
+          showStep(2);
+          return;
+        }
+
+        state.previewMode = false;
         if (!data.recordId || typeof data.preview_text !== 'string') {
           throw new Error(data.error || 'Analysis response missing saved record.');
         }
@@ -795,6 +841,7 @@ Contact: 1-800-829-8310`;
       } else {
         cn.style.display = 'none';
       }
+      applyWizardBlur();
     }
 
     function escapeHtml(s) {
@@ -862,6 +909,7 @@ Contact: 1-800-829-8310`;
         const el = grid.querySelector(`[data-id="${rec}"]`);
         if (el) setTimeout(() => el.click(), 0);
       }
+      applyWizardBlur();
     }
 
     $('btnBack3').addEventListener('click', () => showStep(2));
@@ -872,45 +920,53 @@ Contact: 1-800-829-8310`;
       $('btnGenLetter').disabled = true;
       try {
         const customText = document.getElementById('customStrategyText')?.value.trim();
+        const prev = useWizardPreview();
+        const payload = {
+          strategy: state.strategy,
+          job_id: prev ? undefined : state.jobId,
+          wizard_preview: prev,
+          analysis: prev ? state.analysis : undefined,
+          taxpayerName: $('fillName').value.trim() || undefined,
+          taxpayerAddress: [$('fillAddress').value.trim(), $('fillCity').value.trim()].filter(Boolean).join(', ') || undefined,
+          additionalContext: customText || $('context').value || undefined,
+        };
         const res = await fetch(API.letter, {
           method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify({
-            strategy: state.strategy,
-            job_id: state.jobId,
-            taxpayerName: $('fillName').value.trim() || undefined,
-            taxpayerAddress: [$('fillAddress').value.trim(), $('fillCity').value.trim()].filter(Boolean).join(', ') || undefined,
-            additionalContext: customText || $('context').value || undefined,
-          }),
+          headers: wizardRequestHeaders(),
+          body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || 'Letter generation failed');
         state.letterRaw = data.letter || '';
+        if (data.wizard_preview_only) state.previewMode = true;
+        else state.previewMode = false;
         state.editing = false;
         renderLetterDisplay();
         const a = state.analysis;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
         showStep(4);
-        try {
-          const url = document.querySelector('meta[name="supabase-url"]')?.content;
-          const anon = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-          if (!url?.includes?.('%%') && anon && !anon.includes?.('%%')) {
-            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-            const supabase = createClient(url, anon);
-            const {
-              data: { user },
-            } = await supabase.auth.getUser();
-            if (user) {
-              const noticeTypeVal = a?.noticeType || $('noticeType').value || null;
-              const letterText = state.letterRaw || '';
-              await supabase.from('documents').insert({
-                user_id: user.id,
-                notice_type: noticeTypeVal,
-                letter_html: letterText,
-              });
+        if (!state.previewMode && state.accessToken) {
+          try {
+            const url = document.querySelector('meta[name="supabase-url"]')?.content;
+            const anon = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+            if (!url?.includes?.('%%') && anon && !anon.includes?.('%%')) {
+              const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+              const supabase = createClient(url, anon);
+              const {
+                data: { user },
+              } = await supabase.auth.getUser();
+              if (user) {
+                const noticeTypeVal = a?.noticeType || $('noticeType').value || null;
+                const letterText = state.letterRaw || '';
+                await supabase.from('documents').insert({
+                  user_id: user.id,
+                  notice_type: noticeTypeVal,
+                  letter_html: letterText,
+                });
+              }
             }
-          }
-        } catch (_) {}
+          } catch (_) {}
+        }
       } catch (e) {
         alert(e.message || 'Letter generation failed');
       } finally {
@@ -936,6 +992,7 @@ Contact: 1-800-829-8310`;
         el.style.display = 'block';
         el.innerHTML = highlightPlaceholders(state.letterRaw);
       }
+      applyWizardBlur();
     }
 
     $('btnToggleEdit').addEventListener('click', () => {
@@ -1010,6 +1067,12 @@ Contact: 1-800-829-8310`;
     }
 
     $('btnCopy').addEventListener('click', async () => {
+      if (state.previewMode) {
+        $('step4Error').textContent = 'Checkout and sign in to copy the full, unblurred letter.';
+        $('step4Error').classList.add('show');
+        $('unlockPanel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
       const text = state.editing ? $('letterEdit').value : state.letterRaw;
       try {
         await navigator.clipboard.writeText(text);
@@ -1028,6 +1091,12 @@ Contact: 1-800-829-8310`;
     });
 
     $('btnPdf').addEventListener('click', async () => {
+      if (state.previewMode) {
+        $('step4Error').textContent = 'Checkout and sign in to download PDF and Word.';
+        $('step4Error').classList.add('show');
+        $('unlockPanel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
       $('step4Error').classList.remove('show');
       $('step4Loading').classList.add('show');
       try {
@@ -1046,6 +1115,12 @@ Contact: 1-800-829-8310`;
     });
 
     $('btnDocx').addEventListener('click', async () => {
+      if (state.previewMode) {
+        $('step4Error').textContent = 'Checkout and sign in to download PDF and Word.';
+        $('step4Error').classList.add('show');
+        $('unlockPanel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
       $('step4Error').classList.remove('show');
       $('step4Loading').classList.add('show');
       try {
@@ -1068,6 +1143,7 @@ Contact: 1-800-829-8310`;
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
       $('unlockPanel').classList.remove('show');
+      state.previewMode = false;
       $('step1Error').classList.remove('show');
       $('step1Error').textContent = '';
       document.getElementById('customStrategyText').value = '';
@@ -1104,8 +1180,10 @@ Contact: 1-800-829-8310`;
 
     async function boot() {
       await bootstrapAuthGate();
+      if (state.jobPaid) state.previewMode = false;
       $('unlockPanel').classList.remove('show');
       updateAnalyzeEnabled();
+      applyWizardBlur();
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', boot);

@@ -192,6 +192,24 @@ async function persistPreviewResponse(admin, json, event, userId, jobId, analysi
   return json(200, event, { recordId: jobId, preview_text });
 }
 
+/** Guest / unpaid preview: no DB write. Set DISABLE_WIZARD_PREVIEW=true to disable. */
+function respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysis) {
+  const previewFallback =
+    typeof analysis?.plainEnglish === "string" && analysis.plainEnglish.trim()
+      ? analysis.plainEnglish.trim()
+      : typeof analysis?.noticeType === "string"
+        ? `Notice (${analysis.noticeType}) — preview analysis`
+        : "Notice analysis preview";
+  const preview_text = sanitizeString(previewFallback, 8000);
+  if (wizardPreview) {
+    if (process.env.DISABLE_WIZARD_PREVIEW === "true") {
+      return json(403, event, { error: "Wizard preview is disabled.", code: "preview_disabled" });
+    }
+    return json(200, event, { wizard_preview_only: true, preview_text, analysis });
+  }
+  return persistPreviewResponse(admin, json, event, userId, jobIdTrim, analysis);
+}
+
 async function extractTextFromFile(fileBase64, fileType) {
   if (!fileBase64) return "";
   const buffer = Buffer.from(fileBase64, "base64");
@@ -295,12 +313,6 @@ exports.handler = async (event) => {
     return json(405, event, { error: "Method not allowed" });
   }
 
-  const auth = await authorizeWizardRequest(event);
-  if (!auth.ok) return auth.response;
-  if (!auth.user?.id) {
-    return json(403, event, { error: "Forbidden" });
-  }
-
   if (!process.env.OPENAI_API_KEY) {
     return json(503, event, { error: "Analysis service is not configured." });
   }
@@ -310,6 +322,18 @@ exports.handler = async (event) => {
     body = JSON.parse(event.body || "{}");
   } catch {
     return json(400, event, { error: "Invalid JSON body" });
+  }
+
+  const wizardPreview = body.wizard_preview === true;
+
+  let authUser = null;
+  if (!wizardPreview) {
+    const auth = await authorizeWizardRequest(event);
+    if (!auth.ok) return auth.response;
+    if (!auth.user?.id) {
+      return json(403, event, { error: "Forbidden" });
+    }
+    authUser = auth.user;
   }
 
   const {
@@ -324,8 +348,12 @@ exports.handler = async (event) => {
 
   const jobIdTrim = typeof job_id === "string" ? job_id.trim() : "";
   const admin = getSupabaseAdmin();
-  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, jobIdTrim);
-  if (payDenied) return payDenied;
+  const userId = authUser?.id || null;
+
+  if (!wizardPreview) {
+    const payDenied = await enforcePaidAuditJob(admin, json, event, userId, jobIdTrim);
+    if (payDenied) return payDenied;
+  }
 
   const text = sanitizeString(rawText || "");
   let fileBase64 = typeof rawB64 === "string" ? rawB64.replace(/^data:[^;]+;base64,/, "") : "";
@@ -346,7 +374,7 @@ exports.handler = async (event) => {
       } catch (e) {
         console.error("analyze-notice vision error:", e);
         const analysisFb = fallbackAnalysis("Image text extraction failed.");
-        return persistPreviewResponse(admin, json, event, auth.user.id, jobIdTrim, analysisFb);
+        return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysisFb);
       }
     } else if (ft.includes("pdf")) {
       const extracted = await extractPdfNoticeText(fileBase64);
@@ -355,7 +383,7 @@ exports.handler = async (event) => {
         const analysisFb = fallbackAnalysis(
           "Could not extract text from this PDF. Paste the notice text or try a clearer scan."
         );
-        return persistPreviewResponse(admin, json, event, auth.user.id, jobIdTrim, analysisFb);
+        return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysisFb);
       }
     } else {
       const extracted = await extractTextFromFile(fileBase64, ft);
@@ -412,12 +440,12 @@ exports.handler = async (event) => {
   } catch (e) {
     console.error("analyze-notice OpenAI error:", e);
     const analysisFb = fallbackAnalysis("The analysis service returned an error.");
-    return persistPreviewResponse(admin, json, event, auth.user.id, jobIdTrim, analysisFb);
+    return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysisFb);
   }
 
   if (lastUsage) {
     console.log(JSON.stringify({ fn: "analyze-notice", confidence, usage: lastUsage }));
   }
 
-  return persistPreviewResponse(admin, json, event, auth.user.id, jobIdTrim, analysis);
+  return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysis);
 };
