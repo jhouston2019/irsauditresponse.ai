@@ -46,6 +46,8 @@
   </div>
 
   <script type="module">
+    console.log('[register] module script executing (no DOMContentLoaded wrapper)');
+
     async function getSupabaseBrowser() {
       const url = document.querySelector('meta[name="supabase-url"]')?.content;
       const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
@@ -58,6 +60,8 @@
 
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
+    console.log('[register] session_id from URL:', sessionId ? `present (length ${sessionId.length})` : 'missing');
+
     const verifyPanel = document.getElementById('verifyPanel');
     const verifyMsg = document.getElementById('verifyMsg');
     const formPanel = document.getElementById('formPanel');
@@ -68,32 +72,44 @@
     }
 
     if (!sessionId) {
+      console.log('[register] no session_id — redirecting to /pricing');
       goPricing();
     } else {
       (async () => {
+        console.log('[register] starting payment verification retries');
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         let ok = false;
         for (let attempt = 1; attempt <= 3; attempt++) {
           verifyMsg.textContent = 'Confirming your payment…';
           try {
+            console.log('[register] before verify-session fetch', { attempt });
             const res = await fetch('/.netlify/functions/verify-session', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ session_id: sessionId }),
             });
+            try {
+              const bodyText = await res.clone().text();
+              console.log('[register] after verify-session response', { attempt, status: res.status, ok: res.ok, body: bodyText.slice(0, 800) });
+            } catch (logErr) {
+              console.log('[register] after verify-session response', { attempt, status: res.status, ok: res.ok, bodyReadError: String(logErr) });
+            }
             if (res.ok) {
               ok = true;
               break;
             }
-          } catch {
+          } catch (fetchErr) {
+            console.log('[register] verify-session fetch threw', { attempt, error: String(fetchErr) });
             /* retry */
           }
           if (attempt < 3) await sleep(1500);
         }
         if (!ok) {
+          console.log('[register] verification failed after retries — redirecting to /pricing');
           goPricing();
           return;
         }
+        console.log('[register] verification OK — showing account form');
         verifyPanel.style.display = 'none';
         formPanel.style.display = 'block';
       })();
@@ -110,7 +126,10 @@
         return;
       }
       try {
+        console.log('[register] before getSupabaseBrowser()');
         const supabase = await getSupabaseBrowser();
+        console.log('[register] after getSupabaseBrowser() resolved');
+        console.log('[register] before supabase.auth.signUp');
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
           formErr.textContent = error.message;
