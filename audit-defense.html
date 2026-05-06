@@ -99,7 +99,7 @@
     .unlock-panel-text { font-size: 0.925rem; color: var(--muted); margin: 0 0 1rem; line-height: 1.55; }
     .unlock-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
     .unlock-actions a.btn { text-decoration: none; }
-    /* Preview: blur only the bottom 50% of the mask (Analysis + Letter). Strategy is unmasked. */
+    /* Preview: bottom overlay on Analysis (50%) and Letter (60%). Strategy is unmasked. */
     .wizard-preview-mask {
       position: relative;
       isolation: isolate;
@@ -120,6 +120,10 @@
       -webkit-backdrop-filter: blur(10px);
       border-radius: 0 0 8px 8px;
     }
+    /* Letter step: obscure a larger share of the document in preview */
+    .wizard-preview-mask.preview-bottom-lock.letter-bottom-60::after {
+      height: 60%;
+    }
     .disclaimer-foot { font-size: 0.8rem; color: #94a3b8; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(148, 163, 184, 0.35); }
     .disclaimer-foot a { color: #93c5fd; }
     .disclaimer-foot a:hover { color: #bfdbfe; }
@@ -139,7 +143,7 @@
 
   <div class="shell">
     <div class="progress-wrap">
-      <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. On Analysis and Letter, the bottom half is blurred until checkout; Strategy stays clear. Use step 4 to unlock the full deliverable.</p>
+      <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. On Analysis, the lower half is blurred until checkout; on Letter, the lower 60% is blurred. Strategy stays clear. Use step 4 to unlock the full deliverable.</p>
       <div class="progress-steps" id="progressSteps">
         <div class="step-pill active" data-step="1">1. Input</div>
         <div class="step-pill" data-step="2">2. Analysis</div>
@@ -277,7 +281,7 @@
 
     <!-- Step 4 -->
     <div id="step4" class="card step-panel">
-      <div id="step4BlurWrap" class="wizard-preview-mask">
+      <div id="step4BlurWrap" class="wizard-preview-mask letter-bottom-60">
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0.75rem;margin-bottom:1rem;">
         <h2 id="letterTitleBar" style="margin:0;font-size:1.1rem;">Your IRS Response Letter</h2>
         <div>
