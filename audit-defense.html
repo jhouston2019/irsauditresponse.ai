@@ -99,7 +99,7 @@
     .unlock-panel-text { font-size: 0.925rem; color: var(--muted); margin: 0 0 1rem; line-height: 1.55; }
     .unlock-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
     .unlock-actions a.btn { text-decoration: none; }
-    /* Preview: bottom overlay on Analysis (50%) and Letter (60%). Strategy is unmasked. */
+    /* Preview: bottom overlay on Analysis (50% of that panel). Letter: 60% of the letter box only; Strategy unmasked. */
     .wizard-preview-mask {
       position: relative;
       isolation: isolate;
@@ -124,6 +124,11 @@
     .wizard-preview-mask.preview-bottom-lock.letter-bottom-60::after {
       height: 60%;
     }
+    /* Letter mask wraps only `.letter-wrap`; clip overlay to match inner corners */
+    .wizard-preview-mask.letter-bottom-60 {
+      border-radius: 8px;
+      overflow: hidden;
+    }
     .disclaimer-foot { font-size: 0.8rem; color: #94a3b8; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(148, 163, 184, 0.35); }
     .disclaimer-foot a { color: #93c5fd; }
     .disclaimer-foot a:hover { color: #bfdbfe; }
@@ -143,7 +148,7 @@
 
   <div class="shell">
     <div class="progress-wrap">
-      <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. On Analysis, the lower half is blurred until checkout; on Letter, the lower 60% is blurred. Strategy stays clear. Use step 4 to unlock the full deliverable.</p>
+      <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. On Analysis, the lower half of that screen is blurred until checkout; on Letter, the bottom 60% of the letter text is blurred (not counting the title row or placeholders below). Strategy stays clear. Use step 4 to unlock the full deliverable.</p>
       <div class="progress-steps" id="progressSteps">
         <div class="step-pill active" data-step="1">1. Input</div>
         <div class="step-pill" data-step="2">2. Analysis</div>
@@ -281,16 +286,17 @@
 
     <!-- Step 4 -->
     <div id="step4" class="card step-panel">
-      <div id="step4BlurWrap" class="wizard-preview-mask letter-bottom-60">
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0.75rem;margin-bottom:1rem;">
         <h2 id="letterTitleBar" style="margin:0;font-size:1.1rem;">Your IRS Response Letter</h2>
         <div>
           <button type="button" class="btn btn-secondary" id="btnToggleEdit">Edit letter</button>
         </div>
       </div>
+      <div id="step4BlurWrap" class="wizard-preview-mask letter-bottom-60">
       <div class="letter-wrap">
         <div id="letterDisplay" class="letter-display"></div>
         <textarea id="letterEdit" class="letter-edit" style="display:none;"></textarea>
+      </div>
       </div>
       <p class="dc-legal" style="margin-top:0.75rem;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
       <h3 style="margin-top:1.25rem;">Fill placeholders</h3>
@@ -319,7 +325,6 @@
         </div>
       </div>
       <input type="hidden" id="fillTaxYear" />
-      </div>
       <div class="toolbar">
         <button type="button" class="btn btn-primary" id="btnFillPh">Fill placeholders</button>
       </div>
