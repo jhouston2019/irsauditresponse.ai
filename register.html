@@ -150,7 +150,18 @@
           formErr.textContent = j.error || 'Could not record purchase. Contact support.';
           return;
         }
-        window.location.href = '/app';
+        console.log('[register] record-purchase OK — session then redirect to wizard');
+        let { data: { session: sess } } = await supabase.auth.getSession();
+        if (!sess) {
+          const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInErr) {
+            console.log('[register] signIn after signup:', signInErr.message);
+            window.location.href = '/login?next=' + encodeURIComponent('/audit-defense.html');
+            return;
+          }
+          ({ data: { session: sess } } = await supabase.auth.getSession());
+        }
+        window.location.href = '/audit-defense.html';
       } catch (err) {
         formErr.textContent = err.message || 'Something went wrong.';
       }

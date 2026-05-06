@@ -58,7 +58,7 @@
             </ul>
             <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; margin-bottom:1rem; padding:12px 22px; font-weight:600; text-decoration:none; border-radius:10px; border:2px solid #3b82f6; color:#1e40af;">Open wizard first (recommended)</a>
             <p style="text-align:left; color:#334155; font-weight:600; margin:0 0 8px;">Checkout</p>
-            <button type="button" id="checkoutBtn" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; border:none; cursor:pointer; border-radius:10px; background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:#ffffff; box-shadow:0 6px 20px rgba(59, 130, 246, 0.3);">Pay &amp; unlock my AI letter analysis</button>
+            <button type="button" id="checkoutBtn" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; border:none; cursor:pointer; border-radius:10px; background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:#ffffff; box-shadow:0 6px 20px rgba(59, 130, 246, 0.3);">Get Your Documents Now</button>
             <p id="checkoutErr" style="color:#b91c1c; font-size:0.9rem; margin-top:10px; min-height:1.2em;"></p>
             <div style="display:flex; justify-content:center; gap:2rem; margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid #e2e8f0; flex-wrap:wrap;">
                 <span style="display:flex; align-items:center; gap:0.5rem; color:#64748b; font-size:0.9rem;"><span>🔒</span> SSL encrypted</span>
@@ -107,7 +107,7 @@
         } catch (e) {
           err.textContent = e.message || 'Checkout failed';
           this.disabled = false;
-          this.textContent = 'Pay & unlock my AI letter analysis';
+          this.textContent = 'Get Your Documents Now';
         }
       });
     </script>

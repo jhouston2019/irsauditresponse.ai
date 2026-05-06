@@ -43,47 +43,48 @@ exports.handler = async (event) => {
       };
     }
 
+    // Stripe has confirmed payment. Reconcile DB here so /register works even if the webhook is still in flight.
     const supabase = getSupabaseAdmin();
-    const { data: job } = await supabase
-      .from("audit_jobs")
-      .select("paid, is_unlocked")
-      .eq("stripe_session_id", session_id)
-      .maybeSingle();
-
-    if (job && (job.paid || job.is_unlocked)) {
-      return {
-        statusCode: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders() },
-        body: JSON.stringify({ paid: true }),
-      };
-    }
-
-    const ce =
+    const md = session.metadata || {};
+    const jobId = md.job_id != null && String(md.job_id).trim() !== "" ? String(md.job_id).trim() : "";
+    const userIdMeta = md.user_id != null && String(md.user_id).trim() !== "" ? String(md.user_id).trim() : "";
+    const customerEmail =
       session.customer_email ||
       (session.customer_details && session.customer_details.email) ||
       null;
-    if (ce) {
-      const { data: fb } = await supabase
-        .from("audit_jobs")
-        .select("paid, is_unlocked")
-        .eq("customer_email", ce)
-        .eq("paid", true)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (fb && (fb.paid || fb.is_unlocked)) {
-        return {
-          statusCode: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders() },
-          body: JSON.stringify({ paid: true }),
-        };
+
+    if (jobId) {
+      const patch = {
+        paid: true,
+        is_unlocked: true,
+        stripe_session_id: session.id,
+      };
+      if (customerEmail) patch.customer_email = customerEmail;
+      if (userIdMeta) patch.user_id = userIdMeta;
+      const { error: upErr } = await supabase.from("audit_jobs").update(patch).eq("id", jobId);
+      if (upErr) {
+        console.warn("verify-session audit_jobs update:", upErr.message);
       }
     }
 
+    try {
+      const row = {
+        stripe_session_id: session.id,
+        paid: true,
+        is_unlocked: true,
+      };
+      if (jobId) row.id = jobId;
+      if (userIdMeta) row.user_id = userIdMeta;
+      if (customerEmail) row.customer_email = customerEmail;
+      await supabase.from("audit_jobs").upsert(row, { onConflict: "stripe_session_id" });
+    } catch (e) {
+      console.warn("verify-session audit_jobs upsert:", e.message);
+    }
+
     return {
-      statusCode: 402,
+      statusCode: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders() },
-      body: JSON.stringify({ error: "Payment entitlements pending" }),
+      body: JSON.stringify({ paid: true }),
     };
   } catch (e) {
     return {
