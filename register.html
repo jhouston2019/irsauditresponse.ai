@@ -46,7 +46,15 @@
   </div>
 
   <script type="module">
-    import { getSupabase } from '/src/components/Auth.js';
+    async function getSupabaseBrowser() {
+      const url = document.querySelector('meta[name="supabase-url"]')?.content;
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+      if (!url || !key || url.includes('%%')) {
+        throw new Error('Supabase is not configured');
+      }
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      return createClient(url, key);
+    }
 
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
@@ -102,7 +110,7 @@
         return;
       }
       try {
-        const supabase = getSupabase();
+        const supabase = await getSupabaseBrowser();
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
           formErr.textContent = error.message;
