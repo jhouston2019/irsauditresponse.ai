@@ -8,6 +8,7 @@
   <meta name="description" content="Analyze your IRS notice and generate a professional, submission-ready response letter." />
   <meta name="supabase-url" content="%%SUPABASE_URL%%">
   <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
+  <meta name="stripe-price-id" content="%%STRIPE_PRICE_ID%%">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
@@ -99,6 +100,15 @@
     .unlock-panel-text { font-size: 0.925rem; color: var(--muted); margin: 0 0 1rem; line-height: 1.55; }
     .unlock-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
     .unlock-actions a.btn { text-decoration: none; }
+    .wizard-del-inline {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    body.audit-wizard-preview .wizard-hide-in-preview {
+      display: none !important;
+    }
     /* Preview: bottom overlay on Analysis (50% of that panel). Letter: 60% of the letter box only; Strategy unmasked. */
     .wizard-preview-mask {
       position: relative;
@@ -299,6 +309,7 @@
       </div>
       </div>
       <p class="dc-legal" style="margin-top:0.75rem;">This tool generates draft correspondence for informational purposes only. It does not constitute legal or tax advice and does not create an attorney-client or CPA-client relationship. For complex matters, penalties exceeding $10,000, or notices of deficiency, consult a licensed tax professional or attorney.</p>
+      <div class="wizard-hide-in-preview">
       <h3 style="margin-top:1.25rem;">Fill placeholders</h3>
       <p style="font-size:0.9rem;color:var(--muted);">Complete your details. [DATE] defaults to today.</p>
       <div class="fill-grid">
@@ -325,21 +336,24 @@
         </div>
       </div>
       <input type="hidden" id="fillTaxYear" />
-      <div class="toolbar">
+      </div>
+      <div class="toolbar wizard-hide-in-preview">
         <button type="button" class="btn btn-primary" id="btnFillPh">Fill placeholders</button>
       </div>
-      <div class="toolbar">
+      <div class="toolbar" style="flex-wrap:wrap; align-items:center; gap:0.75rem;">
         <button type="button" class="btn btn-secondary" id="btnBack4">← Back</button>
+        <span class="wizard-del-inline wizard-hide-in-preview">
         <button type="button" class="btn btn-primary" id="btnCopy">Copy letter</button>
         <button type="button" class="btn btn-primary" id="btnPdf">Download PDF</button>
         <button type="button" class="btn btn-primary" id="btnDocx">Download Word</button>
+        </span>
       </div>
       <div id="unlockPanel" class="unlock-panel" aria-live="polite">
         <p class="unlock-panel-title">Unlock your full deliverable</p>
-        <p class="unlock-panel-text">Checkout once ($49), then sign in. You’ll see this letter and all analysis screens in full clarity, with PDF/Word downloads and unlimited copy.</p>
+        <p class="unlock-panel-text">One-time checkout ($49). Then create your password on the next screen—you’ll unlock the full letter and analysis preview limits are removed.</p>
+        <p id="unlockCheckoutErr" style="color:var(--red);font-size:0.9rem;margin:0 0 0.75rem;min-height:1.25em;"></p>
         <div class="unlock-actions">
-          <a class="btn btn-primary" href="/pricing">Checkout — $49</a>
-          <a class="btn btn-outline" href="/login?next=/audit-defense.html">I already paid — Sign in</a>
+          <button type="button" class="btn btn-primary" id="unlockCheckoutBtn">Checkout — $49</button>
         </div>
       </div>
       <div class="toolbar">
@@ -463,6 +477,7 @@ Contact: 1-800-829-8310`;
 
     function applyWizardBlur() {
       const locked = state.previewMode === true;
+      document.body.classList.toggle('audit-wizard-preview', locked);
       const step2Mask = $('step2BlurWrap');
       const step4Mask = $('step4BlurWrap');
       if (step2Mask) step2Mask.classList.toggle('preview-bottom-lock', locked);
@@ -1080,6 +1095,37 @@ Contact: 1-800-829-8310`;
     });
 
     $('btnBack4').addEventListener('click', () => showStep(3));
+
+    $('unlockCheckoutBtn')?.addEventListener('click', async () => {
+      const errEl = $('unlockCheckoutErr');
+      errEl.textContent = '';
+      const priceId = document.querySelector('meta[name="stripe-price-id"]')?.content?.trim();
+      if (!priceId || priceId.includes('%%')) {
+        errEl.textContent = 'Checkout is not configured. Use Pricing from the menu or contact support.';
+        return;
+      }
+      const btn = $('unlockCheckoutBtn');
+      const prev = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Redirecting to Stripe…';
+      try {
+        const res = await fetch('/.netlify/functions/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+        throw new Error(data.error || data.details || 'Checkout failed');
+      } catch (e) {
+        errEl.textContent = e.message || 'Checkout failed';
+        btn.disabled = false;
+        btn.textContent = prev;
+      }
+    });
 
     async function downloadBinary(url, body, filename) {
       const res = await fetch(url, { method: 'POST', headers: authHeaders(), body: JSON.stringify(body) });
