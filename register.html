@@ -25,7 +25,7 @@
 
     <div id="formPanel" style="display:none; max-width:500px; margin:2rem auto; padding:2rem; background:#ffffff; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); color:#2d3748; border:1px solid #e2e8f0;">
       <h2 style="text-align:center; margin-bottom:0.5rem; color:#2d3748; font-size:1.8rem;">Create your account</h2>
-      <p style="text-align:center; color:#64748b; margin-bottom:1.5rem; font-size:0.95rem;">Payment confirmed. Choose an email and password for your workspace.</p>
+      <p style="text-align:center; color:#64748b; margin-bottom:1.5rem; font-size:0.95rem;">Payment confirmed—this creates your secure workspace and links your purchase. Use the checkout email below (or yours if empty), choose a password, then you’ll return to the wizard with everything unlocked.</p>
       <form id="registerForm">
         <div style="margin-bottom:1.25rem;">
           <label for="email" style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#2d3748;">Email</label>
@@ -48,11 +48,19 @@
   <script type="module">
     console.log('[register] module script executing (no DOMContentLoaded wrapper)');
 
+    function supabaseConfiguredInPage() {
+      const url = document.querySelector('meta[name="supabase-url"]')?.content?.trim?.() ?? '';
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content?.trim?.() ?? '';
+      return !!(url && key && !url.includes('%%') && !key.includes('%%'));
+    }
+
     async function getSupabaseBrowser() {
-      const url = document.querySelector('meta[name="supabase-url"]')?.content;
-      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-      if (!url || !key || url.includes('%%')) {
-        throw new Error('Supabase is not configured');
+      const url = document.querySelector('meta[name="supabase-url"]')?.content?.trim?.() ?? '';
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content?.trim?.() ?? '';
+      if (!url || !key || url.includes('%%') || key.includes('%%')) {
+        throw new Error(
+          'Auth is not wired on this build (missing SUPABASE_URL / SUPABASE_ANON_KEY in Netlify env, or placeholders not substituted). Fix env vars and redeploy.',
+        );
       }
       const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
       return createClient(url, key);
@@ -79,6 +87,7 @@
         console.log('[register] starting payment verification retries');
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         let ok = false;
+        let stripeCustomerEmail = '';
         for (let attempt = 1; attempt <= 3; attempt++) {
           verifyMsg.textContent = 'Confirming your payment…';
           try {
@@ -88,13 +97,20 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ session_id: sessionId }),
             });
+            let bodyText = '';
             try {
-              const bodyText = await res.clone().text();
+              bodyText = await res.clone().text();
               console.log('[register] after verify-session response', { attempt, status: res.status, ok: res.ok, body: bodyText.slice(0, 800) });
             } catch (logErr) {
               console.log('[register] after verify-session response', { attempt, status: res.status, ok: res.ok, bodyReadError: String(logErr) });
             }
             if (res.ok) {
+              try {
+                const j = JSON.parse(bodyText || '{}');
+                stripeCustomerEmail = typeof j.customer_email === 'string' ? j.customer_email.trim() : '';
+              } catch (_) {
+                stripeCustomerEmail = '';
+              }
               ok = true;
               break;
             }
@@ -112,12 +128,25 @@
         console.log('[register] verification OK — showing account form');
         verifyPanel.style.display = 'none';
         formPanel.style.display = 'block';
+        formErr.textContent = '';
+        if (stripeCustomerEmail) {
+          const emailEl = document.getElementById('email');
+          if (emailEl && !emailEl.value.trim()) emailEl.value = stripeCustomerEmail;
+        }
+        if (!supabaseConfiguredInPage()) {
+          formErr.innerHTML =
+            'This deployed page doesn’t include Supabase keys (missing or still <code>%%</code> placeholders). In Netlify: set <strong>SUPABASE_URL</strong> and <strong>SUPABASE_ANON_KEY</strong>, redeploy so account creation works.';
+          formErr.style.textAlign = 'left';
+          formErr.style.color = '#b45309';
+        }
       })();
     }
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       formErr.textContent = '';
+      formErr.style.color = '';
+      formErr.style.textAlign = '';
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const password2 = document.getElementById('password2').value;

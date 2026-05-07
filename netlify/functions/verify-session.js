@@ -84,7 +84,10 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders() },
-      body: JSON.stringify({ paid: true }),
+      body: JSON.stringify({
+        paid: true,
+        customer_email: customerEmail || null,
+      }),
     };
   } catch (e) {
     return {
