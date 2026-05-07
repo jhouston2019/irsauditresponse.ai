@@ -29,13 +29,21 @@
   </div>
 
   <script type="module">
-    import { getSupabase } from '/src/components/Auth.js';
+    async function getClient() {
+      const url = document.querySelector('meta[name="supabase-url"]')?.content?.trim?.() ?? '';
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content?.trim?.() ?? '';
+      if (!url || !key || url.includes('%%') || key.includes('%%')) {
+        throw new Error('Auth is not configured on this page.');
+      }
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      return createClient(url, key, { auth: { persistSession: true, detectSessionInUrl: true } });
+    }
 
     const msg = document.getElementById('msg');
     const extra = document.getElementById('extra');
 
     try {
-      const supabase = getSupabase();
+      const supabase = await getClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         window.location.href = '/login?next=' + encodeURIComponent('/audit-defense.html');
