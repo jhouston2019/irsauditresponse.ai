@@ -11,6 +11,32 @@ function corsHeaders() {
   };
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** New signUps can briefly lag before auth.users is visible to Postgres FK checks. */
+async function authUserVisibleToDb(supabaseAdmin, userIdRaw) {
+  const userId = String(userIdRaw || "").trim();
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)
+  ) {
+    return false;
+  }
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+      if (!error && data?.user?.id === userId) {
+        return true;
+      }
+    } catch (_) {
+      /* retry */
+    }
+    await sleep(attempt < 2 ? 200 : 450);
+  }
+  return false;
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: corsHeaders(), body: "" };
@@ -39,6 +65,20 @@ exports.handler = async (event) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
 
+    const authReady = await authUserVisibleToDb(supabase, user_id);
+    if (!authReady) {
+      console.error("record-purchase: auth user not visible:", user_id);
+      return {
+        statusCode: 409,
+        headers: { "Content-Type": "application/json", ...corsHeaders() },
+        body: JSON.stringify({
+          code: "AUTH_USER_NOT_VISIBLE",
+          error:
+            "Your account isn’t readable by the database yet. Wait ~10 seconds, then click Create account once. If this repeats, verify Netlify SUPABASE_URL + service role key match the same Supabase project as your site anon key.",
+        }),
+      };
+    }
+
     const {
       data: jobRows,
       error: upJob,
@@ -46,6 +86,23 @@ exports.handler = async (event) => {
 
     if (upJob) {
       console.error("record-purchase audit_jobs update:", upJob);
+      const msg = String(upJob.message || "");
+      if (
+        upJob.code === "23503" ||
+        msg.includes("foreign key constraint") ||
+        msg.includes("audit_jobs_user_id_fkey")
+      ) {
+        return {
+          statusCode: 409,
+          headers: { "Content-Type": "application/json", ...corsHeaders() },
+          body: JSON.stringify({
+            code: "FK_AUDIT_JOB_USER",
+            error:
+              "Could not attach your workspace to this purchase yet—usually a timing issue. Wait ~10 seconds and click Create account once. Persistent failures often mean deployed Supabase URL/keys don’t match the same project.",
+            step: "audit_jobs_update",
+          }),
+        };
+      }
       return {
         statusCode: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders() },
