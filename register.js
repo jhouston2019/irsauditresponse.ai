@@ -185,7 +185,21 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     console.log('[register] signup success, user id:', userId);
 
     const supabase = getSupabase();
-    if (!data.session) {
+    let accessToken = null;
+
+    if (data.session) {
+      accessToken = data.session.access_token ?? null;
+      const rt = data.session.refresh_token;
+      if (accessToken && rt) {
+        const { error: setErr } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: rt,
+        });
+        if (setErr) {
+          console.log('[register] setSession after signup:', setErr.message);
+        }
+      }
+    } else {
       const { error: signInErr } = await withTimeout(
         supabase.auth.signInWithPassword({ email, password }),
         45000,
@@ -193,18 +207,22 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
       );
       if (signInErr) {
         console.log('[register] signIn after signup failed:', signInErr.message);
-        window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+        formErr.textContent =
+          signInErr.message || 'Signed up but could not start your session. Try again in a moment.';
         return;
       }
     }
 
-    const {
-      data: { session: sessAfter },
-    } = await supabase.auth.getSession();
-    const accessToken = sessAfter?.access_token;
     if (!accessToken) {
-      formErr.textContent = 'Signed up but could not read session token. Try Log in.';
-      window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname + window.location.search);
+      const {
+        data: { session: sessAfter },
+      } = await supabase.auth.getSession();
+      accessToken = sessAfter?.access_token ?? null;
+    }
+
+    if (!accessToken) {
+      formErr.textContent =
+        'Signed up but could not read session token. Try submitting again or open the wizard from the home page.';
       return;
     }
     console.log('[register] access token present:', true);
@@ -242,8 +260,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
         'pending_purchase_message',
         'Your account was created. We are reconnecting your purchase.',
       );
-      window.location.href =
-        '/login?next=' + encodeURIComponent('/dashboard.html?purchase_reconnect=1');
+      window.location.href = '/dashboard.html?purchase_reconnect=1';
       return;
     }
 

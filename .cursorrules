@@ -1,0 +1,20 @@
+# Global frontend rules — do not violate
+
+This project is **static HTML + browser JavaScript + Netlify functions**.
+There is **no bundler**. No Vite. No Webpack. No Next.js for the pages users load in the browser.
+
+## Browser-facing code (HTML and any JS executed in the browser)
+
+- **Never** use bare npm package specifiers in imports:
+  - WRONG: `import { createClient } from '@supabase/supabase-js'`
+  - RIGHT: `import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'`
+
+- **Never** move working inline `<script>` blocks into separate `.js` files **unless the user explicitly asks** to extract them.
+
+- Any `<script>` that uses `import` syntax must use **`type="module"`**.
+
+- **Before editing** a browser-facing file, **confirm** the change does **not** introduce a bare package specifier (anything of the form `'@scope/pkg'` or `'package-name'` loaded as an ES module from the browser).
+
+## Netlify functions (`/netlify/functions/`)
+
+- These run in **Node.js**. They **may** use `require()` or Node-style package imports (e.g. `require('@supabase/supabase-js')`). **Do not** apply the browser CDN import rules there.
