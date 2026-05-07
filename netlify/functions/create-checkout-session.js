@@ -76,6 +76,7 @@ exports.handler = async (event) => {
     }
 
     const metadata = {
+      /** Required for post-payment record-purchase linking to the preview audit_jobs row */
       job_id: String(jobId),
       product_type: "audit_defense",
     };

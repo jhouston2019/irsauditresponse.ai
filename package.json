@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build && npm run copy-html",
     "prod:check": "node scripts/prod-check.js",
-    "copy-html": "copyfiles *.html dist/ && copyfiles styles.css dist/",
+    "copy-html": "copyfiles *.html dist/ && copyfiles register.js dist/ && copyfiles styles.css dist/",
     "preview": "vite preview"
   },
   "dependencies": {

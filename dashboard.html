@@ -30,6 +30,8 @@
     </nav>
 
     <div style="width:min(1120px, 92%); margin-inline:auto; padding:2rem 0;">
+        <div id="purchaseBanner" style="display:none; margin-bottom:1.25rem; padding:1rem 1.25rem; background:#422006; color:#fde68a; border-radius:10px; border:1px solid #b45309; font-size:0.95rem;"></div>
+
         <h1 style="color:#ffffff; font-size:2.5rem; margin-bottom:1rem;">Your letters</h1>
         <p style="color:#94a3b8; margin-bottom:1.5rem;">Letters you generate in the wizard appear here.</p>
 
@@ -77,15 +79,90 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const supabase = getSupabase();
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            const urlParams = new URLSearchParams(window.location.search || '');
+            if (urlParams.get('purchase_reconnect') === '1') {
+                const msg = sessionStorage.getItem('pending_purchase_message') ||
+                    'Your account was created. We are reconnecting your purchase.';
+                const b = document.getElementById('purchaseBanner');
+                if (b) {
+                    b.textContent = msg;
+                    b.style.display = 'block';
+                }
+            }
+
+            const pendingSid = sessionStorage.getItem('pending_purchase_session_id');
+            const retryKey = 'pending_purchase_dashboard_retry_done';
+            let sessionOut = session;
+
+            if (!sessionOut) {
+                if (pendingSid) {
+                    const next =
+                        '/dashboard.html?purchase_reconnect=1' +
+                        window.location.hash;
+                    window.location.href =
+                        '/login?next=' + encodeURIComponent(next);
+                    return;
+                }
                 window.location.href = '/pricing';
                 return;
+            }
+
+            if (pendingSid && !sessionStorage.getItem(retryKey)) {
+                sessionStorage.setItem(retryKey, '1');
+                const token = sessionOut.access_token;
+                try {
+                    const res = await fetch('/.netlify/functions/record-purchase', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: token ? `Bearer ${token}` : '',
+                        },
+                        body: JSON.stringify({
+                            session_id: pendingSid,
+                            user_id: sessionOut.user.id,
+                        }),
+                    });
+                    const body = await res.json().catch(() => ({}));
+                    if (res.ok) {
+                        sessionStorage.removeItem('pending_purchase_session_id');
+                        sessionStorage.removeItem('pending_purchase_message');
+                        sessionStorage.removeItem(retryKey);
+                        const redirectTo =
+                            typeof body.redirect === 'string' &&
+                            body.redirect.startsWith('/') ?
+                                body.redirect : '/audit-defense.html';
+                        if (body.already_processed) {
+                            const b = document.getElementById('purchaseBanner');
+                            if (b) {
+                                b.textContent =
+                                    'Purchase linked. You can open the wizard any time.';
+                                b.style.display = 'block';
+                            }
+                        }
+                        console.log('[dashboard] pending record-purchase ok, redirect:', redirectTo);
+                        window.location.replace(redirectTo);
+                        return;
+                    }
+                    console.warn('[dashboard] pending record-purchase failed', res.status, body);
+                    const b = document.getElementById('purchaseBanner');
+                    if (b) {
+                        b.textContent =
+                            (body.error || 'Purchase could not be linked yet.') +
+                            ' You can retry from Pricing or contact support.';
+                        b.style.display = 'block';
+                    }
+                } catch (err) {
+                    console.warn('[dashboard] pending record-purchase threw', err);
+                }
+                sessionStorage.removeItem(retryKey);
+                const { data: { session: s2 } } = await supabase.auth.getSession();
+                sessionOut = s2 || sessionOut;
             }
 
             const { data: rows, error } = await supabase
                 .from('documents')
                 .select('*')
-                .eq('user_id', session.user.id)
+                .eq('user_id', sessionOut.user.id)
                 .order('created_at', { ascending: false });
 
             if (error) {
