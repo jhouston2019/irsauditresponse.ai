@@ -55,6 +55,27 @@
     }
 
     let browserSupabase;
+    async function loadCreateClient() {
+      return (await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm')).createClient;
+    }
+    async function getSupabaseEphemeralSignup() {
+      const url = document.querySelector('meta[name="supabase-url"]')?.content?.trim?.() ?? '';
+      const key = document.querySelector('meta[name="supabase-anon-key"]')?.content?.trim?.() ?? '';
+      if (!url || !key || url.includes('%%') || key.includes('%%')) {
+        throw new Error(
+          'Auth is not wired on this build (missing SUPABASE_URL / SUPABASE_ANON_KEY in Netlify env, or placeholders not substituted). Fix env vars and redeploy.',
+        );
+      }
+      const createClient = await loadCreateClient();
+      return createClient(url, key, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      });
+    }
+
     async function getSupabaseBrowser() {
       if (browserSupabase) return browserSupabase;
       const url = document.querySelector('meta[name="supabase-url"]')?.content?.trim?.() ?? '';
@@ -64,11 +85,18 @@
           'Auth is not wired on this build (missing SUPABASE_URL / SUPABASE_ANON_KEY in Netlify env, or placeholders not substituted). Fix env vars and redeploy.',
         );
       }
-      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      const createClient = await loadCreateClient();
       browserSupabase = createClient(url, key, {
-        auth: { persistSession: true, detectSessionInUrl: true, storage: localStorage },
+        auth: { persistSession: true, detectSessionInUrl: false, storage: localStorage },
       });
       return browserSupabase;
+    }
+
+    function withTimeout(promise, ms, message) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(message)), ms)),
+      ]);
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -149,6 +177,8 @@
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn?.disabled) return;
       formErr.textContent = '';
       formErr.style.color = '';
       formErr.style.textAlign = '';
@@ -160,11 +190,18 @@
         return;
       }
       try {
-        console.log('[register] before getSupabaseBrowser()');
-        const supabase = await getSupabaseBrowser();
-        console.log('[register] after getSupabaseBrowser() resolved');
-        console.log('[register] before supabase.auth.signUp');
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Creating account…';
+        }
+        console.log('[register] signUp via ephemeral client (no persistSession — avoids auth lock hang)');
+        const supabaseEphem = await getSupabaseEphemeralSignup();
+        const { data, error } = await withTimeout(
+          supabaseEphem.auth.signUp({ email, password }),
+          45000,
+          'Sign-up request timed out. Check your network, disable extensions that block requests, and try again.',
+        );
+        console.log('[register] after supabase.auth.signUp', { hasUser: !!data?.user, error: error?.message });
         if (error) {
           const msg = error.message || '';
           const lc = msg.toLowerCase();
@@ -202,10 +239,15 @@
             'Contact support with your checkout receipt.';
           return;
         }
-        console.log('[register] record-purchase OK — session then redirect to wizard');
+        console.log('[register] record-purchase OK — persisted session then redirect');
+        const supabase = await getSupabaseBrowser();
         let { data: { session: sess } } = await supabase.auth.getSession();
         if (!sess) {
-          const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+          const { error: signInErr } = await withTimeout(
+            supabase.auth.signInWithPassword({ email, password }),
+            45000,
+            'Sign-in after sign-up timed out. Try logging in manually.',
+          );
           if (signInErr) {
             console.log('[register] signIn after signup:', signInErr.message);
             window.location.href = '/login?next=' + encodeURIComponent('/audit-defense.html');
@@ -216,6 +258,11 @@
         window.location.href = '/audit-defense.html';
       } catch (err) {
         formErr.textContent = err.message || 'Something went wrong.';
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create account';
+        }
       }
     });
   </script>
