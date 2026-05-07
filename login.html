@@ -40,32 +40,45 @@
     </div>
 
     <script type="module">
-        import { signInWithPassword, getSupabase } from '/src/components/Auth.js';
+        async function getSupabaseClient() {
+          const url = document.querySelector('meta[name="supabase-url"]')?.content?.trim?.() ?? '';
+          const key = document.querySelector('meta[name="supabase-anon-key"]')?.content?.trim?.() ?? '';
+          if (!url || !key || url.includes('%%') || key.includes('%%')) {
+            throw new Error('Login is not configured on this deploy (missing Supabase URL or anon key).');
+          }
+          const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+          return createClient(url, key, { auth: { persistSession: true, detectSessionInUrl: true } });
+        }
 
         const params = new URLSearchParams(window.location.search);
         const nextRaw = params.get('next');
         const nextPath = nextRaw
           ? (nextRaw.startsWith('/') ? nextRaw : '/' + nextRaw)
-          : '/app';
+          : '/audit-defense.html';
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const msg = document.getElementById('msg');
-            msg.textContent = '';
-            const { error } = await signInWithPassword(email, password);
+          e.preventDefault();
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          const msg = document.getElementById('msg');
+          msg.textContent = '';
+          msg.style.color = '#b91c1c';
+          try {
+            const supabase = await getSupabaseClient();
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) {
-                msg.textContent = error.message;
-                return;
+              msg.textContent = error.message;
+              return;
             }
-            const supabase = getSupabase();
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                msg.textContent = 'Could not establish session. Try again.';
-                return;
+            if (!data.session) {
+              msg.textContent =
+                'No active session returned. If you just signed up, confirm your email link first (Supabase dashboard → Auth → Providers), then try again.';
+              return;
             }
             window.location.href = nextPath;
+          } catch (err) {
+            msg.textContent = err.message || 'Login failed.';
+          }
         });
     </script>
 </body>

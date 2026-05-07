@@ -39,9 +39,31 @@ exports.handler = async (event) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
 
-    const { error: upJob } = await supabase.from("audit_jobs").update({ user_id }).eq("stripe_session_id", session_id);
+    const {
+      data: jobRows,
+      error: upJob,
+    } = await supabase.from("audit_jobs").update({ user_id }).eq("stripe_session_id", session_id).select("id");
+
     if (upJob) {
-      console.error("audit_jobs stripe_session attach error:", upJob.message);
+      console.error("record-purchase audit_jobs update:", upJob);
+      return {
+        statusCode: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders() },
+        body: JSON.stringify({ error: upJob.message, step: "audit_jobs_update" }),
+      };
+    }
+
+    if (!jobRows || jobRows.length === 0) {
+      console.error("record-purchase: no audit_jobs row for stripe_session_id", session_id);
+      return {
+        statusCode: 422,
+        headers: { "Content-Type": "application/json", ...corsHeaders() },
+        body: JSON.stringify({
+          error:
+            "No checkout record matched this session. Your payment may still process—try again shortly or contact support.",
+          code: "NO_AUDIT_JOB",
+        }),
+      };
     }
 
     const { error: insErr } = await supabase.from("purchases").insert({
@@ -51,11 +73,7 @@ exports.handler = async (event) => {
     });
 
     if (insErr && insErr.code !== "23505") {
-      return {
-        statusCode: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders() },
-        body: JSON.stringify({ error: insErr.message }),
-      };
+      console.warn("record-purchase purchases insert skipped (non-fatal):", insErr.code, insErr.message);
     }
 
     return {

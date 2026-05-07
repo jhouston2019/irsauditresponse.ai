@@ -54,7 +54,9 @@
       return !!(url && key && !url.includes('%%') && !key.includes('%%'));
     }
 
+    let browserSupabase;
     async function getSupabaseBrowser() {
+      if (browserSupabase) return browserSupabase;
       const url = document.querySelector('meta[name="supabase-url"]')?.content?.trim?.() ?? '';
       const key = document.querySelector('meta[name="supabase-anon-key"]')?.content?.trim?.() ?? '';
       if (!url || !key || url.includes('%%') || key.includes('%%')) {
@@ -63,7 +65,10 @@
         );
       }
       const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-      return createClient(url, key);
+      browserSupabase = createClient(url, key, {
+        auth: { persistSession: true, detectSessionInUrl: true, storage: localStorage },
+      });
+      return browserSupabase;
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -161,7 +166,21 @@
         console.log('[register] before supabase.auth.signUp');
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
-          formErr.textContent = error.message;
+          const msg = error.message || '';
+          const lc = msg.toLowerCase();
+          const code = error.code ?? '';
+          if (
+            lc.includes('seconds') ||
+            lc.includes('rate') ||
+            lc.includes('too many requests') ||
+            code === 'over_request_rate_limit' ||
+            String(error.status) === '429'
+          ) {
+            formErr.textContent =
+              'Supabase briefly limited signup attempts. Wait about one minute, then tap Create account once (avoid double-clicks).';
+          } else {
+            formErr.textContent = msg;
+          }
           return;
         }
         const userId = data.user?.id;
@@ -176,7 +195,11 @@
         });
         if (!rec.ok) {
           const j = await rec.json().catch(() => ({}));
-          formErr.textContent = j.error || 'Could not record purchase. Contact support.';
+          const suffix = [j.step, j.code].filter(Boolean).join(' ');
+          formErr.textContent =
+            j.error ||
+            (!rec.ok ? `Could not finalize purchase (${rec.status}${suffix ? `: ${suffix}` : ''}).` : '') ||
+            'Contact support with your checkout receipt.';
           return;
         }
         console.log('[register] record-purchase OK — session then redirect to wizard');
