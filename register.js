@@ -185,21 +185,17 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     console.log('[register] signup success, user id:', userId);
 
     const supabase = getSupabase();
-    let accessToken = null;
+    let accessToken = data.session?.access_token ?? null;
 
-    if (data.session) {
-      accessToken = data.session.access_token ?? null;
-      const rt = data.session.refresh_token;
-      if (accessToken && rt) {
-        const { error: setErr } = await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: rt,
-        });
-        if (setErr) {
-          console.log('[register] setSession after signup:', setErr.message);
-        }
+    if (accessToken && data.session?.refresh_token) {
+      const { error: setErr } = await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+      if (setErr) {
+        console.log('[register] setSession after signup:', setErr.message);
       }
-    } else {
+    } else if (!accessToken) {
       const { error: signInErr } = await withTimeout(
         supabase.auth.signInWithPassword({ email, password }),
         45000,
