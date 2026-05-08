@@ -1,114 +1,57 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Create your account | IRS Audit Defense Pro</title>
-
   <meta name="description" content="Complete your IRS Audit Defense Pro account after checkout." />
-
   <meta name="supabase-url" content="%%SUPABASE_URL%%" />
-
   <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%" />
-
   <link rel="canonical" href="https://irsauditresponseai.netlify.app/register" />
-
 </head>
-
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
-
   <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155;">
-
     <div style="color: #f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
-
     <div>
-
       <a href="/pricing" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Pricing</a> |
-
       <a href="/login" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Log in</a>
-
     </div>
-
   </nav>
 
-
-
   <div style="width:min(1120px, 92%); margin-inline:auto; padding:2rem 0;">
-
     <p id="reconnectBanner" style="display:none; max-width:500px; margin:0 auto 1rem; padding:1rem 1.25rem; background:#422006; color:#fde68a; border-radius:10px; border:1px solid #b45309; font-size:0.95rem;"></p>
 
-
-
     <div id="verifyPanel" style="max-width:500px; margin:2rem auto; padding:2rem; background:#ffffff; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); color:#2d3748; border:1px solid #e2e8f0;">
-
       <p id="verifyMsg" style="text-align:center; margin:0;">Verifying your payment…</p>
-
     </div>
-
-
 
     <div id="formPanel" style="display:none; max-width:500px; margin:2rem auto; padding:2rem; background:#ffffff; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1); color:#2d3748; border:1px solid #e2e8f0;">
-
       <h2 style="text-align:center; margin-bottom:0.5rem; color:#2d3748; font-size:1.8rem;">Create your account</h2>
-
-      <p style="text-align:center; color:#64748b; margin-bottom:1.5rem; font-size:0.95rem;">Payment confirmed—this creates your secure workspace and links your purchase. Use the checkout email below (or yours if empty), choose a password, then you’ll return to the wizard with everything unlocked.</p>
-
+      <p style="text-align:center; color:#64748b; margin-bottom:1.5rem; font-size:0.95rem;">Payment confirmed — choose a password to create your secure workspace. You'll return to the wizard with everything unlocked.</p>
       <form id="registerForm">
-
         <div style="margin-bottom:1.25rem;">
-
           <label for="email" style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#2d3748;">Email</label>
-
           <input type="email" id="email" name="email" required autocomplete="email" style="width:100%; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-family:'Inter',sans-serif; font-size:1rem; background:#ffffff; color:#2d3748; box-sizing:border-box;" />
-
         </div>
-
         <div style="margin-bottom:1.25rem;">
-
           <label for="password" style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#2d3748;">Password</label>
-
           <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password" style="width:100%; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-family:'Inter',sans-serif; font-size:1rem; background:#ffffff; color:#2d3748; box-sizing:border-box;" />
-
         </div>
-
         <div style="margin-bottom:1.25rem;">
-
           <label for="password2" style="display:block; margin-bottom:0.5rem; font-weight:bold; color:#2d3748;">Confirm password</label>
-
           <input type="password" id="password2" name="password2" required minlength="6" autocomplete="new-password" style="width:100%; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-family:'Inter',sans-serif; font-size:1rem; background:#ffffff; color:#2d3748; box-sizing:border-box;" />
-
         </div>
-
         <button type="submit" style="background:#334155; color:white; padding:14px 28px; border:none; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:1rem; font-weight:600; width:100%;">Create account</button>
-
       </form>
-
       <p id="formErr" style="color:#b91c1c; margin-top:1rem; text-align:center; font-size:0.95rem; min-height:1.2em;"></p>
-
-
-
       <div id="recoveryActions" style="display:none; margin-top:1rem; text-align:center; font-size:0.95rem;">
-
-        <a href="/dashboard" style="display:inline-block; margin:0 8px 8px 0; padding:10px 18px; border-radius:8px; background:#334155; color:#fff; text-decoration:none; font-weight:600;">Dashboard</a>
-
-        <a href="/login?next=/dashboard" style="display:inline-block; margin:0 8px 8px 0; padding:10px 18px; border-radius:8px; background:#1e293b; color:#e2e8f0; text-decoration:none; font-weight:600;">Log in</a>
-
+        <a href="/dashboard.html" style="display:inline-block; margin:0 8px 8px 0; padding:10px 18px; border-radius:8px; background:#334155; color:#fff; text-decoration:none; font-weight:600;">Dashboard</a>
+        <a href="/login?next=/dashboard.html" style="display:inline-block; margin:0 8px 8px 0; padding:10px 18px; border-radius:8px; background:#1e293b; color:#e2e8f0; text-decoration:none; font-weight:600;">Log in</a>
       </div>
-
     </div>
-
   </div>
 
-
-
-  <script type="module" src="/register.js"></script>
-
+  <script type="module" src="/register.js?v=3"></script>
 </body>
-
 </html>
 
