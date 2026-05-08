@@ -470,6 +470,184 @@ Contact: 1-800-829-8310`;
 
     const $ = (id) => document.getElementById(id);
 
+    function saveIrsWizardState() {
+      const wizardState = {
+        noticeText: $('noticeText')?.value ?? '',
+        noticeType: $('noticeType')?.value ?? '',
+        taxYear: $('taxYear')?.value ?? '',
+        suppAmount: $('suppAmount')?.value ?? '',
+        suppDeadline: $('suppDeadline')?.value ?? '',
+        context: $('context')?.value ?? '',
+        analysis: state.analysis,
+        strategy: state.strategy,
+        customStrategyText: $('customStrategyText')?.value ?? '',
+        letterRaw: state.letterRaw,
+        step: state.step,
+        jobId: state.jobId,
+        fileBase64: state.fileBase64,
+        fileType: state.fileType,
+        fillName: $('fillName')?.value ?? '',
+        fillAddress: $('fillAddress')?.value ?? '',
+        fillCity: $('fillCity')?.value ?? '',
+        fillPhone: $('fillPhone')?.value ?? '',
+        fillEmail: $('fillEmail')?.value ?? '',
+        fillSsn: $('fillSsn')?.value ?? '',
+        fillIrsAddress: $('fillIrsAddress')?.value ?? '',
+        fillNoticeNum: $('fillNoticeNum')?.value ?? '',
+        fillNoticeDate: $('fillNoticeDate')?.value ?? '',
+        fillTaxYear: $('fillTaxYear')?.value ?? '',
+        fileLabel: $('fileLabel')?.textContent ?? '',
+        savedAt: Date.now(),
+      };
+      try {
+        localStorage.setItem('irs_wizard_state', JSON.stringify(wizardState));
+      } catch (e) {
+        console.warn('[wizard] save irs_wizard_state failed', e);
+      }
+    }
+
+    async function restoreWizardState(sessionId) {
+      showStep(1);
+      const loading = $('step1Loading');
+      const loadingText = $('step1LoadingText');
+      if (loading) loading.classList.add('show');
+      if (loadingText) loadingText.textContent = 'Restoring your session…';
+
+      let verified = false;
+      for (let i = 1; i <= 3; i++) {
+        try {
+          const res = await fetch('/.netlify/functions/verify-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId }),
+          });
+          if (res.ok) {
+            verified = true;
+            break;
+          }
+        } catch {
+          /* retry */
+        }
+        if (i < 3) await new Promise((r) => setTimeout(r, 1500));
+      }
+
+      if (!verified) {
+        if (loading) loading.classList.remove('show');
+        if (loadingText) loadingText.textContent = 'Analyzing notice…';
+        history.replaceState({}, '', '/audit-defense.html');
+        return;
+      }
+
+      state.jobPaid = true;
+      state.previewMode = false;
+
+      const raw = localStorage.getItem('irs_wizard_state');
+      if (!raw) {
+        if (loading) loading.classList.remove('show');
+        if (loadingText) loadingText.textContent = 'Analyzing notice…';
+        applyWizardBlur();
+        history.replaceState({}, '', '/audit-defense.html');
+        return;
+      }
+
+      let st;
+      try {
+        st = JSON.parse(raw);
+      } catch {
+        if (loading) loading.classList.remove('show');
+        if (loadingText) loadingText.textContent = 'Analyzing notice…';
+        history.replaceState({}, '', '/audit-defense.html');
+        return;
+      }
+
+      if (!st.savedAt || Date.now() - st.savedAt > 7200000) {
+        localStorage.removeItem('irs_wizard_state');
+        if (loading) loading.classList.remove('show');
+        if (loadingText) loadingText.textContent = 'Analyzing notice…';
+        applyWizardBlur();
+        history.replaceState({}, '', '/audit-defense.html');
+        return;
+      }
+
+      if (typeof st.noticeText === 'string') {
+        const el = $('noticeText');
+        if (el) el.value = st.noticeText;
+      }
+      if (typeof st.noticeType === 'string') {
+        const el = $('noticeType');
+        if (el) el.value = st.noticeType;
+      }
+      if (typeof st.taxYear === 'string') {
+        const el = $('taxYear');
+        if (el) el.value = st.taxYear;
+      }
+      if (typeof st.suppAmount === 'string') {
+        const el = $('suppAmount');
+        if (el) el.value = st.suppAmount;
+      }
+      if (typeof st.suppDeadline === 'string') {
+        const el = $('suppDeadline');
+        if (el) el.value = st.suppDeadline;
+      }
+      if (typeof st.context === 'string') {
+        const el = $('context');
+        if (el) el.value = st.context;
+      }
+      if (typeof st.customStrategyText === 'string') {
+        const el = $('customStrategyText');
+        if (el) el.value = st.customStrategyText;
+      }
+      if (typeof st.fillName === 'string' && $('fillName')) $('fillName').value = st.fillName;
+      if (typeof st.fillAddress === 'string' && $('fillAddress')) $('fillAddress').value = st.fillAddress;
+      if (typeof st.fillCity === 'string' && $('fillCity')) $('fillCity').value = st.fillCity;
+      if (typeof st.fillPhone === 'string' && $('fillPhone')) $('fillPhone').value = st.fillPhone;
+      if (typeof st.fillEmail === 'string' && $('fillEmail')) $('fillEmail').value = st.fillEmail;
+      if (typeof st.fillSsn === 'string' && $('fillSsn')) $('fillSsn').value = st.fillSsn;
+      if (typeof st.fillIrsAddress === 'string' && $('fillIrsAddress')) $('fillIrsAddress').value = st.fillIrsAddress;
+      if (typeof st.fillNoticeNum === 'string' && $('fillNoticeNum')) $('fillNoticeNum').value = st.fillNoticeNum;
+      if (typeof st.fillNoticeDate === 'string' && $('fillNoticeDate')) $('fillNoticeDate').value = st.fillNoticeDate;
+      if (typeof st.fillTaxYear === 'string' && $('fillTaxYear')) $('fillTaxYear').value = st.fillTaxYear;
+      if (typeof st.fileLabel === 'string' && $('fileLabel')) $('fileLabel').textContent = st.fileLabel;
+
+      if (st.jobId) state.jobId = st.jobId;
+      if ('fileBase64' in st) state.fileBase64 = st.fileBase64 ?? null;
+      if ('fileType' in st) state.fileType = st.fileType ?? null;
+      state.analysis = st.analysis && typeof st.analysis === 'object' ? st.analysis : null;
+      state.strategy = typeof st.strategy === 'string' ? st.strategy : null;
+      state.letterRaw = typeof st.letterRaw === 'string' ? st.letterRaw : '';
+      state.editing = false;
+      if (typeof st.step === 'number' && st.step >= 1 && st.step <= 4) state.step = st.step;
+
+      if (state.analysis) renderStep2();
+
+      if (state.analysis && state.strategy) renderStep3(state.strategy);
+
+      if (state.letterRaw) {
+        $('btnToggleEdit').textContent = 'Edit letter';
+        renderLetterDisplay();
+        const a = state.analysis;
+        if (a) {
+          $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy || ''}`;
+        }
+      }
+
+      const targetStep = state.letterRaw
+        ? 4
+        : state.strategy
+          ? 3
+          : state.analysis
+            ? 2
+            : 1;
+      showStep(targetStep);
+
+      localStorage.removeItem('irs_wizard_state');
+      if (loading) loading.classList.remove('show');
+      if (loadingText) loadingText.textContent = 'Analyzing notice…';
+      applyWizardBlur();
+      updateAnalyzeEnabled();
+      history.replaceState({}, '', '/audit-defense.html');
+    }
+
     function applyWizardBlur() {
       const locked = state.previewMode === true;
       document.body.classList.toggle('audit-wizard-preview', locked);
@@ -895,7 +1073,7 @@ Contact: 1-800-829-8310`;
       showStep(3);
     });
 
-    function renderStep3() {
+    function renderStep3(selectStrategyAfterRender) {
       const a = state.analysis;
       const strategies = Array.isArray(a.availableStrategies) ? a.availableStrategies : [];
       const grid = $('strategyGrid');
@@ -943,9 +1121,9 @@ Contact: 1-800-829-8310`;
         grid.appendChild(card);
       });
 
-      const rec = a.recommendedStrategy;
-      if (rec) {
-        const el = grid.querySelector(`[data-id="${rec}"]`);
+      const toSelect = selectStrategyAfterRender || a.recommendedStrategy;
+      if (toSelect) {
+        const el = grid.querySelector(`[data-id="${toSelect}"]`);
         if (el) setTimeout(() => el.click(), 0);
       }
       applyWizardBlur();
@@ -1104,6 +1282,7 @@ Contact: 1-800-829-8310`;
       btn.disabled = true;
       btn.textContent = 'Redirecting to Stripe…';
       try {
+        saveIrsWizardState();
         const res = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1250,6 +1429,11 @@ Contact: 1-800-829-8310`;
 
     async function boot() {
       await bootstrapAuthGate();
+      const bootParams = new URLSearchParams(window.location.search);
+      const paySessionId = bootParams.get('session_id');
+      if (paySessionId) {
+        await restoreWizardState(paySessionId);
+      }
       if (state.jobPaid) state.previewMode = false;
       $('unlockPanel').classList.remove('show');
       updateAnalyzeEnabled();
