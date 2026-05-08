@@ -114,175 +114,226 @@ if (!sessionId) {
       formErr.style.textAlign = 'left';
       formErr.style.color = '#b45309';
     }
-      })();
+  })();
 }
 
-document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const submitBtn = e.target.querySelector('button[type="submit"]');
-  if (submitBtn?.disabled) return;
+const registerFormEl = document.getElementById('registerForm');
+if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
+  registerFormEl.dataset.registerSubmitBound = '1';
 
-  showRecoveryActions(false);
-  formErr.textContent = '';
-  formErr.style.color = '';
-  formErr.style.textAlign = '';
+  let registerSubmitInFlight = false;
 
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const password2 = document.getElementById('password2').value;
-  if (password !== password2) {
-    formErr.textContent = 'Passwords do not match.';
-    return;
-  }
+  registerFormEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (registerSubmitInFlight) return;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn?.disabled) return;
 
-  const sid =
-    (typeof sessionId === 'string' && sessionId.trim()
-      ? sessionId.trim()
-      : new URLSearchParams(window.location.search).get('session_id')) || '';
-  if (!sid) {
-    formErr.textContent = 'Missing checkout session. Start again from pricing.';
-    return;
-  }
+    registerSubmitInFlight = true;
 
-  try {
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Creating account…';
-    }
+    showRecoveryActions(false);
+    formErr.textContent = '';
+    formErr.style.color = '';
+    formErr.style.textAlign = '';
 
-    console.log('[register] signUp via ephemeral client (avoids auth lock hang)');
-    const supabaseEphem = await getSupabaseEphemeralSignup();
-    const { data, error } = await withTimeout(
-      supabaseEphem.auth.signUp({ email, password }),
-      45000,
-      'Sign-up request timed out. Check your network, disable extensions that block requests, and try again.',
-    );
-
-    if (error) {
-      const msg = error.message || '';
-      const lc = msg.toLowerCase();
-      const code = error.code ?? '';
-      if (
-        lc.includes('seconds') ||
-        lc.includes('rate') ||
-        lc.includes('too many requests') ||
-        code === 'over_request_rate_limit' ||
-        String(error.status) === '429'
-      ) {
-        formErr.textContent =
-          'Supabase briefly limited signup attempts. Wait about one minute, then tap Create account once (avoid double-clicks).';
-      } else {
-        formErr.textContent = msg;
-      }
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const password2 = document.getElementById('password2').value;
+    if (password !== password2) {
+      formErr.textContent = 'Passwords do not match.';
+      registerSubmitInFlight = false;
       return;
     }
 
-    const userId = data.user?.id;
-    if (!userId) {
-      formErr.textContent = 'Could not create user. Try again or log in if you already have an account.';
+    const sid =
+      (typeof sessionId === 'string' && sessionId.trim()
+        ? sessionId.trim()
+        : new URLSearchParams(window.location.search).get('session_id')) || '';
+    if (!sid) {
+      formErr.textContent = 'Missing checkout session. Start again from pricing.';
+      registerSubmitInFlight = false;
       return;
     }
-    console.log('[register] signup success, user id:', userId);
 
-    const supabase = getSupabase();
-    let accessToken = data.session?.access_token ?? null;
-
-    if (accessToken && data.session?.refresh_token) {
-      const { error: setErr } = await supabase.auth.setSession({
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-      });
-      if (setErr) {
-        console.log('[register] setSession after signup:', setErr.message);
+    try {
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account…';
       }
-    } else if (!accessToken) {
-      const { error: signInErr } = await withTimeout(
-        supabase.auth.signInWithPassword({ email, password }),
+
+      console.log('[register] signUp via ephemeral client (avoids auth lock hang)');
+      const supabaseEphem = await getSupabaseEphemeralSignup();
+      const { data, error: signUpErr } = await withTimeout(
+        supabaseEphem.auth.signUp({ email, password }),
         45000,
-        'Sign-in after sign-up timed out. Try logging in manually.',
+        'Sign-up request timed out. Check your network, disable extensions that block requests, and try again.',
       );
-      if (signInErr) {
-        console.log('[register] signIn after signup failed:', signInErr.message);
-        formErr.textContent =
-          signInErr.message || 'Signed up but could not start your session. Try again in a moment.';
+
+      const supabase = getSupabase();
+      let userId;
+      let accessToken;
+
+      if (signUpErr) {
+        const msg = signUpErr.message || '';
+        const lc = msg.toLowerCase();
+        const code = signUpErr.code ?? '';
+        if (
+          lc.includes('seconds') ||
+          lc.includes('rate') ||
+          lc.includes('too many requests') ||
+          code === 'over_request_rate_limit' ||
+          String(signUpErr.status) === '429'
+        ) {
+          formErr.textContent =
+            'Supabase briefly limited signup attempts. Wait about one minute, then tap Create account once (avoid double-clicks).';
+          return;
+        }
+
+        const existingUser =
+          lc.includes('user already registered') ||
+          code === 'user_already_exists' ||
+          String(signUpErr.status) === '422';
+
+        if (!existingUser) {
+          formErr.textContent = msg;
+          return;
+        }
+
+        const { data: signInData, error: signInErr } = await withTimeout(
+          supabase.auth.signInWithPassword({ email, password }),
+          45000,
+          'Sign-in timed out. Try again in a moment.',
+        );
+        if (signInErr) {
+          console.log('[register] signIn after existing-user signUp:', signInErr.message);
+          formErr.textContent =
+            signInErr.message || 'Could not sign in. Check your password or use Log in.';
+          return;
+        }
+        userId = signInData.user?.id ?? signInData.session?.user?.id;
+        accessToken = signInData.session?.access_token ?? null;
+        console.log('[register] existing user signed in, user id:', userId);
+      } else {
+        userId = data.user?.id;
+        if (!userId) {
+          formErr.textContent = 'Could not create user. Try again or log in if you already have an account.';
+          return;
+        }
+        console.log('[register] signup success, user id:', userId);
+
+        accessToken = data.session?.access_token ?? null;
+
+        if (accessToken && data.session?.refresh_token) {
+          const { error: setErr } = await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          });
+          if (setErr) {
+            console.log('[register] setSession after signup:', setErr.message);
+          }
+        } else if (!accessToken) {
+          const { error: signInErr } = await withTimeout(
+            supabase.auth.signInWithPassword({ email, password }),
+            45000,
+            'Sign-in after sign-up timed out. Try logging in manually.',
+          );
+          if (signInErr) {
+            console.log('[register] signIn after signup failed:', signInErr.message);
+            formErr.textContent =
+              signInErr.message || 'Signed up but could not start your session. Try again in a moment.';
+            return;
+          }
+        }
+
+        if (!accessToken) {
+          const {
+            data: { session: sessAfter },
+          } = await supabase.auth.getSession();
+          accessToken = sessAfter?.access_token ?? null;
+        }
+      }
+
+      if (!accessToken) {
+        const {
+          data: { session: sessAfter },
+        } = await supabase.auth.getSession();
+        accessToken = sessAfter?.access_token ?? null;
+      }
+
+      if (!userId) {
+        formErr.textContent = 'Could not determine your account. Try again or use Log in.';
         return;
       }
-    }
 
-    if (!accessToken) {
-      const {
-        data: { session: sessAfter },
-      } = await supabase.auth.getSession();
-      accessToken = sessAfter?.access_token ?? null;
-    }
+      if (!accessToken) {
+        formErr.textContent =
+          'Could not read session token. Try submitting again or open the wizard from the home page.';
+        return;
+      }
+      console.log('[register] access token present:', true);
 
-    if (!accessToken) {
-      formErr.textContent =
-        'Signed up but could not read session token. Try submitting again or open the wizard from the home page.';
-      return;
-    }
-    console.log('[register] access token present:', true);
+      const rec = await fetch('/.netlify/functions/record-purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ session_id: sid, user_id: userId }),
+      });
 
-    const rec = await fetch('/.netlify/functions/record-purchase', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ session_id: sid, user_id: userId }),
-    });
+      console.log('[register] record-purchase status:', rec.status);
 
-    console.log('[register] record-purchase status:', rec.status);
+      let recBody = {};
+      try {
+        recBody = await rec.json();
+      } catch {
+        recBody = {};
+      }
 
-    let recBody = {};
-    try {
-      recBody = await rec.json();
-    } catch {
-      recBody = {};
-    }
+      if (rec.ok) {
+        const dest = typeof recBody.redirect === 'string' && recBody.redirect.startsWith('/')
+          ? recBody.redirect
+          : '/audit-defense.html';
+        console.log('[register] redirect destination:', dest);
+        window.location.href = dest;
+        return;
+      }
 
-    if (rec.ok) {
-      const dest = typeof recBody.redirect === 'string' && recBody.redirect.startsWith('/')
-        ? recBody.redirect
-        : '/audit-defense.html';
-      console.log('[register] redirect destination:', dest);
-      window.location.href = dest;
-      return;
-    }
+      if (rec.status === 401 || rec.status === 403) {
+        sessionStorage.setItem('pending_purchase_session_id', sid);
+        sessionStorage.setItem(
+          'pending_purchase_message',
+          'Your account was created. We are reconnecting your purchase.',
+        );
+        window.location.href = '/dashboard.html?purchase_reconnect=1';
+        return;
+      }
 
-    if (rec.status === 401 || rec.status === 403) {
+      if (rec.status === 409) {
+        formErr.style.color = '#b91c1c';
+        formErr.textContent =
+          recBody.error ||
+          'We could not link this checkout to your account (policy conflict).';
+        showRecoveryActions(true);
+        return;
+      }
+
+      /** Account exists; reconnect purchase later */
       sessionStorage.setItem('pending_purchase_session_id', sid);
       sessionStorage.setItem(
         'pending_purchase_message',
         'Your account was created. We are reconnecting your purchase.',
       );
+      console.log('[register] record-purchase failed; saved pending_purchase_session_id');
       window.location.href = '/dashboard.html?purchase_reconnect=1';
-      return;
+    } catch (err) {
+      formErr.textContent = err.message || 'Something went wrong.';
+    } finally {
+      registerSubmitInFlight = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+      }
     }
-
-    if (rec.status === 409) {
-      formErr.style.color = '#b91c1c';
-      formErr.textContent =
-        recBody.error ||
-        'We could not link this checkout to your account (policy conflict).';
-      showRecoveryActions(true);
-      return;
-    }
-
-    /** Account exists; reconnect purchase later */
-    sessionStorage.setItem('pending_purchase_session_id', sid);
-    sessionStorage.setItem(
-      'pending_purchase_message',
-      'Your account was created. We are reconnecting your purchase.',
-    );
-    console.log('[register] record-purchase failed; saved pending_purchase_session_id');
-    window.location.href = '/dashboard.html?purchase_reconnect=1';
-  } catch (err) {
-    formErr.textContent = err.message || 'Something went wrong.';
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Create account';
-    }
-  }
-});
+  });
+}
