@@ -653,9 +653,7 @@ Contact: 1-800-829-8310`;
       localStorage.removeItem('irs_wizard_state');
       if (loading) loading.classList.remove('show');
       if (loadingText) loadingText.textContent = 'Analyzing notice…';
-      applyWizardBlur();
       updateAnalyzeEnabled();
-      showStep(4);
       const postUnlockPanelEl = document.getElementById('postUnlockPanel');
       if (postUnlockPanelEl) {
         postUnlockPanelEl.style.display = 'block';
@@ -687,7 +685,7 @@ Contact: 1-800-829-8310`;
         if (s === n) pill.classList.add('active');
         else if (s < n) pill.classList.add('done');
       });
-      applyWizardBlur();
+      if (state.previewMode) applyWizardBlur();
     }
 
     function parseMoney(amt) {
