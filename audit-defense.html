@@ -32,7 +32,7 @@
     .shell { max-width: 1100px; margin: 0 auto; padding: 1.25rem; }
     .progress-wrap { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
     .progress-steps { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: space-between; }
-    .step-pill { flex: 1; min-width: 120px; text-align: center; padding: 0.5rem 0.35rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: var(--muted); border: 1px solid var(--border); background: #fafafa; }
+    .step-pill { flex: 1; min-width: 120px; text-align: center; padding: 0.5rem 0.35rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; color: var(--muted); border: 1px solid var(--border); background: #fafafa; cursor: pointer; }
     .step-pill.active { background: var(--navy2); color: #fff; border-color: var(--navy2); }
     .step-pill.done { background: #ecfdf5; color: var(--green); border-color: #86efac; }
     .card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1.75rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
@@ -662,6 +662,13 @@ Contact: 1-800-829-8310`;
             : 1;
       showStep(targetStep);
 
+      const b2 = document.getElementById('btnBack2');
+      const b3 = document.getElementById('btnBack3');
+      const b4 = document.getElementById('btnBack4');
+      if (b2) b2.style.display = '';
+      if (b3) b3.style.display = '';
+      if (b4) b4.style.display = '';
+
       if (loading) loading.classList.remove('show');
       if (loadingText) loadingText.textContent = 'Analyzing notice…';
       updateAnalyzeEnabled();
@@ -698,6 +705,27 @@ Contact: 1-800-829-8310`;
       });
       if (state.previewMode) applyWizardBlur();
     }
+
+    document.querySelectorAll('.step-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const n = +pill.dataset.step;
+        if (n === 1) {
+          showStep(1);
+          return;
+        }
+        if (n === 2 && state.analysis) {
+          showStep(2);
+          return;
+        }
+        if (n === 3 && state.strategy) {
+          showStep(3);
+          return;
+        }
+        if (n === 4 && state.letterRaw) {
+          showStep(4);
+        }
+      });
+    });
 
     function parseMoney(amt) {
       if (!amt || typeof amt !== 'string') return 0;
