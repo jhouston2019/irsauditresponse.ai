@@ -480,6 +480,34 @@ Contact: 1-800-829-8310`;
 
     const $ = (id) => document.getElementById(id);
 
+    function captureWizardState() {
+      return {
+        noticeText: $('noticeText')?.value ?? '',
+        noticeType: $('noticeType')?.value ?? '',
+        taxYear: $('taxYear')?.value ?? '',
+        suppAmount: $('suppAmount')?.value ?? '',
+        suppDeadline: $('suppDeadline')?.value ?? '',
+        context: $('context')?.value ?? '',
+        analysis: state.analysis,
+        strategy: state.strategy,
+        customStrategyText: $('customStrategyText')?.value ?? '',
+        letterRaw: state.letterRaw,
+        step: state.step,
+        jobId: state.jobId,
+        fileLabel: $('fileLabel')?.textContent ?? '',
+        fillName: $('fillName')?.value ?? '',
+        fillAddress: $('fillAddress')?.value ?? '',
+        fillCity: $('fillCity')?.value ?? '',
+        fillPhone: $('fillPhone')?.value ?? '',
+        fillEmail: $('fillEmail')?.value ?? '',
+        fillSsn: $('fillSsn')?.value ?? '',
+        fillIrsAddress: $('fillIrsAddress')?.value ?? '',
+        fillNoticeNum: $('fillNoticeNum')?.value ?? '',
+        fillNoticeDate: $('fillNoticeDate')?.value ?? '',
+        fillTaxYear: $('fillTaxYear')?.value ?? '',
+      };
+    }
+
     function saveIrsWizardState() {
       const wizardState = {
         noticeText: $('noticeText')?.value ?? '',
@@ -524,6 +552,7 @@ Contact: 1-800-829-8310`;
       if (loadingText) loadingText.textContent = 'Restoring your session…';
 
       let verified = false;
+      let verifyResponseBody = {};
       for (let i = 1; i <= 3; i++) {
         try {
           const res = await fetch('/.netlify/functions/verify-session', {
@@ -533,6 +562,11 @@ Contact: 1-800-829-8310`;
           });
           if (res.ok) {
             verified = true;
+            try {
+              verifyResponseBody = await res.json();
+            } catch {
+              verifyResponseBody = {};
+            }
             break;
           }
         } catch {
@@ -551,30 +585,10 @@ Contact: 1-800-829-8310`;
       state.jobPaid = true;
       state.previewMode = false;
 
-      const raw = localStorage.getItem('irs_wizard_state');
-      if (!raw) {
+      const st = verifyResponseBody.wizardState;
+      if (!st || typeof st !== 'object') {
         if (loading) loading.classList.remove('show');
         if (loadingText) loadingText.textContent = 'Analyzing notice…';
-        applyWizardBlur();
-        history.replaceState({}, '', '/audit-defense.html');
-        return;
-      }
-
-      let st;
-      try {
-        st = JSON.parse(raw);
-      } catch {
-        if (loading) loading.classList.remove('show');
-        if (loadingText) loadingText.textContent = 'Analyzing notice…';
-        history.replaceState({}, '', '/audit-defense.html');
-        return;
-      }
-
-      if (!st.savedAt || Date.now() - st.savedAt > 7200000) {
-        localStorage.removeItem('irs_wizard_state');
-        if (loading) loading.classList.remove('show');
-        if (loadingText) loadingText.textContent = 'Analyzing notice…';
-        applyWizardBlur();
         history.replaceState({}, '', '/audit-defense.html');
         return;
       }
@@ -620,8 +634,6 @@ Contact: 1-800-829-8310`;
       if (typeof st.fileLabel === 'string' && $('fileLabel')) $('fileLabel').textContent = st.fileLabel;
 
       if (st.jobId) state.jobId = st.jobId;
-      if ('fileBase64' in st) state.fileBase64 = st.fileBase64 ?? null;
-      if ('fileType' in st) state.fileType = st.fileType ?? null;
       state.analysis = st.analysis && typeof st.analysis === 'object' ? st.analysis : null;
       state.strategy = typeof st.strategy === 'string' ? st.strategy : null;
       state.letterRaw = typeof st.letterRaw === 'string' ? st.letterRaw : '';
@@ -650,7 +662,6 @@ Contact: 1-800-829-8310`;
             : 1;
       showStep(targetStep);
 
-      localStorage.removeItem('irs_wizard_state');
       if (loading) loading.classList.remove('show');
       if (loadingText) loadingText.textContent = 'Analyzing notice…';
       updateAnalyzeEnabled();
@@ -1296,11 +1307,10 @@ Contact: 1-800-829-8310`;
       btn.disabled = true;
       btn.textContent = 'Redirecting to Stripe…';
       try {
-        saveIrsWizardState();
         const res = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId }),
+          body: JSON.stringify({ priceId, wizardState: captureWizardState() }),
         });
         const data = await res.json().catch(() => ({}));
         if (data.url) {

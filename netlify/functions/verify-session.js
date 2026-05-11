@@ -81,12 +81,29 @@ exports.handler = async (event) => {
       console.warn("verify-session audit_jobs upsert:", e.message);
     }
 
+    let wizardState = null;
+    try {
+      const { data: wsRow, error: wsErr } = await supabase
+        .from("wizard_state")
+        .select("state")
+        .eq("stripe_session_id", session_id)
+        .maybeSingle();
+      if (wsErr) {
+        console.warn("verify-session wizard_state:", wsErr.message);
+      } else {
+        wizardState = wsRow?.state ?? null;
+      }
+    } catch (e) {
+      console.warn("verify-session wizard_state:", e.message);
+    }
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders() },
       body: JSON.stringify({
         paid: true,
         customer_email: customerEmail || null,
+        wizardState,
       }),
     };
   } catch (e) {

@@ -1,3 +1,15 @@
+// MANUAL STEP REQUIRED: Run this SQL in Supabase before deploying:
+// create table wizard_state (
+//   id uuid primary key default gen_random_uuid(),
+//   stripe_session_id text unique not null,
+//   state jsonb not null,
+//   created_at timestamptz default now()
+// );
+// alter table wizard_state enable row level security;
+// create policy "service role only"
+//   on wizard_state for all
+//   to service_role using (true);
+
 const Stripe = require("stripe");
 const { authorizeWizardRequest, corsHeaders, json } = require("./_wizardAuth.js");
 const { getSupabaseAdmin } = require("./_supabase.js");
@@ -19,7 +31,7 @@ exports.handler = async (event) => {
 
   try {
     const parsedBody = JSON.parse(event.body || "{}");
-    const { priceId, email } = parsedBody;
+    const { priceId, email, wizardState } = parsedBody;
     if (!priceId || typeof priceId !== "string") {
       return json(400, event, { error: "priceId required" });
     }
@@ -92,6 +104,25 @@ exports.handler = async (event) => {
     };
 
     const session = await stripe.checkout.sessions.create(params);
+
+    if (
+      wizardState != null &&
+      typeof wizardState === "object" &&
+      !Array.isArray(wizardState)
+    ) {
+      try {
+        const { error: wsErr } = await admin.from("wizard_state").insert({
+          stripe_session_id: session.id,
+          state: wizardState,
+          created_at: new Date().toISOString(),
+        });
+        if (wsErr) {
+          console.warn("wizard_state insert:", wsErr.message);
+        }
+      } catch (e) {
+        console.warn("wizard_state insert:", e.message);
+      }
+    }
 
     return json(200, event, { url: session.url });
   } catch (error) {
