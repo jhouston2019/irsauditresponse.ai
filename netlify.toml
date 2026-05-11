@@ -104,7 +104,7 @@
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
-    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Service-Key"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Service-Key, X-Stripe-Session"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
 
 # ✅ Long-term caching for assets

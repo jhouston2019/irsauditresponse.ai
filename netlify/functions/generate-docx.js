@@ -3,6 +3,7 @@ const { Document, Packer, Paragraph, TextRun } = require("docx");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
 const { getSupabaseAdmin } = require("./_supabase.js");
 const { enforcePaidAuditJob } = require("./_auditJobs.js");
+const { authorizeExportViaStripeSession } = require("./_stripeSessionExportAuth.js");
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
@@ -13,10 +14,16 @@ exports.handler = async (event) => {
     return json(405, event, { error: "Method not allowed" });
   }
 
+  const authHeader =
+    event.headers.authorization || event.headers.Authorization || "";
+  const hasBearer = /^Bearer\s+\S+/i.test(authHeader || "");
+
   const auth = await authorizeWizardRequest(event);
-  if (!auth.ok) return auth.response;
-  if (!auth.user?.id) {
-    return json(403, event, { error: "Forbidden" });
+  let userId = null;
+  if (auth.ok && auth.user?.id) {
+    userId = auth.user.id;
+  } else if (hasBearer) {
+    return auth.response || json(401, event, { error: "Authentication required" });
   }
 
   let body;
@@ -30,8 +37,19 @@ exports.handler = async (event) => {
   if (!jobIdTrim) return json(400, event, { error: "job_id is required" });
 
   const admin = getSupabaseAdmin();
-  const payDenied = await enforcePaidAuditJob(admin, json, event, auth.user.id, jobIdTrim);
-  if (payDenied) return payDenied;
+
+  if (userId) {
+    const payDenied = await enforcePaidAuditJob(admin, json, event, userId, jobIdTrim);
+    if (payDenied) return payDenied;
+  } else {
+    const stripeAuth = await authorizeExportViaStripeSession(event, jobIdTrim, json);
+    if (!stripeAuth.ok) {
+      return (
+        stripeAuth.response ||
+        json(401, event, { error: "Authentication required" })
+      );
+    }
+  }
 
   const text = sanitizeString(body.text || "", 200000);
   const fileName = sanitizeString(body.fileName || "irs-response-letter.docx", 120) || "irs-response-letter.docx";

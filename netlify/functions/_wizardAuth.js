@@ -26,7 +26,7 @@ function corsHeaders(event, extra = {}) {
   const allowOrigin = origin && allowed.has(origin) ? origin : site;
   return {
     "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Service-Key",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Service-Key, X-Stripe-Session",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     ...extra,
   };

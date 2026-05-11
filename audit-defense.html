@@ -157,7 +157,7 @@
 
   <div class="shell">
     <div class="progress-wrap">
-      <p style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. On Analysis, the lower half of that screen is blurred until checkout; on Letter, the bottom 60% of the letter text is blurred (not counting the title row or placeholders below). Strategy stays clear. Use step 4 to unlock the full deliverable.</p>
+      <p id="wizardPreviewBanner" style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. On Analysis, the lower half of that screen is blurred until checkout; on Letter, the bottom 60% of the letter text is blurred (not counting the title row or placeholders below). Strategy stays clear. Use step 4 to unlock the full deliverable.</p>
       <div class="progress-steps" id="progressSteps">
         <div class="step-pill active" data-step="1">1. Input</div>
         <div class="step-pill" data-step="2">2. Analysis</div>
@@ -467,6 +467,7 @@ Contact: 1-800-829-8310`;
     const state = {
       step: 1,
       accessToken: null,
+      stripeSessionId: null,
       jobId: null,
       jobPaid: false,
       previewMode: false,
@@ -584,6 +585,10 @@ Contact: 1-800-829-8310`;
 
       state.jobPaid = true;
       state.previewMode = false;
+      state.stripeSessionId = sessionId;
+      syncWizardPreviewBanner();
+      const wpbPaid = $('wizardPreviewBanner');
+      if (wpbPaid) wpbPaid.style.display = 'none';
 
       const st = verifyResponseBody.wizardState;
       if (!st || typeof st !== 'object') {
@@ -680,6 +685,12 @@ Contact: 1-800-829-8310`;
       history.replaceState({}, '', '/audit-defense.html');
     }
 
+    function syncWizardPreviewBanner() {
+      const el = $('wizardPreviewBanner');
+      if (!el) return;
+      el.style.display = state.previewMode === true ? '' : 'none';
+    }
+
     function applyWizardBlur() {
       const locked = state.previewMode === true;
       document.body.classList.toggle('audit-wizard-preview', locked);
@@ -703,7 +714,8 @@ Contact: 1-800-829-8310`;
         if (s === n) pill.classList.add('active');
         else if (s < n) pill.classList.add('done');
       });
-      if (state.previewMode) applyWizardBlur();
+      syncWizardPreviewBanner();
+      applyWizardBlur();
     }
 
     document.querySelectorAll('.step-pill').forEach((pill) => {
@@ -751,6 +763,8 @@ Contact: 1-800-829-8310`;
       const h = { 'Content-Type': 'application/json' };
       if (state.accessToken) {
         h.Authorization = `Bearer ${state.accessToken}`;
+      } else if (state.stripeSessionId) {
+        h['X-Stripe-Session'] = state.stripeSessionId;
       }
       return h;
     }
@@ -1281,6 +1295,16 @@ Contact: 1-800-829-8310`;
     $('btnFillPh').addEventListener('click', () => {
       let t = state.editing ? $('letterEdit').value : state.letterRaw;
       const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const supAmtEl = $('suppAmount');
+      const supAmtVal = (supAmtEl?.value ?? '').trim();
+      const anaAmt = state.analysis?.irsProposedAmount;
+      const anaAmtTrim =
+        typeof anaAmt === 'string' &&
+        anaAmt.trim() &&
+        anaAmt.trim().toLowerCase() !== 'not specified'
+          ? anaAmt.trim()
+          : '';
+      const agreedAmountReplacement = supAmtVal || anaAmtTrim;
       const name = $('fillName').value.trim();
       const addr = $('fillAddress').value.trim();
       const city = $('fillCity').value.trim();
@@ -1311,6 +1335,7 @@ Contact: 1-800-829-8310`;
         [/\[NOTICE NUMBER[^\]]*\]/gi, $('fillNoticeNum').value.trim() || '[NOTICE NUMBER — found at top of notice]'],
         [/\[NOTICE DATE[^\]]*\]/gi, $('fillNoticeDate').value.trim() || today],
         [/\[TAX YEAR[^\]]*\]/gi, $('fillTaxYear')?.value?.trim() || state.analysis?.taxYear || $('taxYear')?.value.trim() || '[TAX YEAR]'],
+        [/\[\$?\s*INSERT\s+AGREED\s+AMOUNT\s+HERE\s*\]/gi, agreedAmountReplacement],
         [/\[DESCRIBE YOUR SPECIFIC SITUATION[^\]]*\]/gi, ''],
       ];
       map.forEach(([re, val]) => { t = t.replace(re, val); });
@@ -1479,6 +1504,7 @@ Contact: 1-800-829-8310`;
       if (warn) warn.style.display = 'none';
       $('unlockPanel').classList.remove('show');
       state.previewMode = false;
+      state.stripeSessionId = null;
       $('step1Error').classList.remove('show');
       $('step1Error').textContent = '';
       document.getElementById('customStrategyText').value = '';
@@ -1523,6 +1549,7 @@ Contact: 1-800-829-8310`;
       if (state.jobPaid) state.previewMode = false;
       $('unlockPanel').classList.remove('show');
       updateAnalyzeEnabled();
+      syncWizardPreviewBanner();
       applyWizardBlur();
     }
     if (document.readyState === 'loading') {
