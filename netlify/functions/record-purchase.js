@@ -472,6 +472,5 @@ exports.handler = async (event) => {
   return json(200, event, {
     ok: true,
     already_processed: !!alreadyProcessed,
-    redirect: alreadyProcessed ? "/dashboard.html" : "/audit-defense.html",
   });
 };

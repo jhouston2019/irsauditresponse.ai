@@ -64,8 +64,15 @@ const formPanel = document.getElementById('formPanel');
 const formErr = document.getElementById('formErr');
 
 if (!sessionId) {
-  console.log('[register] no session_id — redirecting to /pricing');
-  goPricing();
+  verifyPanel.style.display = 'none';
+  formPanel.style.display = 'block';
+  formErr.textContent = '';
+  if (!supabaseConfiguredInPage()) {
+    formErr.innerHTML =
+      'This deployed page doesn’t include Supabase keys (missing or still <code>%%</code> placeholders). In Netlify: set <strong>SUPABASE_URL</strong> and <strong>SUPABASE_ANON_KEY</strong>, redeploy so account creation works.';
+    formErr.style.textAlign = 'left';
+    formErr.style.color = '#b45309';
+  }
 } else {
   (async () => {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -149,11 +156,6 @@ if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
       (typeof sessionId === 'string' && sessionId.trim()
         ? sessionId.trim()
         : new URLSearchParams(window.location.search).get('session_id')) || '';
-    if (!sid) {
-      formErr.textContent = 'Missing checkout session. Start again from pricing.';
-      registerSubmitInFlight = false;
-      return;
-    }
 
     try {
       if (submitBtn) {
@@ -272,6 +274,11 @@ if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
       }
       console.log('[register] access token present:', true);
 
+      if (!sid) {
+        window.location.href = '/dashboard.html';
+        return;
+      }
+
       const rec = await fetch('/.netlify/functions/record-purchase', {
         method: 'POST',
         headers: {
@@ -291,17 +298,7 @@ if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
       }
 
       if (rec.ok) {
-        const dest = typeof recBody.redirect === 'string' && recBody.redirect.startsWith('/')
-          ? recBody.redirect
-          : '/audit-defense.html';
-
-        // Append session_id so the wizard can restore saved state
-        const finalDest = dest.includes('audit-defense')
-          ? dest + '?session_id=' + encodeURIComponent(sid)
-          : dest;
-
-        console.log('[register] redirect destination:', finalDest);
-        window.location.href = finalDest;
+        window.location.href = '/dashboard.html';
         return;
       }
 

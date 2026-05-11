@@ -38,7 +38,7 @@
       var p = new URLSearchParams(window.location.search);
       var sid = p.get('session_id');
       if (sid) {
-        window.location.replace('/register?session_id=' + encodeURIComponent(sid));
+        window.location.replace('/audit-defense.html?session_id=' + encodeURIComponent(sid));
       } else {
         document.getElementById('cta').setAttribute('href', '/register');
       }

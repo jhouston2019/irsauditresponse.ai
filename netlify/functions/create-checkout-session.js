@@ -85,7 +85,7 @@ exports.handler = async (event) => {
     const params = {
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${site}/register?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${site}/audit-defense.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${site}/pricing`,
       metadata,
       customer_email: (typeof email === "string" && email.trim() ? email.trim() : undefined) || customerEmail || undefined,

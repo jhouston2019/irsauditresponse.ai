@@ -352,6 +352,16 @@
           <button type="button" class="btn btn-primary" id="unlockCheckoutBtn">Get Your Documents Now</button>
         </div>
       </div>
+      <div id="postUnlockPanel" class="unlock-panel" style="display:none;">
+        <p id="unlockConfirm">Your results are unlocked.</p>
+        <div id="saveResultsBlock">
+          <h3>Save your results for later</h3>
+          <p>Create a free account to access your letter from any device.</p>
+          <button type="button" class="btn btn-primary" id="btnCreateAccount">Create Free Account</button>
+        </div>
+        <button type="button" class="btn btn-outline" id="btnReviewAnother" style="margin-top:1rem;">Review Another Notice</button>
+        <span id="btnReviewAnotherErr" style="display:inline-block;color:var(--red);font-size:0.9rem;margin-left:0.75rem;"></span>
+      </div>
       <div class="toolbar">
         <button type="button" class="btn btn-danger" id="btnStartOver">Start over</button>
       </div>
@@ -645,6 +655,12 @@ Contact: 1-800-829-8310`;
       if (loadingText) loadingText.textContent = 'Analyzing notice…';
       applyWizardBlur();
       updateAnalyzeEnabled();
+      showStep(4);
+      const postUnlockPanelEl = document.getElementById('postUnlockPanel');
+      if (postUnlockPanelEl) {
+        postUnlockPanelEl.style.display = 'block';
+        postUnlockPanelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       history.replaceState({}, '', '/audit-defense.html');
     }
 
@@ -1298,6 +1314,40 @@ Contact: 1-800-829-8310`;
         errEl.textContent = e.message || 'Checkout failed';
         btn.disabled = false;
         btn.textContent = prev;
+      }
+    });
+
+    document.getElementById('btnCreateAccount')?.addEventListener('click', () => {
+      window.location.href = '/register.html';
+    });
+
+    document.getElementById('btnReviewAnother')?.addEventListener('click', async () => {
+      const btn = document.getElementById('btnReviewAnother');
+      const errSpan = document.getElementById('btnReviewAnotherErr');
+      if (errSpan) errSpan.textContent = '';
+      if (!btn) return;
+      const prevText = btn.textContent;
+      try {
+        localStorage.removeItem('irs_wizard_state');
+        btn.disabled = true;
+        btn.textContent = 'Redirecting to checkout…';
+        const meta = document.querySelector('meta[name="stripe-price-id"]');
+        const priceId = (meta?.getAttribute('content') || '').trim();
+        const res = await fetch('/.netlify/functions/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ priceId }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+        throw new Error('checkout');
+      } catch {
+        btn.disabled = false;
+        btn.textContent = prevText || 'Review Another Notice';
+        if (errSpan) errSpan.textContent = 'Something went wrong. Please try again.';
       }
     });
 

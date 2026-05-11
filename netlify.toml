@@ -8,7 +8,7 @@
 # --- Clean URLs + API proxy (must be before SPA fallback) ---
 [[redirects]]
   from = "/success"
-  to = "/register"
+  to = "/audit-defense.html"
   status = 301
 
 [[redirects]]
