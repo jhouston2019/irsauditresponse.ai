@@ -1397,7 +1397,10 @@ Contact: 1-800-829-8310`;
     });
 
     document.getElementById('btnCreateAccount')?.addEventListener('click', () => {
-      window.location.href = '/register.html';
+      const sid = state.stripeSessionId;
+      window.location.href = sid
+        ? '/register.html?session_id=' + encodeURIComponent(sid)
+        : '/register.html';
     });
 
     document.getElementById('btnReviewAnother')?.addEventListener('click', async () => {
