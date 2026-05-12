@@ -76,6 +76,21 @@
             }
         }
 
+        function noticeTypeFromJob(row) {
+            try {
+                const raw = row?.letter_full;
+                if (typeof raw === 'string' && raw.trim()) {
+                    const o = JSON.parse(raw);
+                    if (o && typeof o.noticeType === 'string' && o.noticeType.trim()) {
+                        return o.noticeType.trim();
+                    }
+                }
+            } catch {
+                /* ignore */
+            }
+            return 'Notice';
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const supabase = getSupabase();
             const { data: { session } } = await supabase.auth.getSession();
@@ -120,6 +135,7 @@
                         body: JSON.stringify({
                             session_id: pendingSid,
                             user_id: sessionOut.user.id,
+                            stripe_session_id: pendingSid,
                         }),
                     });
                     const body = await res.json().catch(() => ({}));
@@ -160,29 +176,30 @@
             }
 
             const { data: rows, error } = await supabase
-                .from('documents')
+                .from('audit_jobs')
                 .select('*')
                 .eq('user_id', sessionOut.user.id)
+                .not('letter_html', 'is', null)
                 .order('created_at', { ascending: false });
 
             if (error) {
-                docList.innerHTML = '<p style="color:#fca5a5;">Could not load documents.</p>';
+                docList.innerHTML = '<p style="color:#fca5a5;">Could not load letters.</p>';
                 return;
             }
 
-            const letters = (rows || []).filter((r) => r.letter_html != null && String(r.letter_html).trim() !== '');
+            const letters = (rows || []).filter((r) => String(r.letter_html || '').trim() !== '');
 
             if (letters.length === 0) {
                 docList.innerHTML = `
                     <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:2rem; color:#e2e8f0;">
-                        <p style="margin:0 0 1rem;">No documents yet. Complete the wizard to generate your first letter.</p>
+                        <p style="margin:0 0 1rem;">No letters yet. Complete the wizard to generate your first letter.</p>
                         <a href="/app" style="color:#93c5fd; font-weight:600;">Open the app →</a>
                     </div>`;
                 return;
             }
 
             docList.innerHTML = letters.map((doc) => {
-                const nt = doc.notice_type || 'Notice';
+                const nt = noticeTypeFromJob(doc);
                 const dt = formatDate(doc.created_at);
                 const safeId = escapeHtml(doc.id);
                 return `
@@ -202,7 +219,7 @@
                     const id = btn.getAttribute('data-id');
                     const doc = byId[id];
                     if (!doc) return;
-                    letterModalTitle.textContent = doc.notice_type || 'Letter';
+                    letterModalTitle.textContent = noticeTypeFromJob(doc);
                     letterModalBody.textContent = doc.letter_html || '';
                     letterModal.showModal();
                 });

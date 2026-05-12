@@ -20,7 +20,7 @@ function isFkViolation(err) {
 }
 
 /**
- * POST body: { session_id: string, user_id?: string } — user_id optional but must match JWT if sent.
+ * POST body: { session_id: string, user_id?: string, stripe_session_id?: string (must match session_id) }
  * Header: Authorization: Bearer <Supabase access token>
  */
 exports.handler = async (event) => {
@@ -63,6 +63,16 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || "{}");
     sessionId =
       typeof body.session_id === "string" ? body.session_id.trim() : "";
+    const stripeSessionIdBody =
+      typeof body.stripe_session_id === "string"
+        ? body.stripe_session_id.trim()
+        : "";
+    if (stripeSessionIdBody && stripeSessionIdBody !== sessionId) {
+      return json(400, event, {
+        error: "stripe_session_id must match session_id",
+        code: "STRIPE_SESSION_MISMATCH",
+      });
+    }
     if (body.user_id != null && String(body.user_id).trim() !== jwtUserId) {
       return json(400, event, {
         error: "user_id does not match authenticated user",

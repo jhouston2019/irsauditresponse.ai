@@ -377,9 +377,6 @@
   <script type="module">
     import { getSupabase } from '/src/components/Auth.js';
 
-    let letterGenSerial = 0;
-    let savedDocumentsLetterGenSerial = null;
-
     async function bootstrapAuthGate() {
       try {
         const url = document.querySelector('meta[name="supabase-url"]')?.content;
@@ -927,6 +924,8 @@ Contact: 1-800-829-8310`;
       const h = { 'Content-Type': 'application/json' };
       if (!useWizardPreview() && state.accessToken) {
         h.Authorization = `Bearer ${state.accessToken}`;
+      } else if (state.stripeSessionId) {
+        h['X-Stripe-Session'] = state.stripeSessionId;
       }
       return h;
     }
@@ -1213,8 +1212,6 @@ Contact: 1-800-829-8310`;
 
     $('btnGenLetter').addEventListener('click', async () => {
       if (!state.strategy || !state.analysis) return;
-      letterGenSerial += 1;
-      const saveSerial = letterGenSerial;
       $('step3Loading').classList.add('show');
       $('btnGenLetter').disabled = true;
       try {
@@ -1222,7 +1219,7 @@ Contact: 1-800-829-8310`;
         const prev = useWizardPreview();
         const payload = {
           strategy: state.strategy,
-          job_id: prev ? undefined : state.jobId,
+          job_id: state.jobId ?? undefined,
           wizard_preview: prev,
           analysis: prev ? state.analysis : undefined,
           taxpayerName: $('fillName').value.trim() || undefined,
@@ -1241,11 +1238,6 @@ Contact: 1-800-829-8310`;
         else state.previewMode = false;
         state.editing = false;
         renderLetterDisplay();
-        if (state.letterRaw) {
-          sessionStorage.setItem('pendingLetterRaw', state.letterRaw);
-          sessionStorage.setItem('pendingNoticeType', state.analysis?.noticeType ?? '');
-        }
-        void saveLetterToDocuments(saveSerial);
         const a = state.analysis;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
         showStep(4);
@@ -1256,31 +1248,6 @@ Contact: 1-800-829-8310`;
         $('btnGenLetter').disabled = false;
       }
     });
-
-    async function saveLetterToDocuments(genSerial) {
-      if (!state.letterRaw) return;
-      if (!state.accessToken) return;
-      if (savedDocumentsLetterGenSerial === genSerial) return;
-
-      try {
-        const supabase = getSupabase();
-        const { error } = await supabase
-          .from('documents')
-          .insert({
-            user_id: (await supabase.auth.getUser()).data.user?.id,
-            letter_html: state.letterRaw,
-            notice_type: state.analysis?.noticeType ?? null,
-            created_at: new Date().toISOString(),
-          });
-        if (error) {
-          console.warn('[wizard] saveLetterToDocuments failed', error);
-          return;
-        }
-        savedDocumentsLetterGenSerial = genSerial;
-      } catch (e) {
-        console.warn('[wizard] saveLetterToDocuments error', e);
-      }
-    }
 
     function highlightPlaceholders(text) {
       const escaped = escapeHtml(text);
@@ -1409,8 +1376,6 @@ Contact: 1-800-829-8310`;
     });
 
     document.getElementById('btnReviewAnother')?.addEventListener('click', async () => {
-      sessionStorage.removeItem('pendingLetterRaw');
-      sessionStorage.removeItem('pendingNoticeType');
       sessionStorage.removeItem('stripeSessionId');
       const btn = document.getElementById('btnReviewAnother');
       const errSpan = document.getElementById('btnReviewAnotherErr');
@@ -1529,8 +1494,6 @@ Contact: 1-800-829-8310`;
 
     $('btnStartOver').addEventListener('click', () => {
       if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
-      sessionStorage.removeItem('pendingLetterRaw');
-      sessionStorage.removeItem('pendingNoticeType');
       sessionStorage.removeItem('stripeSessionId');
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';

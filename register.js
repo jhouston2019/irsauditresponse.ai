@@ -38,46 +38,6 @@ function withTimeout(promise, ms, message) {
   ]);
 }
 
-let saveLetterFromWizardAttempted = false;
-
-async function saveLetterFromWizardState() {
-  if (saveLetterFromWizardAttempted) return;
-  const letterRaw = sessionStorage.getItem('pendingLetterRaw');
-  if (!letterRaw || !letterRaw.trim()) return;
-
-  try {
-    const supabase = getSupabase();
-    const {
-      data: { user },
-      error: userErr,
-    } = await supabase.auth.getUser();
-    if (userErr || !user?.id) {
-      console.warn('[register] no user for letter save');
-      return;
-    }
-
-    const noticeType = sessionStorage.getItem('pendingNoticeType') || null;
-
-    const { error } = await supabase.from('documents').insert({
-      user_id: user.id,
-      letter_html: letterRaw,
-      notice_type: noticeType,
-      created_at: new Date().toISOString(),
-    });
-
-    if (error) {
-      console.warn('[register] letter save failed', error.code, error.message);
-      return;
-    }
-
-    saveLetterFromWizardAttempted = true;
-    sessionStorage.removeItem('pendingLetterRaw');
-    sessionStorage.removeItem('pendingNoticeType');
-  } catch (e) {
-    console.warn('[register] letter save error', e);
-  }
-}
-
 function goPricing() {
   window.location.replace('/pricing');
 }
@@ -314,8 +274,6 @@ if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
       }
       console.log('[register] access token present:', true);
 
-      await saveLetterFromWizardState();
-
       if (!sid) {
         window.location.href = '/dashboard.html';
         return;
@@ -327,7 +285,11 @@ if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ session_id: sid, user_id: userId }),
+        body: JSON.stringify({
+          session_id: sid,
+          user_id: userId,
+          stripe_session_id: sid,
+        }),
       });
 
       console.log('[register] record-purchase status:', rec.status);

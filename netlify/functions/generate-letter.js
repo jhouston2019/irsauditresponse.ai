@@ -4,6 +4,55 @@ const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require(".
 const { getSupabaseAdmin } = require("./_supabase.js");
 const { enforcePaidAuditJob } = require("./_auditJobs.js");
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Persist final letter text to audit_jobs.letter_html (service role).
+ * Authenticated path: job must belong to user (already validated by enforcePaidAuditJob).
+ * Preview + paid checkout: X-Stripe-Session must match job.stripe_session_id.
+ */
+async function persistGeneratedLetterHtml(admin, event, wizardPreview, authUser, jobIdTrim, letter) {
+  if (!jobIdTrim || !UUID_RE.test(jobIdTrim) || !letter) return;
+  const text = String(letter);
+  if (text.length > 4_800_000) return;
+
+  if (!wizardPreview) {
+    const userId = authUser?.id;
+    if (!userId) return;
+    const { error: upErr } = await admin
+      .from("audit_jobs")
+      .update({ letter_html: text })
+      .eq("id", jobIdTrim)
+      .eq("user_id", userId);
+    if (upErr) console.error("generate-letter letter_html persist:", upErr.message);
+    return;
+  }
+
+  const stripeHdr =
+    event.headers["x-stripe-session"] || event.headers["X-Stripe-Session"] || "";
+  const sid = String(stripeHdr).trim();
+  if (!sid) return;
+
+  const { data: job, error: selErr } = await admin
+    .from("audit_jobs")
+    .select("id,stripe_session_id,paid,is_unlocked")
+    .eq("id", jobIdTrim)
+    .maybeSingle();
+
+  if (selErr || !job) return;
+  if (job.stripe_session_id !== sid) return;
+  if (!job.paid && !job.is_unlocked) return;
+
+  const { error: upErr } = await admin
+    .from("audit_jobs")
+    .update({ letter_html: text })
+    .eq("id", jobIdTrim)
+    .eq("stripe_session_id", sid);
+
+  if (upErr) console.error("generate-letter letter_html persist (checkout preview):", upErr.message);
+}
+
 const LETTER_SYSTEM_PROMPT = `You are a senior tax attorney and IRS correspondence specialist with 25 years
 of experience handling IRS audits, CP2000 notices, deficiency notices, and
 tax controversy matters. You have successfully resolved thousands of IRS disputes.
@@ -238,6 +287,15 @@ Generate the complete response letter now.`;
     if (!letter) {
       return json(503, event, { error: "Letter generation produced no content. Please try again." });
     }
+
+    await persistGeneratedLetterHtml(
+      admin,
+      event,
+      wizardPreview,
+      authUser,
+      jobIdTrim,
+      letter,
+    );
 
     const payload = { letter };
     if (wizardPreview) payload.wizard_preview_only = true;
