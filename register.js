@@ -38,6 +38,44 @@ function withTimeout(promise, ms, message) {
   ]);
 }
 
+/** Wizard snapshot from verify-session when registering after Stripe checkout */
+let verifiedWizardState = null;
+
+let saveLetterFromWizardAttempted = false;
+
+async function saveLetterFromWizardState(session, ws) {
+  if (!ws || !ws.letterRaw) return;
+  if (!session?.access_token) return;
+  if (saveLetterFromWizardAttempted) return;
+  saveLetterFromWizardAttempted = true;
+
+  try {
+    const { createClient } = await import(
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm',
+    );
+    const url = document.querySelector('meta[name="supabase-url"]')?.content;
+    const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+    if (!url || !key || url.includes('%%') || key.includes('%%')) return;
+
+    const supabase = createClient(url, key, {
+      global: {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      },
+    });
+
+    const { error } = await supabase.from('documents').insert({
+      user_id: session.user.id,
+      letter_html: ws.letterRaw,
+      notice_type: ws.analysis?.noticeType ?? null,
+      created_at: new Date().toISOString(),
+    });
+
+    if (error) console.warn('[register] saveLetterFromWizardState failed', error);
+  } catch (e) {
+    console.warn('[register] saveLetterFromWizardState error', e);
+  }
+}
+
 function goPricing() {
   window.location.replace('/pricing');
 }
@@ -90,8 +128,11 @@ if (!sessionId) {
           try {
             const j = await res.json();
             stripeCustomerEmail = typeof j.customer_email === 'string' ? j.customer_email.trim() : '';
+            verifiedWizardState =
+              j.wizardState != null && typeof j.wizardState === 'object' ? j.wizardState : null;
           } catch {
             stripeCustomerEmail = '';
+            verifiedWizardState = null;
           }
           ok = true;
           break;
@@ -273,6 +314,11 @@ if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
         return;
       }
       console.log('[register] access token present:', true);
+
+      const {
+        data: { session: sessionForDocs },
+      } = await supabase.auth.getSession();
+      await saveLetterFromWizardState(sessionForDocs, verifiedWizardState);
 
       if (!sid) {
         window.location.href = '/dashboard.html';
