@@ -657,7 +657,13 @@ Contact: 1-800-829-8310`;
 
       if (state.analysis) renderStep2();
 
-      if (state.analysis && state.strategy) renderStep3(state.strategy);
+      if (state.analysis && state.strategy) {
+        const savedStrategy = state.strategy;
+        renderStep3(savedStrategy);
+        state.strategy = savedStrategy;
+        const genBtn = $('btnGenLetter');
+        if (genBtn) genBtn.disabled = false;
+      }
 
       if (state.letterRaw) {
         $('btnToggleEdit').textContent = 'Edit letter';
