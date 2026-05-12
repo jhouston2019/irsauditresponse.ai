@@ -1240,6 +1240,7 @@ Contact: 1-800-829-8310`;
         else state.previewMode = false;
         state.editing = false;
         renderLetterDisplay();
+        void updateWizardStateWithLetter();
         void saveLetterToDocuments(saveSerial);
         const a = state.analysis;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
@@ -1274,6 +1275,27 @@ Contact: 1-800-829-8310`;
         savedDocumentsLetterGenSerial = genSerial;
       } catch (e) {
         console.warn('[wizard] saveLetterToDocuments error', e);
+      }
+    }
+
+    async function updateWizardStateWithLetter() {
+      if (!state.letterRaw) return;
+      if (!state.stripeSessionId) return;
+
+      try {
+        const res = await fetch('/.netlify/functions/update-wizard-state-letter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: state.stripeSessionId,
+            letterRaw: state.letterRaw,
+          }),
+        });
+        if (!res.ok) {
+          console.warn('[wizard] updateWizardStateWithLetter failed', res.status);
+        }
+      } catch (e) {
+        console.warn('[wizard] updateWizardStateWithLetter error', e);
       }
     }
 
