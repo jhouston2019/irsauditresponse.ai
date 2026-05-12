@@ -284,6 +284,7 @@
         </p>
       </div>
       <div id="strategyDetail" style="margin-top:1.25rem;padding:1rem;background:#f9fafb;border-radius:8px;border:1px solid var(--border);display:none;"></div>
+      <div id="step3Error" class="error-inline"></div>
       <div class="toolbar">
         <button type="button" class="btn btn-secondary" id="btnBack3">← Back</button>
         <button type="button" class="btn btn-primary" id="btnGenLetter" disabled>Generate My Response Letter →</button>
@@ -603,6 +604,12 @@ Contact: 1-800-829-8310`;
         if (loading) loading.classList.remove('show');
         if (loadingText) loadingText.textContent = 'Analyzing notice…';
         if (stripeJobFromVerify) state.jobId = stripeJobFromVerify;
+        console.log(
+          '[audit_jobs lifecycle] post-payment no wizard_state blob; state.jobId=',
+          state.jobId,
+          'verify.jobId=',
+          stripeJobFromVerify || null,
+        );
         history.replaceState({}, '', '/audit-defense.html');
         return;
       }
@@ -649,11 +656,30 @@ Contact: 1-800-829-8310`;
 
       if (st.jobId) state.jobId = st.jobId;
       if (stripeJobFromVerify) state.jobId = stripeJobFromVerify;
+      console.log(
+        '[audit_jobs lifecycle] post-payment restore state.jobId=',
+        state.jobId,
+        'verify.jobId=',
+        stripeJobFromVerify || null,
+        'wizardState.jobId=',
+        st.jobId || null,
+      );
       state.analysis = st.analysis && typeof st.analysis === 'object' ? st.analysis : null;
       state.strategy = typeof st.strategy === 'string' ? st.strategy : null;
       state.letterRaw = typeof st.letterRaw === 'string' ? st.letterRaw : '';
       state.editing = false;
       if (typeof st.step === 'number' && st.step >= 1 && st.step <= 4) state.step = st.step;
+
+      if (state.letterRaw && state.stripeSessionId) {
+        fetch('/.netlify/functions/update-wizard-state-letter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: state.stripeSessionId,
+            letterRaw: state.letterRaw,
+          }),
+        }).catch((e) => console.warn('[wizard] letter restore save failed', e));
+      }
 
       if (state.analysis) renderStep2();
 
@@ -724,6 +750,13 @@ Contact: 1-800-829-8310`;
       state.step = n;
       document.querySelectorAll('.step-panel').forEach((el) => el.classList.remove('active'));
       $(`step${n}`).classList.add('active');
+      if (n === 3) {
+        const e3 = $('step3Error');
+        if (e3) {
+          e3.textContent = '';
+          e3.classList.remove('show');
+        }
+      }
       document.querySelectorAll('.step-pill').forEach((pill) => {
         const s = +pill.dataset.step;
         pill.classList.remove('active', 'done');
@@ -961,10 +994,15 @@ Contact: 1-800-829-8310`;
         if (suppDeadline?.value.trim()) {
           text += '\nResponse Deadline: ' + suppDeadline.value.trim();
         }
+        if (!preview) {
+          if (!state.jobId) {
+            throw new Error('Missing job ID before analysis. Return to step 1 or complete checkout, then try again.');
+          }
+        }
         const body = {
           text,
           wizard_preview: preview,
-          job_id: preview ? undefined : state.jobId,
+          ...(state.jobId ? { job_id: state.jobId } : {}),
           fileBase64: state.fileBase64 || undefined,
           fileType: state.fileType || undefined,
           noticeType: $('noticeType').value || undefined,
@@ -988,9 +1026,21 @@ Contact: 1-800-829-8310`;
           throw new Error(data.error || 'Analysis failed');
         }
 
+        console.log(
+          '[audit_jobs lifecycle] analyze OK; recordId=',
+          data.recordId,
+          'state.jobId(before)=',
+          state.jobId,
+        );
+
         if (data.wizard_preview_only === true && data.analysis && typeof data.analysis === 'object') {
           state.previewMode = true;
           state.analysis = data.analysis;
+          if (!data.recordId || String(data.recordId).trim() === '') {
+            throw new Error('Analysis succeeded but no job was saved. Please try again or contact support.');
+          }
+          state.jobId = data.recordId;
+          console.log('[audit_jobs lifecycle] preview assigned state.jobId=', state.jobId);
           renderStep2();
           showStep(2);
           return;
@@ -1001,25 +1051,30 @@ Contact: 1-800-829-8310`;
           throw new Error(data.error || 'Analysis response missing saved record.');
         }
         state.jobId = data.recordId;
-        const supUrl = document.querySelector('meta[name="supabase-url"]')?.content;
-        const supKey = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-        if (!supUrl || supUrl.includes('%%') || !supKey || supKey.includes('%%')) {
-          throw new Error('Supabase not configured.');
-        }
-        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-        const supHydrate = createClient(supUrl, supKey);
-        const { data: aj, error: ajErr } = await supHydrate
-          .from('audit_jobs')
-          .select('letter_full')
-          .eq('id', data.recordId)
-          .single();
-        if (ajErr || !aj?.letter_full) {
-          throw new Error('Could not load saved analysis.');
-        }
-        try {
-          state.analysis = JSON.parse(aj.letter_full);
-        } catch {
-          throw new Error('Saved analysis format error.');
+        console.log('[audit_jobs lifecycle] signed-in path state.jobId=', state.jobId);
+        if (data.analysis && typeof data.analysis === 'object') {
+          state.analysis = data.analysis;
+        } else {
+          const supUrl = document.querySelector('meta[name="supabase-url"]')?.content;
+          const supKey = document.querySelector('meta[name="supabase-anon-key"]')?.content;
+          if (!supUrl || supUrl.includes('%%') || !supKey || supKey.includes('%%')) {
+            throw new Error('Supabase not configured.');
+          }
+          const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+          const supHydrate = createClient(supUrl, supKey);
+          const { data: aj, error: ajErr } = await supHydrate
+            .from('audit_jobs')
+            .select('letter_full')
+            .eq('id', data.recordId)
+            .single();
+          if (ajErr || !aj?.letter_full) {
+            throw new Error('Could not load saved analysis.');
+          }
+          try {
+            state.analysis = JSON.parse(aj.letter_full);
+          } catch {
+            throw new Error('Saved analysis format error.');
+          }
         }
         renderStep2();
         showStep(2);
@@ -1218,27 +1273,37 @@ Contact: 1-800-829-8310`;
 
     $('btnGenLetter').addEventListener('click', async () => {
       if (!state.strategy || !state.analysis) return;
+      const err3 = $('step3Error');
+      err3.textContent = '';
+      err3.classList.remove('show');
       $('step3Loading').classList.add('show');
       $('btnGenLetter').disabled = true;
       try {
+        if (!state.jobId) {
+          throw new Error('Missing job ID before letter generation. Run Analyze again.');
+        }
         const customText = document.getElementById('customStrategyText')?.value.trim();
         const prev = useWizardPreview();
         const payload = {
           strategy: state.strategy,
-          job_id: state.jobId ?? undefined,
+          job_id: state.jobId,
           wizard_preview: prev,
           analysis: prev ? state.analysis : undefined,
           taxpayerName: $('fillName').value.trim() || undefined,
           taxpayerAddress: [$('fillAddress').value.trim(), $('fillCity').value.trim()].filter(Boolean).join(', ') || undefined,
           additionalContext: customText || $('context').value || undefined,
         };
+        console.log('[audit_jobs lifecycle] generate-letter request job_id=', payload.job_id, 'wizard_preview=', prev);
         const res = await fetch(API.letter, {
           method: 'POST',
           headers: wizardRequestHeaders(),
           body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || 'Letter generation failed');
+        if (!res.ok) {
+          const detail = data.code ? ` (${data.code})` : '';
+          throw new Error((data.error || 'Letter generation failed') + detail);
+        }
         state.letterRaw = data.letter || '';
         if (data.wizard_preview_only) state.previewMode = true;
         else state.previewMode = false;
@@ -1248,7 +1313,9 @@ Contact: 1-800-829-8310`;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
         showStep(4);
       } catch (e) {
-        alert(e.message || 'Letter generation failed');
+        err3.textContent = e.message || 'Letter generation failed';
+        err3.classList.add('show');
+        err3.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } finally {
         $('step3Loading').classList.remove('show');
         $('btnGenLetter').disabled = false;
@@ -1356,10 +1423,14 @@ Contact: 1-800-829-8310`;
       btn.disabled = true;
       btn.textContent = 'Redirecting to Stripe…';
       try {
+        if (!state.jobId) {
+          errEl.textContent = 'Run Analyze first so your notice is linked to a saved job, then try checkout again.';
+          throw new Error('Missing job ID');
+        }
         const res = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId, wizardState: captureWizardState() }),
+          body: JSON.stringify({ priceId, job_id: state.jobId, wizardState: captureWizardState() }),
         });
         const data = await res.json().catch(() => ({}));
         if (data.url) {
@@ -1460,10 +1531,13 @@ Contact: 1-800-829-8310`;
       $('step4Error').classList.remove('show');
       $('step4Loading').classList.add('show');
       try {
+        if (!state.jobId) {
+          throw new Error('Missing job ID. Run Analyze again before exporting.');
+        }
         const text = state.editing ? $('letterEdit').value : state.letterRaw;
         await downloadBinary(API.pdf, {
           text,
-          job_id: state.jobId ?? null,
+          job_id: state.jobId,
           fileName: 'irs-response-letter.pdf',
         }, 'irs-response-letter.pdf');
       } catch (e) {
@@ -1484,10 +1558,13 @@ Contact: 1-800-829-8310`;
       $('step4Error').classList.remove('show');
       $('step4Loading').classList.add('show');
       try {
+        if (!state.jobId) {
+          throw new Error('Missing job ID. Run Analyze again before exporting.');
+        }
         const text = state.editing ? $('letterEdit').value : state.letterRaw;
         await downloadBinary(API.docx, {
           text,
-          job_id: state.jobId ?? null,
+          job_id: state.jobId,
           fileName: 'irs-response-letter.docx',
         }, 'irs-response-letter.docx');
       } catch (e) {

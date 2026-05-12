@@ -16,6 +16,9 @@ const { getSupabaseAdmin } = require("./_supabase.js");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function hasBearerToken(event) {
   const auth = event.headers.authorization || event.headers.Authorization || "";
   return /^Bearer\s+\S+/i.test(auth || "");
@@ -80,11 +83,33 @@ exports.handler = async (event) => {
       customerEmail = auth.user.email || null;
       metadataUserId = auth.user.id;
     } else {
-      const ins = await admin.from("audit_jobs").insert({ user_id: null }).select("id").single();
-      if (ins.error || !ins.data?.id) {
-        return json(500, event, { error: ins.error?.message || "Could not create job" });
+      if (jobIdRaw && UUID_RE.test(jobIdRaw)) {
+        const chk = await admin.from("audit_jobs").select("id").eq("id", jobIdRaw).maybeSingle();
+        if (chk.data?.id) {
+          jobId = chk.data.id;
+          console.log(
+            JSON.stringify({
+              fn: "create-checkout-session",
+              phase: "reuse_job",
+              jobId,
+            }),
+          );
+        }
       }
-      jobId = ins.data.id;
+      if (!jobId) {
+        const ins = await admin.from("audit_jobs").insert({ user_id: null }).select("id").single();
+        if (ins.error || !ins.data?.id) {
+          return json(500, event, { error: ins.error?.message || "Could not create job" });
+        }
+        jobId = ins.data.id;
+        console.log(
+          JSON.stringify({
+            fn: "create-checkout-session",
+            phase: "job_created_guest",
+            jobId,
+          }),
+        );
+      }
     }
 
     const metadata = {
@@ -104,6 +129,15 @@ exports.handler = async (event) => {
     };
 
     const session = await stripe.checkout.sessions.create(params);
+    console.log(
+      JSON.stringify({
+        fn: "create-checkout-session",
+        phase: "checkout_session_created",
+        jobId,
+        stripeSessionId: session.id,
+        metadataJobId: metadata.job_id,
+      }),
+    );
 
     if (
       wizardState != null &&

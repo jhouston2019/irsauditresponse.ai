@@ -61,9 +61,41 @@ exports.handler = async (event) => {
       };
       if (customerEmail) patch.customer_email = customerEmail;
       if (userIdMeta) patch.user_id = userIdMeta;
-      const { error: upErr } = await supabase.from("audit_jobs").update(patch).eq("id", jobId);
+      const { data: updatedById, error: upErr } = await supabase
+        .from("audit_jobs")
+        .update(patch)
+        .eq("id", jobId)
+        .select("id");
       if (upErr) {
-        console.warn("verify-session audit_jobs update:", upErr.message);
+        console.error(
+          JSON.stringify({
+            fn: "verify-session",
+            phase: "audit_jobs_update_error",
+            jobId,
+            message: upErr.message,
+          }),
+        );
+      } else {
+        const n = updatedById?.length ?? 0;
+        console.log(
+          JSON.stringify({
+            fn: "verify-session",
+            phase: "audit_jobs_update_by_id",
+            jobId,
+            rowsUpdated: n,
+            stripeSessionId: session.id,
+          }),
+        );
+        if (n === 0) {
+          console.error(
+            JSON.stringify({
+              fn: "verify-session",
+              phase: "audit_jobs_zero_rows",
+              jobId,
+              hint: "No row matched id — job_id metadata may not match preview row or migration issue",
+            }),
+          );
+        }
       }
     }
 

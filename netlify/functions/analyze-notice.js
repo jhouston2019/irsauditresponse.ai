@@ -4,6 +4,14 @@ const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require(".
 const { getSupabaseAdmin } = require("./_supabase.js");
 const { enforcePaidAuditJob } = require("./_auditJobs.js");
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function stripeSessionFromEvent(event) {
+  const h = event.headers["x-stripe-session"] || event.headers["X-Stripe-Session"] || "";
+  return String(h).trim();
+}
+
 const ANALYSIS_SYSTEM_PROMPT = `You are an expert IRS correspondence analyst with 20 years of experience
 in tax controversy, audit defense, and IRS notice resolution.
 
@@ -165,7 +173,121 @@ function fallbackAnalysis(reason) {
   };
 }
 
-async function persistPreviewResponse(admin, json, event, userId, jobId, analysis) {
+async function resolveCanonicalJobId(admin, event, wizardPreview, userId, jobIdTrim) {
+  const sid = stripeSessionFromEvent(event);
+  const log = (step, extra = {}) =>
+    console.log(
+      JSON.stringify({
+        fn: "analyze-notice",
+        phase: "job_resolution",
+        step,
+        userId: userId || null,
+        jobIdCandidate: jobIdTrim || null,
+        hasStripeHeader: Boolean(sid),
+        ...extra,
+      }),
+    );
+
+  if (!wizardPreview) {
+    if (!jobIdTrim || !UUID_RE.test(jobIdTrim)) {
+      log("reject_missing_job_id");
+      return { errorResponse: json(400, event, { error: "job_id is required", code: "missing_job_id" }) };
+    }
+    const { data: job, error: selErr } = await admin
+      .from("audit_jobs")
+      .select("id,user_id")
+      .eq("id", jobIdTrim)
+      .maybeSingle();
+    if (selErr) {
+      log("db_error", { message: selErr.message });
+      return { errorResponse: json(500, event, { error: "Database error", code: "job_lookup_failed" }) };
+    }
+    if (!job) {
+      log("reject_unknown_job");
+      return { errorResponse: json(400, event, { error: "Invalid job_id", code: "invalid_job" }) };
+    }
+    if (job.user_id !== userId) {
+      log("reject_user_mismatch");
+      return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
+    }
+    log("resolved", { resolvedJobId: jobIdTrim });
+    return { jobId: jobIdTrim };
+  }
+
+  if (process.env.DISABLE_WIZARD_PREVIEW === "true") {
+    return { errorResponse: json(403, event, { error: "Wizard preview is disabled.", code: "preview_disabled" }) };
+  }
+
+  if (sid) {
+    const { data: byStripe } = await admin
+      .from("audit_jobs")
+      .select("id,user_id,stripe_session_id")
+      .eq("stripe_session_id", sid)
+      .maybeSingle();
+    if (byStripe?.id) {
+      if (jobIdTrim && UUID_RE.test(jobIdTrim) && byStripe.id !== jobIdTrim) {
+        log("reject_stripe_job_mismatch");
+        return {
+          errorResponse: json(400, event, {
+            error: "job_id does not match this checkout session",
+            code: "job_stripe_mismatch",
+          }),
+        };
+      }
+      if (userId && byStripe.user_id && byStripe.user_id !== userId) {
+        return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
+      }
+      log("resolved_by_stripe", { resolvedJobId: byStripe.id });
+      return { jobId: byStripe.id };
+    }
+  }
+
+  if (jobIdTrim && UUID_RE.test(jobIdTrim)) {
+    const { data: job, error: selErr } = await admin
+      .from("audit_jobs")
+      .select("id,user_id,stripe_session_id")
+      .eq("id", jobIdTrim)
+      .maybeSingle();
+    if (selErr) {
+      log("db_error", { message: selErr.message });
+      return { errorResponse: json(500, event, { error: "Database error", code: "job_lookup_failed" }) };
+    }
+    if (!job) {
+      log("reject_unknown_job");
+      return { errorResponse: json(400, event, { error: "Invalid job_id", code: "invalid_job" }) };
+    }
+    if (sid && job.stripe_session_id && job.stripe_session_id !== sid) {
+      log("reject_stripe_mismatch");
+      return { errorResponse: json(403, event, { error: "Stripe session does not match this job", code: "stripe_mismatch" }) };
+    }
+    if (userId && job.user_id && job.user_id !== userId) {
+      return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
+    }
+    log("resolved", { resolvedJobId: jobIdTrim });
+    return { jobId: jobIdTrim };
+  }
+
+  const insert = {
+    user_id: userId || null,
+    wizard_status: "draft",
+  };
+  if (sid) insert.stripe_session_id = sid;
+
+  const { data: created, error: insErr } = await admin.from("audit_jobs").insert(insert).select("id").single();
+  if (insErr || !created?.id) {
+    log("create_failed", { message: insErr?.message });
+    return {
+      errorResponse: json(500, event, {
+        error: insErr?.message || "Could not create audit job",
+        code: "job_create_failed",
+      }),
+    };
+  }
+  log("job_created", { resolvedJobId: created.id });
+  return { jobId: created.id };
+}
+
+async function persistAnalysisToJob(admin, json, event, wizardPreview, jobId, analysis) {
   let preview_src =
     typeof analysis?.plainEnglish === "string" && analysis.plainEnglish.trim()
       ? analysis.plainEnglish.trim()
@@ -182,32 +304,44 @@ async function persistPreviewResponse(admin, json, event, userId, jobId, analysi
   }
   if (letter_full.length > 4_800_000) letter_full = letter_full.slice(0, 4_800_000);
 
-  const { error } = await admin.from("audit_jobs").update({ letter_full, preview_text }).eq("id", jobId).eq("user_id", userId);
+  const updatedAt = new Date().toISOString();
+  console.log(JSON.stringify({ fn: "analyze-notice", phase: "persist_attempt", jobId, wizardPreview }));
+
+  const { data, error } = await admin
+    .from("audit_jobs")
+    .update({
+      letter_full,
+      preview_text,
+      wizard_status: "analyzed",
+      updated_at: updatedAt,
+    })
+    .eq("id", jobId)
+    .select("id");
 
   if (error) {
-    console.error("audit_jobs persist analysis:", error.message);
-    return json(503, event, { error: "Could not save analysis. Try again." });
+    console.error(JSON.stringify({ fn: "analyze-notice", phase: "persist_error", jobId, message: error.message }));
+    return json(503, event, {
+      error: "Could not save analysis.",
+      code: "PERSIST_FAILED",
+      details: error.message,
+    });
+  }
+  if (!data || data.length === 0) {
+    console.error(JSON.stringify({ fn: "analyze-notice", phase: "persist_zero_rows", jobId }));
+    return json(503, event, {
+      error: "Analysis save matched no rows.",
+      code: "PERSIST_ZERO_ROWS",
+    });
   }
 
-  return json(200, event, { recordId: jobId, preview_text });
-}
+  console.log(JSON.stringify({ fn: "analyze-notice", phase: "persist_ok", jobId, rowsUpdated: data.length }));
 
-/** Guest / unpaid preview: no DB write. Set DISABLE_WIZARD_PREVIEW=true to disable. */
-function respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysis) {
-  const previewFallback =
-    typeof analysis?.plainEnglish === "string" && analysis.plainEnglish.trim()
-      ? analysis.plainEnglish.trim()
-      : typeof analysis?.noticeType === "string"
-        ? `Notice (${analysis.noticeType}) — preview analysis`
-        : "Notice analysis preview";
-  const preview_text = sanitizeString(previewFallback, 8000);
-  if (wizardPreview) {
-    if (process.env.DISABLE_WIZARD_PREVIEW === "true") {
-      return json(403, event, { error: "Wizard preview is disabled.", code: "preview_disabled" });
-    }
-    return json(200, event, { wizard_preview_only: true, preview_text, analysis });
-  }
-  return persistPreviewResponse(admin, json, event, userId, jobIdTrim, analysis);
+  return json(200, event, {
+    recordId: jobId,
+    preview_text,
+    analysis,
+    wizard_preview_only: wizardPreview,
+  });
 }
 
 async function extractTextFromFile(fileBase64, fileType) {
@@ -347,19 +481,46 @@ exports.handler = async (event) => {
   } = body;
 
   const jobIdTrim = typeof job_id === "string" ? job_id.trim() : "";
+  console.log(
+    JSON.stringify({
+      fn: "analyze-notice",
+      phase: "request_accepted",
+      wizardPreview,
+      hasJobId: Boolean(jobIdTrim && UUID_RE.test(jobIdTrim)),
+    }),
+  );
   const admin = getSupabaseAdmin();
   const userId = authUser?.id || null;
 
-  if (!wizardPreview) {
-    const payDenied = await enforcePaidAuditJob(admin, json, event, userId, jobIdTrim);
-    if (payDenied) return payDenied;
-  }
-
-  const text = sanitizeString(rawText || "");
+  const textHead = sanitizeString(rawText || "");
   let fileBase64 = typeof rawB64 === "string" ? rawB64.replace(/^data:[^;]+;base64,/, "") : "";
   if (fileBase64.length > 14 * 1024 * 1024) {
     return json(413, event, { error: "File too large. Upload a smaller file or paste text." });
   }
+  const hasAnyInput = textHead.trim().length > 0 || fileBase64.length > 0;
+  if (!hasAnyInput) {
+    return json(400, event, { error: "Paste your notice or upload a file before analyzing." });
+  }
+
+  const jobResolve = await resolveCanonicalJobId(admin, event, wizardPreview, userId, jobIdTrim);
+  if (jobResolve.errorResponse) return jobResolve.errorResponse;
+  const resolvedJobId = jobResolve.jobId;
+  console.log(
+    JSON.stringify({
+      fn: "analyze-notice",
+      phase: "canonical_job_resolved",
+      resolvedJobId,
+      requestJobIdTrim: jobIdTrim || null,
+      dbRowId: resolvedJobId,
+    }),
+  );
+
+  if (!wizardPreview) {
+    const payDenied = await enforcePaidAuditJob(admin, json, event, userId, resolvedJobId);
+    if (payDenied) return payDenied;
+  }
+
+  const text = textHead;
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -374,7 +535,7 @@ exports.handler = async (event) => {
       } catch (e) {
         console.error("analyze-notice vision error:", e);
         const analysisFb = fallbackAnalysis("Image text extraction failed.");
-        return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysisFb);
+        return persistAnalysisToJob(admin, json, event, wizardPreview, resolvedJobId, analysisFb);
       }
     } else if (ft.includes("pdf")) {
       const extracted = await extractPdfNoticeText(fileBase64);
@@ -383,7 +544,7 @@ exports.handler = async (event) => {
         const analysisFb = fallbackAnalysis(
           "Could not extract text from this PDF. Paste the notice text or try a clearer scan."
         );
-        return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysisFb);
+        return persistAnalysisToJob(admin, json, event, wizardPreview, resolvedJobId, analysisFb);
       }
     } else {
       const extracted = await extractTextFromFile(fileBase64, ft);
@@ -440,12 +601,12 @@ exports.handler = async (event) => {
   } catch (e) {
     console.error("analyze-notice OpenAI error:", e);
     const analysisFb = fallbackAnalysis("The analysis service returned an error.");
-    return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysisFb);
+    return persistAnalysisToJob(admin, json, event, wizardPreview, resolvedJobId, analysisFb);
   }
 
   if (lastUsage) {
     console.log(JSON.stringify({ fn: "analyze-notice", confidence, usage: lastUsage }));
   }
 
-  return respondAnalysisResult(admin, json, event, wizardPreview, userId, jobIdTrim, analysis);
+  return persistAnalysisToJob(admin, json, event, wizardPreview, resolvedJobId, analysis);
 };

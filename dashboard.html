@@ -179,46 +179,70 @@
                 .from('audit_jobs')
                 .select('*')
                 .eq('user_id', sessionOut.user.id)
-                .not('letter_html', 'is', null)
                 .order('created_at', { ascending: false });
+
+            console.log(JSON.stringify({
+                fn: 'dashboard',
+                phase: 'fetch_audit_jobs',
+                userId: sessionOut.user.id,
+                ok: !error,
+                rowCount: (rows || []).length,
+            }));
 
             if (error) {
                 docList.innerHTML = '<p style="color:#fca5a5;">Could not load letters.</p>';
                 return;
             }
 
-            const letters = (rows || []).filter((r) => String(r.letter_html || '').trim() !== '');
+            const jobs = (rows || []).slice().sort((a, b) => {
+                const ta = new Date(a.updated_at || a.created_at || 0).getTime();
+                const tb = new Date(b.updated_at || b.created_at || 0).getTime();
+                return tb - ta;
+            });
 
-            if (letters.length === 0) {
+            function statusLabel(s) {
+                const v = String(s || 'draft').toLowerCase();
+                if (v === 'letter_ready') return 'Letter ready';
+                if (v === 'analyzed') return 'Analyzed';
+                if (v === 'error') return 'Needs attention';
+                return 'In progress';
+            }
+
+            if (jobs.length === 0) {
                 docList.innerHTML = `
                     <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:2rem; color:#e2e8f0;">
-                        <p style="margin:0 0 1rem;">No letters yet. Complete the wizard to generate your first letter.</p>
-                        <a href="/app" style="color:#93c5fd; font-weight:600;">Open the app →</a>
+                        <p style="margin:0 0 1rem;">No saved notices yet. Complete the wizard to start a job.</p>
+                        <a href="/audit-defense.html" style="color:#93c5fd; font-weight:600;">Open the wizard →</a>
                     </div>`;
                 return;
             }
 
-            docList.innerHTML = letters.map((doc) => {
+            docList.innerHTML = jobs.map((doc) => {
                 const nt = noticeTypeFromJob(doc);
-                const dt = formatDate(doc.created_at);
+                const st = statusLabel(doc.wizard_status);
+                const dt = formatDate(doc.updated_at || doc.created_at);
                 const safeId = escapeHtml(doc.id);
+                const hasLetter = doc.letter_html != null && String(doc.letter_html).trim() !== '';
+                const btnStyle = hasLetter
+                    ? 'background:#334155; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;'
+                    : 'background:#475569; color:#cbd5e1; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:not-allowed; opacity:0.85;';
                 return `
                     <div style="background:#ffffff; color:#1f2937; border-radius:12px; padding:1.25rem 1.5rem; border:1px solid #e2e8f0; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem;">
                         <div>
                             <div style="font-weight:700; font-size:1.05rem;">${escapeHtml(nt)}</div>
-                            <div style="font-size:0.9rem; color:#64748b; margin-top:0.25rem;">${escapeHtml(dt)}</div>
+                            <div style="font-size:0.9rem; color:#64748b; margin-top:0.25rem;"><span style="font-weight:600;color:#334155;">${escapeHtml(st)}</span> · ${escapeHtml(dt)}</div>
                         </div>
-                        <button type="button" class="view-letter-btn" data-id="${safeId}" style="background:#334155; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">View Letter</button>
+                        <button type="button" class="view-letter-btn" data-id="${safeId}" ${hasLetter ? '' : 'disabled'} style="${btnStyle}">${hasLetter ? 'View letter' : 'Letter not saved yet'}</button>
                     </div>`;
             }).join('');
 
-            const byId = Object.fromEntries(letters.map((d) => [d.id, d]));
+            const byId = Object.fromEntries(jobs.map((d) => [d.id, d]));
 
             docList.querySelectorAll('.view-letter-btn').forEach((btn) => {
                 btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-id');
                     const doc = byId[id];
-                    if (!doc) return;
+                    if (!doc || !doc.letter_html || !String(doc.letter_html).trim()) return;
                     letterModalTitle.textContent = noticeTypeFromJob(doc);
                     letterModalBody.textContent = doc.letter_html || '';
                     letterModal.showModal();

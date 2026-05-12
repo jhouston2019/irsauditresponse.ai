@@ -7,50 +7,135 @@ const { enforcePaidAuditJob } = require("./_auditJobs.js");
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+function stripeSessionFromEvent(event) {
+  const h = event.headers["x-stripe-session"] || event.headers["X-Stripe-Session"] || "";
+  return String(h).trim();
+}
+
+function persistError(message, code, statusHint = 500) {
+  const e = new Error(message);
+  e.code = code;
+  e.statusHint = statusHint;
+  return e;
+}
+
 /**
- * Persist final letter text to audit_jobs.letter_html (service role).
- * Authenticated path: job must belong to user (already validated by enforcePaidAuditJob).
- * Preview + paid checkout: X-Stripe-Session must match job.stripe_session_id.
+ * Single canonical persistence path for letter + analysis snapshot + strategy + status.
  */
-async function persistGeneratedLetterHtml(admin, event, wizardPreview, authUser, jobIdTrim, letter) {
-  if (!jobIdTrim || !UUID_RE.test(jobIdTrim) || !letter) return;
-  const text = String(letter);
-  if (text.length > 4_800_000) return;
+async function persistLetterDeliverables(admin, event, opts) {
+  const { wizardPreview, authUser, jobIdTrim, strat, analysis, letter } = opts;
 
-  if (!wizardPreview) {
-    const userId = authUser?.id;
-    if (!userId) return;
-    const { error: upErr } = await admin
-      .from("audit_jobs")
-      .update({ letter_html: text })
-      .eq("id", jobIdTrim)
-      .eq("user_id", userId);
-    if (upErr) console.error("generate-letter letter_html persist:", upErr.message);
-    return;
+  console.log(
+    JSON.stringify({
+      fn: "generate-letter",
+      phase: "persist_start",
+      jobId: jobIdTrim,
+      wizardPreview,
+    }),
+  );
+
+  if (!jobIdTrim || !UUID_RE.test(jobIdTrim)) {
+    throw persistError("job_id is required and must be a valid UUID", "INVALID_JOB_ID", 400);
   }
-
-  const stripeHdr =
-    event.headers["x-stripe-session"] || event.headers["X-Stripe-Session"] || "";
-  const sid = String(stripeHdr).trim();
-  if (!sid) return;
+  const text = String(letter || "");
+  if (!text.trim()) {
+    throw persistError("Letter body empty", "EMPTY_LETTER", 500);
+  }
+  if (text.length > 4_800_000) {
+    throw persistError("Letter too large", "LETTER_TOO_LARGE", 413);
+  }
 
   const { data: job, error: selErr } = await admin
     .from("audit_jobs")
-    .select("id,stripe_session_id,paid,is_unlocked")
+    .select("id,user_id,stripe_session_id,paid,is_unlocked")
     .eq("id", jobIdTrim)
     .maybeSingle();
 
-  if (selErr || !job) return;
-  if (job.stripe_session_id !== sid) return;
-  if (!job.paid && !job.is_unlocked) return;
+  if (selErr) {
+    console.error(JSON.stringify({ fn: "generate-letter", phase: "job_lookup", error: selErr.message }));
+    throw persistError(selErr.message, "JOB_LOOKUP_FAILED", 500);
+  }
+  if (!job) {
+    throw persistError("Job not found", "JOB_NOT_FOUND", 404);
+  }
 
-  const { error: upErr } = await admin
+  const sid = stripeSessionFromEvent(event);
+  const paid = !!(job.paid || job.is_unlocked);
+
+  if (!wizardPreview) {
+    if (!authUser?.id) {
+      throw persistError("Authentication required", "AUTH_REQUIRED", 401);
+    }
+    if (job.user_id !== authUser.id) {
+      throw persistError("Job does not belong to this user", "JOB_FORBIDDEN", 403);
+    }
+    if (!paid) {
+      throw persistError("Payment required", "PAYMENT_REQUIRED", 402);
+    }
+  } else if (sid) {
+    if (job.stripe_session_id !== sid) {
+      throw persistError("Stripe session does not match this job", "STRIPE_MISMATCH", 403);
+    }
+    if (!paid) {
+      throw persistError("Payment required", "PAYMENT_REQUIRED", 402);
+    }
+  } else {
+    if (job.user_id) {
+      throw persistError("Sign in to save this letter to your account job", "PREVIEW_AUTH_REQUIRED", 403);
+    }
+    if (job.stripe_session_id) {
+      throw persistError("Stripe session required for this job", "STRIPE_HEADER_REQUIRED", 400);
+    }
+  }
+
+  let letter_full_json;
+  try {
+    letter_full_json = JSON.stringify(analysis);
+  } catch {
+    letter_full_json = "{}";
+  }
+  if (letter_full_json.length > 4_800_000) letter_full_json = letter_full_json.slice(0, 4_800_000);
+
+  const updatedAt = new Date().toISOString();
+  const patch = {
+    letter_html: text,
+    letter_full: letter_full_json,
+    selected_strategy: strat,
+    wizard_status: "letter_ready",
+    updated_at: updatedAt,
+  };
+
+  console.log(
+    JSON.stringify({
+      fn: "generate-letter",
+      phase: "persist_update_attempt",
+      jobId: jobIdTrim,
+    }),
+  );
+
+  const { data: updated, error: upErr } = await admin
     .from("audit_jobs")
-    .update({ letter_html: text })
+    .update(patch)
     .eq("id", jobIdTrim)
-    .eq("stripe_session_id", sid);
+    .select("id");
 
-  if (upErr) console.error("generate-letter letter_html persist (checkout preview):", upErr.message);
+  if (upErr) {
+    console.error(JSON.stringify({ fn: "generate-letter", phase: "persist_db_error", message: upErr.message }));
+    throw persistError(upErr.message || "Update failed", "UPDATE_FAILED", 500);
+  }
+  if (!updated || updated.length === 0) {
+    console.error(JSON.stringify({ fn: "generate-letter", phase: "persist_zero_rows", jobId: jobIdTrim }));
+    throw persistError("Letter save matched no rows", "PERSIST_ZERO_ROWS", 500);
+  }
+
+  console.log(
+    JSON.stringify({
+      fn: "generate-letter",
+      phase: "persist_ok",
+      jobId: jobIdTrim,
+      rowsUpdated: updated.length,
+    }),
+  );
 }
 
 const LETTER_SYSTEM_PROMPT = `You are a senior tax attorney and IRS correspondence specialist with 25 years
@@ -214,6 +299,16 @@ exports.handler = async (event) => {
   const { strategy, taxpayerName, taxpayerAddress, additionalContext, job_id, analysis: analysisBody } = body;
 
   const jobIdTrim = typeof job_id === "string" ? job_id.trim() : "";
+  if (!jobIdTrim || !UUID_RE.test(jobIdTrim)) {
+    console.log(JSON.stringify({ fn: "generate-letter", phase: "reject", code: "missing_job_id" }));
+    return json(400, event, {
+      error: "job_id is required and must be a valid UUID",
+      code: "missing_job_id",
+    });
+  }
+
+  console.log(JSON.stringify({ fn: "generate-letter", phase: "request_accepted", jobId: jobIdTrim, wizardPreview }));
+
   const admin = getSupabaseAdmin();
 
   let analysis;
@@ -288,20 +383,35 @@ Generate the complete response letter now.`;
       return json(503, event, { error: "Letter generation produced no content. Please try again." });
     }
 
-    await persistGeneratedLetterHtml(
-      admin,
-      event,
+    await persistLetterDeliverables(admin, event, {
       wizardPreview,
       authUser,
       jobIdTrim,
+      strat,
+      analysis,
       letter,
-    );
+    });
 
     const payload = { letter };
     if (wizardPreview) payload.wizard_preview_only = true;
     if (usage) payload.usage = usage;
     return json(200, event, payload);
   } catch (e) {
+    if (e.code && typeof e.statusHint === "number") {
+      const status = e.statusHint;
+      console.error(
+        JSON.stringify({
+          fn: "generate-letter",
+          phase: "persist_or_validation_error",
+          code: e.code,
+          message: e.message,
+        }),
+      );
+      return json(status, event, {
+        error: e.message,
+        code: e.code,
+      });
+    }
     console.error("generate-letter error:", e);
     return json(503, event, { error: "Letter generation is temporarily unavailable. Please try again." });
   }

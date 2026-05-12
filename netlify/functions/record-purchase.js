@@ -456,8 +456,9 @@ exports.handler = async (event) => {
     );
   }
 
+  let linkedAuditJobId = null;
   try {
-    await provisionOrLinkAuditJob();
+    linkedAuditJobId = await provisionOrLinkAuditJob();
   } catch (err) {
     if (err.code409) {
       return json(409, event, {
@@ -479,8 +480,20 @@ exports.handler = async (event) => {
 
   await upsertSideTables();
 
+  console.log(
+    JSON.stringify({
+      fn: "record-purchase",
+      phase: "audit_job_and_entitlements_complete",
+      linkedAuditJobId,
+      sessionId,
+      userId: jwtUserId,
+      jobIdFromStripeMetadata: jobIdMeta || null,
+    }),
+  );
+
   return json(200, event, {
     ok: true,
     already_processed: !!alreadyProcessed,
+    job_id: linkedAuditJobId,
   });
 };
