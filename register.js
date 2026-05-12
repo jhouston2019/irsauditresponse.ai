@@ -44,33 +44,39 @@ let verifiedWizardState = null;
 let saveLetterFromWizardAttempted = false;
 
 async function saveLetterFromWizardState(session, ws) {
-  if (!ws || !ws.letterRaw) return;
+  if (
+    !ws ||
+    ws.letterRaw == null ||
+    (typeof ws.letterRaw === 'string' && !ws.letterRaw.trim())
+  ) {
+    return;
+  }
   if (!session?.access_token) return;
   if (saveLetterFromWizardAttempted) return;
-  saveLetterFromWizardAttempted = true;
 
   try {
-    const { createClient } = await import(
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm',
-    );
-    const url = document.querySelector('meta[name="supabase-url"]')?.content;
-    const key = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-    if (!url || !key || url.includes('%%') || key.includes('%%')) return;
-
-    const supabase = createClient(url, key, {
-      global: {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      },
-    });
+    const supabase = getSupabase();
+    const {
+      data: { user },
+      error: userErr,
+    } = await supabase.auth.getUser();
+    if (userErr || !user?.id) {
+      console.warn('[register] saveLetterFromWizardState: no user', userErr?.message || '');
+      return;
+    }
 
     const { error } = await supabase.from('documents').insert({
-      user_id: session.user.id,
+      user_id: user.id,
       letter_html: ws.letterRaw,
       notice_type: ws.analysis?.noticeType ?? null,
       created_at: new Date().toISOString(),
     });
 
-    if (error) console.warn('[register] saveLetterFromWizardState failed', error);
+    if (error) {
+      console.warn('[register] saveLetterFromWizardState failed', error.code || '', error.message || error);
+      return;
+    }
+    saveLetterFromWizardAttempted = true;
   } catch (e) {
     console.warn('[register] saveLetterFromWizardState error', e);
   }

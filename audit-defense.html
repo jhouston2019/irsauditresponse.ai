@@ -591,6 +591,7 @@ Contact: 1-800-829-8310`;
       state.jobPaid = true;
       state.previewMode = false;
       state.stripeSessionId = sessionId;
+      sessionStorage.setItem('stripeSessionId', sessionId);
       syncWizardPreviewBanner();
       const wpbPaid = $('wizardPreviewBanner');
       if (wpbPaid) wpbPaid.style.display = 'none';
@@ -1426,6 +1427,7 @@ Contact: 1-800-829-8310`;
     });
 
     document.getElementById('btnReviewAnother')?.addEventListener('click', async () => {
+      sessionStorage.removeItem('stripeSessionId');
       const btn = document.getElementById('btnReviewAnother');
       const errSpan = document.getElementById('btnReviewAnotherErr');
       if (errSpan) errSpan.textContent = '';
@@ -1543,6 +1545,7 @@ Contact: 1-800-829-8310`;
 
     $('btnStartOver').addEventListener('click', () => {
       if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
+      sessionStorage.removeItem('stripeSessionId');
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';
       $('unlockPanel').classList.remove('show');
@@ -1583,6 +1586,10 @@ Contact: 1-800-829-8310`;
     });
 
     async function boot() {
+      if (!state.stripeSessionId) {
+        const stored = sessionStorage.getItem('stripeSessionId');
+        if (stored) state.stripeSessionId = stored;
+      }
       await bootstrapAuthGate();
       const bootParams = new URLSearchParams(window.location.search);
       const paySessionId = bootParams.get('session_id');

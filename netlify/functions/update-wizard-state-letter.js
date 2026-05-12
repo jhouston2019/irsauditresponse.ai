@@ -79,32 +79,45 @@ exports.handler = async (event) => {
       };
     }
 
-    if (!wsRow) {
-      return {
-        statusCode: 404,
-        headers: corsHeaders(),
-        body: JSON.stringify({ error: "Session not found" }),
-      };
+    let prev = {};
+    if (
+      wsRow &&
+      wsRow.state != null &&
+      typeof wsRow.state === "object" &&
+      !Array.isArray(wsRow.state)
+    ) {
+      prev = wsRow.state;
     }
-
-    const prev =
-      wsRow.state != null && typeof wsRow.state === "object" && !Array.isArray(wsRow.state)
-        ? wsRow.state
-        : {};
     const updatedState = { ...prev, letterRaw };
 
-    const { error: upErr } = await admin
-      .from("wizard_state")
-      .update({ state: updatedState })
-      .eq("stripe_session_id", session_id);
+    if (!wsRow) {
+      const { error: insErr } = await admin.from("wizard_state").insert({
+        stripe_session_id: session_id,
+        state: updatedState,
+        created_at: new Date().toISOString(),
+      });
+      if (insErr) {
+        console.error("[update-wizard-state-letter] insert missing row failed:", insErr);
+        return {
+          statusCode: 500,
+          headers: corsHeaders(),
+          body: JSON.stringify({ error: "Save failed" }),
+        };
+      }
+    } else {
+      const { error: upErr } = await admin
+        .from("wizard_state")
+        .update({ state: updatedState })
+        .eq("stripe_session_id", session_id);
 
-    if (upErr) {
-      console.error("[update-wizard-state-letter] update failed:", upErr);
-      return {
-        statusCode: 500,
-        headers: corsHeaders(),
-        body: JSON.stringify({ error: "Update failed" }),
-      };
+      if (upErr) {
+        console.error("[update-wizard-state-letter] update failed:", upErr);
+        return {
+          statusCode: 500,
+          headers: corsHeaders(),
+          body: JSON.stringify({ error: "Update failed" }),
+        };
+      }
     }
 
     return {
