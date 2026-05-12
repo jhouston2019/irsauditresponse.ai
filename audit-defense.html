@@ -494,7 +494,7 @@ Contact: 1-800-829-8310`;
         customStrategyText: $('customStrategyText')?.value ?? '',
         letterRaw: state.letterRaw,
         step: state.step,
-        jobId: state.jobId,
+        jobId: state.jobId ?? null,
         fileLabel: $('fileLabel')?.textContent ?? '',
         fillName: $('fillName')?.value ?? '',
         fillAddress: $('fillAddress')?.value ?? '',
@@ -522,7 +522,7 @@ Contact: 1-800-829-8310`;
         customStrategyText: $('customStrategyText')?.value ?? '',
         letterRaw: state.letterRaw,
         step: state.step,
-        jobId: state.jobId,
+        jobId: state.jobId ?? null,
         fileBase64: state.fileBase64,
         fileType: state.fileType,
         fillName: $('fillName')?.value ?? '',
@@ -590,10 +590,16 @@ Contact: 1-800-829-8310`;
       const wpbPaid = $('wizardPreviewBanner');
       if (wpbPaid) wpbPaid.style.display = 'none';
 
+      const stripeJobFromVerify =
+        verifyResponseBody.jobId != null && String(verifyResponseBody.jobId).trim() !== ''
+          ? String(verifyResponseBody.jobId).trim()
+          : '';
+
       const st = verifyResponseBody.wizardState;
       if (!st || typeof st !== 'object') {
         if (loading) loading.classList.remove('show');
         if (loadingText) loadingText.textContent = 'Analyzing notice…';
+        if (stripeJobFromVerify) state.jobId = stripeJobFromVerify;
         history.replaceState({}, '', '/audit-defense.html');
         return;
       }
@@ -639,6 +645,7 @@ Contact: 1-800-829-8310`;
       if (typeof st.fileLabel === 'string' && $('fileLabel')) $('fileLabel').textContent = st.fileLabel;
 
       if (st.jobId) state.jobId = st.jobId;
+      if (stripeJobFromVerify) state.jobId = stripeJobFromVerify;
       state.analysis = st.analysis && typeof st.analysis === 'object' ? st.analysis : null;
       state.strategy = typeof st.strategy === 'string' ? st.strategy : null;
       state.letterRaw = typeof st.letterRaw === 'string' ? st.letterRaw : '';
@@ -1463,7 +1470,7 @@ Contact: 1-800-829-8310`;
         const text = state.editing ? $('letterEdit').value : state.letterRaw;
         await downloadBinary(API.pdf, {
           text,
-          job_id: state.jobId,
+          job_id: state.jobId ?? null,
           fileName: 'irs-response-letter.pdf',
         }, 'irs-response-letter.pdf');
       } catch (e) {
@@ -1487,7 +1494,7 @@ Contact: 1-800-829-8310`;
         const text = state.editing ? $('letterEdit').value : state.letterRaw;
         await downloadBinary(API.docx, {
           text,
-          job_id: state.jobId,
+          job_id: state.jobId ?? null,
           fileName: 'irs-response-letter.docx',
         }, 'irs-response-letter.docx');
       } catch (e) {

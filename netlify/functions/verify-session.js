@@ -104,6 +104,7 @@ exports.handler = async (event) => {
         paid: true,
         customer_email: customerEmail || null,
         wizardState,
+        jobId: jobId || null,
       }),
     };
   } catch (e) {

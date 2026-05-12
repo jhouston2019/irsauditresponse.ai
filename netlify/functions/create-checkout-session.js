@@ -111,9 +111,10 @@ exports.handler = async (event) => {
       !Array.isArray(wizardState)
     ) {
       try {
+        const statePayload = { ...wizardState, jobId };
         const { error: wsErr } = await admin.from("wizard_state").insert({
           stripe_session_id: session.id,
-          state: wizardState,
+          state: statePayload,
           created_at: new Date().toISOString(),
         });
         if (wsErr) {
