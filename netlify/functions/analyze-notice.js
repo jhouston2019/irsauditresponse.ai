@@ -269,7 +269,6 @@ async function resolveCanonicalJobId(admin, event, wizardPreview, userId, jobIdT
 
   const insert = {
     user_id: userId || null,
-    wizard_status: "draft",
   };
   if (sid) insert.stripe_session_id = sid;
 
@@ -312,7 +311,6 @@ async function persistAnalysisToJob(admin, json, event, wizardPreview, jobId, an
     .update({
       letter_full,
       preview_text,
-      wizard_status: "analyzed",
       updated_at: updatedAt,
     })
     .eq("id", jobId)

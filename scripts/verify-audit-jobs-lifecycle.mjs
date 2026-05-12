@@ -44,7 +44,6 @@ function summarizeRow(r) {
     id: r.id,
     updated_at: r.updated_at,
     created_at: r.created_at,
-    wizard_status: r.wizard_status ?? null,
     user_id: r.user_id,
     paid: r.paid,
     is_unlocked: r.is_unlocked,
@@ -80,7 +79,7 @@ async function main() {
   const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 
   const columns =
-    "id,created_at,updated_at,user_id,stripe_session_id,paid,is_unlocked,wizard_status,selected_strategy,preview_text,letter_html,letter_full,customer_email";
+    "id,created_at,updated_at,user_id,stripe_session_id,paid,is_unlocked,selected_strategy,preview_text,letter_html,letter_full,customer_email";
 
   if (argJobId) {
     if (!UUID_RE.test(argJobId)) {
@@ -111,12 +110,6 @@ async function main() {
 
     const paidish = !!(row.paid || row.is_unlocked);
     const issues = [];
-    if (row.wizard_status === "letter_ready" && letterHtmlLen === 0) {
-      issues.push("wizard_status is letter_ready but letter_html is empty");
-    }
-    if ((row.wizard_status === "analyzed" || row.wizard_status === "letter_ready") && letterFullLen === 0) {
-      issues.push("status implies analysis persisted but letter_full is empty");
-    }
     if (paidish && !row.stripe_session_id && !row.user_id) {
       issues.push("paid/is_unlocked but both stripe_session_id and user_id are null");
     }
@@ -139,7 +132,7 @@ async function main() {
 
   const { data: orphans, error: oErr } = await admin
     .from("audit_jobs")
-    .select("id,paid,user_id,stripe_session_id,wizard_status,updated_at")
+    .select("id,paid,user_id,stripe_session_id,updated_at")
     .eq("paid", true)
     .is("user_id", null)
     .limit(30);
@@ -182,7 +175,7 @@ async function main() {
       global: { headers: { Authorization: `Bearer ${jwt}` } },
       auth: { persistSession: false },
     });
-    const { data: rlsRows, error: rlsErr } = await userClient.from("audit_jobs").select("id,user_id,updated_at,wizard_status");
+    const { data: rlsRows, error: rlsErr } = await userClient.from("audit_jobs").select("id,user_id,updated_at");
     const { count: svcCount, error: cErr } = await admin
       .from("audit_jobs")
       .select("id", { count: "exact", head: true })

@@ -101,7 +101,6 @@ async function persistLetterDeliverables(admin, event, opts) {
     letter_html: text,
     letter_full: letter_full_json,
     selected_strategy: strat,
-    wizard_status: "letter_ready",
     updated_at: updatedAt,
   };
 

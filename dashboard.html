@@ -219,7 +219,7 @@
 
             docList.innerHTML = jobs.map((doc) => {
                 const nt = noticeTypeFromJob(doc);
-                const st = statusLabel(doc.wizard_status);
+                const st = statusLabel(null);
                 const dt = formatDate(doc.updated_at || doc.created_at);
                 const safeId = escapeHtml(doc.id);
                 const hasLetter = doc.letter_html != null && String(doc.letter_html).trim() !== '';
