@@ -375,6 +375,11 @@
   </div>
 
   <script type="module">
+    import { getSupabase } from '/src/components/Auth.js';
+
+    let letterGenSerial = 0;
+    let savedDocumentsLetterGenSerial = null;
+
     async function bootstrapAuthGate() {
       try {
         const url = document.querySelector('meta[name="supabase-url"]')?.content;
@@ -1207,6 +1212,8 @@ Contact: 1-800-829-8310`;
 
     $('btnGenLetter').addEventListener('click', async () => {
       if (!state.strategy || !state.analysis) return;
+      letterGenSerial += 1;
+      const saveSerial = letterGenSerial;
       $('step3Loading').classList.add('show');
       $('btnGenLetter').disabled = true;
       try {
@@ -1233,31 +1240,10 @@ Contact: 1-800-829-8310`;
         else state.previewMode = false;
         state.editing = false;
         renderLetterDisplay();
+        void saveLetterToDocuments(saveSerial);
         const a = state.analysis;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
         showStep(4);
-        if (!state.previewMode && state.accessToken) {
-          try {
-            const url = document.querySelector('meta[name="supabase-url"]')?.content;
-            const anon = document.querySelector('meta[name="supabase-anon-key"]')?.content;
-            if (!url?.includes?.('%%') && anon && !anon.includes?.('%%')) {
-              const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-              const supabase = createClient(url, anon);
-              const {
-                data: { user },
-              } = await supabase.auth.getUser();
-              if (user) {
-                const noticeTypeVal = a?.noticeType || $('noticeType').value || null;
-                const letterText = state.letterRaw || '';
-                await supabase.from('documents').insert({
-                  user_id: user.id,
-                  notice_type: noticeTypeVal,
-                  letter_html: letterText,
-                });
-              }
-            }
-          } catch (_) {}
-        }
       } catch (e) {
         alert(e.message || 'Letter generation failed');
       } finally {
@@ -1265,6 +1251,31 @@ Contact: 1-800-829-8310`;
         $('btnGenLetter').disabled = false;
       }
     });
+
+    async function saveLetterToDocuments(genSerial) {
+      if (!state.letterRaw) return;
+      if (!state.accessToken) return;
+      if (savedDocumentsLetterGenSerial === genSerial) return;
+
+      try {
+        const supabase = getSupabase();
+        const { error } = await supabase
+          .from('documents')
+          .insert({
+            user_id: (await supabase.auth.getUser()).data.user?.id,
+            letter_html: state.letterRaw,
+            notice_type: state.analysis?.noticeType ?? null,
+            created_at: new Date().toISOString(),
+          });
+        if (error) {
+          console.warn('[wizard] saveLetterToDocuments failed', error);
+          return;
+        }
+        savedDocumentsLetterGenSerial = genSerial;
+      } catch (e) {
+        console.warn('[wizard] saveLetterToDocuments error', e);
+      }
+    }
 
     function highlightPlaceholders(text) {
       const escaped = escapeHtml(text);
