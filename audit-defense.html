@@ -1241,7 +1241,10 @@ Contact: 1-800-829-8310`;
         else state.previewMode = false;
         state.editing = false;
         renderLetterDisplay();
-        void updateWizardStateWithLetter();
+        if (state.letterRaw) {
+          sessionStorage.setItem('pendingLetterRaw', state.letterRaw);
+          sessionStorage.setItem('pendingNoticeType', state.analysis?.noticeType ?? '');
+        }
         void saveLetterToDocuments(saveSerial);
         const a = state.analysis;
         $('letterTitleBar').textContent = `Your IRS Response Letter — ${a.noticeType || 'Notice'} | ${a.taxYear || '—'} | ${state.strategy}`;
@@ -1276,27 +1279,6 @@ Contact: 1-800-829-8310`;
         savedDocumentsLetterGenSerial = genSerial;
       } catch (e) {
         console.warn('[wizard] saveLetterToDocuments error', e);
-      }
-    }
-
-    async function updateWizardStateWithLetter() {
-      if (!state.letterRaw) return;
-      if (!state.stripeSessionId) return;
-
-      try {
-        const res = await fetch('/.netlify/functions/update-wizard-state-letter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            session_id: state.stripeSessionId,
-            letterRaw: state.letterRaw,
-          }),
-        });
-        if (!res.ok) {
-          console.warn('[wizard] updateWizardStateWithLetter failed', res.status);
-        }
-      } catch (e) {
-        console.warn('[wizard] updateWizardStateWithLetter error', e);
       }
     }
 
@@ -1427,6 +1409,8 @@ Contact: 1-800-829-8310`;
     });
 
     document.getElementById('btnReviewAnother')?.addEventListener('click', async () => {
+      sessionStorage.removeItem('pendingLetterRaw');
+      sessionStorage.removeItem('pendingNoticeType');
       sessionStorage.removeItem('stripeSessionId');
       const btn = document.getElementById('btnReviewAnother');
       const errSpan = document.getElementById('btnReviewAnotherErr');
@@ -1545,6 +1529,8 @@ Contact: 1-800-829-8310`;
 
     $('btnStartOver').addEventListener('click', () => {
       if (!confirm('Reset the wizard? All unsaved progress will be cleared.')) return;
+      sessionStorage.removeItem('pendingLetterRaw');
+      sessionStorage.removeItem('pendingNoticeType');
       sessionStorage.removeItem('stripeSessionId');
       const warn = document.getElementById('pdfWarn');
       if (warn) warn.style.display = 'none';

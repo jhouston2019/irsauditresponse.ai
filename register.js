@@ -38,21 +38,12 @@ function withTimeout(promise, ms, message) {
   ]);
 }
 
-/** Wizard snapshot from verify-session when registering after Stripe checkout */
-let verifiedWizardState = null;
-
 let saveLetterFromWizardAttempted = false;
 
-async function saveLetterFromWizardState(session, ws) {
-  if (
-    !ws ||
-    ws.letterRaw == null ||
-    (typeof ws.letterRaw === 'string' && !ws.letterRaw.trim())
-  ) {
-    return;
-  }
-  if (!session?.access_token) return;
+async function saveLetterFromWizardState() {
   if (saveLetterFromWizardAttempted) return;
+  const letterRaw = sessionStorage.getItem('pendingLetterRaw');
+  if (!letterRaw || !letterRaw.trim()) return;
 
   try {
     const supabase = getSupabase();
@@ -61,24 +52,29 @@ async function saveLetterFromWizardState(session, ws) {
       error: userErr,
     } = await supabase.auth.getUser();
     if (userErr || !user?.id) {
-      console.warn('[register] saveLetterFromWizardState: no user', userErr?.message || '');
+      console.warn('[register] no user for letter save');
       return;
     }
 
+    const noticeType = sessionStorage.getItem('pendingNoticeType') || null;
+
     const { error } = await supabase.from('documents').insert({
       user_id: user.id,
-      letter_html: ws.letterRaw,
-      notice_type: ws.analysis?.noticeType ?? null,
+      letter_html: letterRaw,
+      notice_type: noticeType,
       created_at: new Date().toISOString(),
     });
 
     if (error) {
-      console.warn('[register] saveLetterFromWizardState failed', error.code || '', error.message || error);
+      console.warn('[register] letter save failed', error.code, error.message);
       return;
     }
+
     saveLetterFromWizardAttempted = true;
+    sessionStorage.removeItem('pendingLetterRaw');
+    sessionStorage.removeItem('pendingNoticeType');
   } catch (e) {
-    console.warn('[register] saveLetterFromWizardState error', e);
+    console.warn('[register] letter save error', e);
   }
 }
 
@@ -134,11 +130,8 @@ if (!sessionId) {
           try {
             const j = await res.json();
             stripeCustomerEmail = typeof j.customer_email === 'string' ? j.customer_email.trim() : '';
-            verifiedWizardState =
-              j.wizardState != null && typeof j.wizardState === 'object' ? j.wizardState : null;
           } catch {
             stripeCustomerEmail = '';
-            verifiedWizardState = null;
           }
           ok = true;
           break;
@@ -321,10 +314,7 @@ if (registerFormEl && !registerFormEl.dataset.registerSubmitBound) {
       }
       console.log('[register] access token present:', true);
 
-      const {
-        data: { session: sessionForDocs },
-      } = await supabase.auth.getSession();
-      await saveLetterFromWizardState(sessionForDocs, verifiedWizardState);
+      await saveLetterFromWizardState();
 
       if (!sid) {
         window.location.href = '/dashboard.html';
