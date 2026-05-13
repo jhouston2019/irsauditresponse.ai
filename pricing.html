@@ -18,30 +18,20 @@
     <meta property="og:type" content="product">
 </head>
 <body style="background:#f9fafb; color:#111827; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
-    <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #334155;">
+    <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-bottom: 2px solid #334155;">
         <div style="color: #f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
-        <div>
-            <a href="/audit-defense.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">IRS Defense</a> |
-            <a href="/dashboard" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Dashboard</a> |
-            <a href="/pricing" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Pricing</a> |
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <button type="button" id="navReviewAnotherBtn" style="background:#2563eb; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.9rem;">Review Another Notice</button>
+            <span id="navReviewAnotherErr" style="color:#fecaca; font-size:0.75rem; max-width:200px; line-height:1.35;"></span>
+            <span style="color:#64748b;">|</span>
+            <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; transition: background-color 0.2s, color 0.2s;">Dashboard</a>
             <a href="/login" style="color: #cbd5e1; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px; font-size:0.9rem;">Log in</a>
         </div>
     </nav>
 
     <main>
-    <section style="padding:0 0 1.25rem; text-align:center;">
-        <div style="width:min(1120px, 92%); margin-inline:auto; padding:3rem 0 2rem; background:linear-gradient(135deg, #1e293b 0%, #334155 100%); color:white; border-radius:12px; margin-top:1.5rem;">
-            <h1 style="font-size:clamp(1.5rem, 3vw, 2.25rem); margin:0 0 0.5rem; font-weight:700;">Secure checkout — Tax Letter Defense</h1>
-            <p style="font-size:1.05rem; opacity:0.92; max-width:640px; margin:0 auto; line-height:1.5;">Same wizard and letter flow as IRS Audit Defense: unlock AI notice analysis and a professional draft response in minutes.</p>
-        </div>
-    </section>
-
     <section style="padding:0 0 84px; background:linear-gradient(180deg, #f8fafc, #eef2ff); border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb; text-align:center;" id="pricing">
         <div style="width:min(1120px, 92%); margin-inline:auto;">
-        <h2 style="font-size:clamp(1.6rem, 3vw, 2.2rem); margin-bottom:0.5rem; color:#2d3748;">Choose your plan</h2>
-        <p style="color:#64748b; margin-bottom:2rem;">
-            Start in the <a href="/audit-defense.html" style="color:#2563eb; font-weight:600;">wizard</a> anytime, then return here to pay. Most CPAs charge $300–$600 per letter — we’re <strong>$49</strong> one-time.
-        </p>
 
         <div style="width:min(760px, 92%); margin:28px auto 10px; background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:3px solid #3b82f6; border-radius:16px; padding:clamp(18px, 3vw, 28px); box-shadow:0 20px 40px rgba(0, 0, 0, 0.1); position:relative; overflow:hidden;">
             <h3 style="font-size:1.6rem; margin:0 0 10px; color:#000000;">Tax Letter Defense · IRS Audit Defense</h3>
@@ -56,7 +46,7 @@
                 <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ PDF and Word download</li>
                 <li style="background:rgba(255, 255, 255, 0.9); border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin:8px 0; text-align:left; display:block; color:#000000;">✓ Placeholder fill tool</li>
             </ul>
-            <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; margin-bottom:1rem; padding:12px 22px; font-weight:600; text-decoration:none; border-radius:10px; border:2px solid #3b82f6; color:#1e40af;">Open wizard first (recommended)</a>
+            <a href="/audit-defense.html" style="display:block; width:100%; text-align:center; margin:0 0 1rem; padding:12px 22px; font-weight:600; text-decoration:none; border-radius:10px; border:2px solid #64748b; color:#334155; background:#fff;">See a preview of your notice analysis</a>
             <p style="text-align:left; color:#334155; font-weight:600; margin:0 0 8px;">Checkout</p>
             <button type="button" id="checkoutBtn" style="display:block; width:100%; text-align:center; padding:14px 22px; font-weight:600; border:none; cursor:pointer; border-radius:10px; background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:#ffffff; box-shadow:0 6px 20px rgba(59, 130, 246, 0.3);">Get Your Documents Now</button>
             <p id="checkoutErr" style="color:#b91c1c; font-size:0.9rem; margin-top:10px; min-height:1.2em;"></p>
@@ -111,5 +101,6 @@
         }
       });
     </script>
+    <script src="/nav-review-notice.js" defer></script>
 </body>
 </html>

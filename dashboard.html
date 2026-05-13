@@ -7,6 +7,7 @@
     <meta name="description" content="Access your IRS Audit Defense Pro dashboard.">
     <meta name="supabase-url" content="%%SUPABASE_URL%%">
     <meta name="supabase-anon-key" content="%%SUPABASE_ANON_KEY%%">
+    <meta name="stripe-price-id" content="%%STRIPE_PRICE_ID%%">
     <link rel="canonical" href="https://irsauditresponseai.netlify.app/dashboard">
     <style>
         #letterModal[open] { display: flex; align-items: center; justify-content: center; }
@@ -27,13 +28,14 @@
     </style>
 </head>
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
-    <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155;">
+    <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-bottom: 2px solid #334155;">
         <div style="color: #f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
-        <div>
-            <a href="/app" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">App</a> |
-            <a href="/audit-defense.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Wizard</a> |
-            <a href="/pricing" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Pricing</a> |
-            <a href="/login" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Login</a>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <button type="button" id="navReviewAnotherBtn" style="background:#2563eb; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.9rem;">Review Another Notice</button>
+            <span id="navReviewAnotherErr" style="color:#fecaca; font-size:0.75rem; max-width:200px; line-height:1.35;"></span>
+            <span style="color:#64748b;">|</span>
+            <a href="/dashboard.html" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Dashboard</a>
+            <a href="/login" style="color: #f5f5f5; text-decoration: none; margin: 0 10px; padding: 8px 16px; border-radius: 4px;">Log in</a>
         </div>
     </nav>
 
@@ -350,5 +352,6 @@
             });
         });
     </script>
+    <script src="/nav-review-notice.js" defer></script>
 </body>
 </html>

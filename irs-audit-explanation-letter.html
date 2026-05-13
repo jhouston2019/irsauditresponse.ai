@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="stripe-price-id" content="%%STRIPE_PRICE_ID%%" />
   <title>IRS Audit Explanation Letter – How to Write One</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <meta name="description" content="Need to write an IRS audit explanation letter? Learn how to explain discrepancies, provide context, and draft a clear factual response.">
@@ -10,12 +11,17 @@
 </head>
 
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
-  <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155; align-items:center;">
+  <nav style="background:#1e293b; padding:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; border-bottom: 2px solid #334155; align-items:center; flex-wrap:wrap; gap:0.5rem;">
     <div style="color:#f5f5f5;"><strong>IRS Audit Defense Pro</strong></div>
-    <div>
-      <a href="index.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Home</a> |
-      <a href="/pricing" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Pricing</a> |
-      <a href="/login.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Login</a>
+    <div style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+      <button type="button" id="navReviewAnotherBtn" style="background:#2563eb; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.9rem;">Review Another Notice</button>
+      <span id="navReviewAnotherErr" style="color:#fecaca; font-size:0.75rem; max-width:200px; line-height:1.35;"></span>
+      <span style="color:#64748b;">|</span>
+      <a href="/dashboard.html" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Dashboard</a>
+      <span style="color:#64748b;">|</span>
+      <a href="/" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Home</a>
+      <span style="color:#64748b;">|</span>
+      <a href="/login" style="color:#f5f5f5; text-decoration:none; margin:0 10px; padding:8px 12px; border-radius:4px; transition:background-color 0.2s, color 0.2s;">Log in</a>
     </div>
   </nav>
 
@@ -92,5 +98,7 @@
     </div>
   </footer>
 
+
+    <script src="/nav-review-notice.js" defer></script>
 </body>
 </html>
