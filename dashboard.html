@@ -15,6 +15,14 @@
             background: #fff; color: #1f2937; max-width: 900px; width: 92%; max-height: 85vh; overflow: auto;
             border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.35);
         }
+        #letterModal .modal-meta-wrap { margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid #e2e8f0; }
+        #letterModal .modal-meta-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem 1.1rem; margin-bottom: 0.75rem; }
+        #letterModal .modal-meta-section:last-child { margin-bottom: 0; }
+        #letterModal .modal-meta-section h3 { margin: 0 0 0.65rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; font-weight: 700; }
+        #letterModal .modal-meta-row { font-size: 0.9rem; margin-bottom: 0.45rem; color: #334155; }
+        #letterModal .modal-meta-row:last-child { margin-bottom: 0; }
+        #letterModal .modal-meta-label { font-weight: 600; color: #0f172a; margin-right: 0.35rem; }
+        #letterModal .modal-meta-plain { margin: 0.35rem 0 0; font-size: 0.9rem; line-height: 1.5; color: #475569; white-space: pre-wrap; }
         #letterModal pre { white-space: pre-wrap; font-family: 'Courier New', ui-monospace, monospace; font-size: 0.82rem; line-height: 1.5; margin: 0; }
     </style>
 </head>
@@ -46,6 +54,7 @@
                 <h2 id="letterModalTitle" style="margin:0; font-size:1.15rem; color:#0f172a;">Letter</h2>
                 <button type="button" id="letterModalClose" style="background:#e2e8f0; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;">Close</button>
             </div>
+            <div id="letterModalMeta" class="modal-meta-wrap" hidden></div>
             <pre id="letterModalBody"></pre>
         </div>
     </dialog>
@@ -57,6 +66,7 @@
         const letterModal = document.getElementById('letterModal');
         const letterModalBody = document.getElementById('letterModalBody');
         const letterModalTitle = document.getElementById('letterModalTitle');
+        const letterModalMeta = document.getElementById('letterModalMeta');
         document.getElementById('letterModalClose').addEventListener('click', () => letterModal.close());
 
         function escapeHtml(s) {
@@ -89,6 +99,88 @@
                 /* ignore */
             }
             return 'Notice';
+        }
+
+        /**
+         * Analysis object: prefer analysis_json on row if present, else JSON in letter_full
+         * (letter_full is JSON.stringify(analysis) from analyze-notice — not plain text).
+         */
+        function parseJobAnalysis(row) {
+            if (!row) return null;
+            const aj = row.analysis_json;
+            if (aj != null) {
+                if (typeof aj === 'object' && aj !== null && !Array.isArray(aj)) return aj;
+                if (typeof aj === 'string' && aj.trim()) {
+                    try {
+                        return JSON.parse(aj);
+                    } catch {
+                        /* fall through */
+                    }
+                }
+            }
+            const raw = row.letter_full;
+            if (typeof raw !== 'string' || !raw.trim()) return null;
+            try {
+                return JSON.parse(raw);
+            } catch {
+                return null;
+            }
+        }
+
+        function strategyDisplayLabel(code) {
+            const v = String(code || '').toLowerCase().trim();
+            const map = {
+                agree: 'Full Agreement',
+                partial: 'Partial Agreement',
+                dispute: 'Full Dispute',
+                extension: 'Request Extension',
+                other: 'Other / Custom',
+                custom: 'Other / Custom',
+            };
+            return map[v] || '';
+        }
+
+        function buildLetterModalMetaHtml(doc) {
+            const analysis = parseJobAnalysis(doc);
+            const stratRaw = doc?.selected_strategy;
+            const stratLabel = strategyDisplayLabel(stratRaw) || (stratRaw && String(stratRaw).trim() ? String(stratRaw).trim() : '');
+
+            const noticeType = analysis && typeof analysis.noticeType === 'string' ? analysis.noticeType.trim() : '';
+            const taxYear = analysis && typeof analysis.taxYear === 'string' ? analysis.taxYear.trim() : '';
+            const riskLevel = analysis && typeof analysis.riskLevel === 'string' ? analysis.riskLevel.trim() : '';
+            const plainEnglish =
+                analysis && typeof analysis.plainEnglish === 'string' ? analysis.plainEnglish.trim() : '';
+
+            const hasAnalysisBlock = noticeType || taxYear || riskLevel || plainEnglish;
+            const hasStrategy = Boolean(stratLabel);
+
+            if (!hasAnalysisBlock && !hasStrategy) {
+                return '';
+            }
+
+            let html = '';
+            if (hasAnalysisBlock) {
+                html += '<div class="modal-meta-section"><h3>Analysis summary</h3>';
+                if (noticeType) {
+                    html += `<div class="modal-meta-row"><span class="modal-meta-label">Notice type</span>${escapeHtml(noticeType)}</div>`;
+                }
+                if (taxYear) {
+                    html += `<div class="modal-meta-row"><span class="modal-meta-label">Tax year</span>${escapeHtml(taxYear)}</div>`;
+                }
+                if (riskLevel) {
+                    html += `<div class="modal-meta-row"><span class="modal-meta-label">Risk level</span>${escapeHtml(riskLevel)}</div>`;
+                }
+                if (plainEnglish) {
+                    html += `<p class="modal-meta-plain">${escapeHtml(plainEnglish)}</p>`;
+                }
+                html += '</div>';
+            }
+            if (hasStrategy) {
+                html += '<div class="modal-meta-section"><h3>Strategy</h3>';
+                html += `<div class="modal-meta-row">${escapeHtml(stratLabel)}</div>`;
+                html += '</div>';
+            }
+            return html;
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -244,6 +336,14 @@
                     const doc = byId[id];
                     if (!doc || !doc.letter_html || !String(doc.letter_html).trim()) return;
                     letterModalTitle.textContent = noticeTypeFromJob(doc);
+                    const metaHtml = buildLetterModalMetaHtml(doc);
+                    if (metaHtml) {
+                        letterModalMeta.innerHTML = metaHtml;
+                        letterModalMeta.hidden = false;
+                    } else {
+                        letterModalMeta.innerHTML = '';
+                        letterModalMeta.hidden = true;
+                    }
                     letterModalBody.textContent = doc.letter_html || '';
                     letterModal.showModal();
                 });
