@@ -25,6 +25,15 @@
         #letterModal .modal-meta-label { font-weight: 600; color: #0f172a; margin-right: 0.35rem; }
         #letterModal .modal-meta-plain { margin: 0.35rem 0 0; font-size: 0.9rem; line-height: 1.5; color: #475569; white-space: pre-wrap; }
         #letterModal pre { white-space: pre-wrap; font-family: 'Courier New', ui-monospace, monospace; font-size: 0.82rem; line-height: 1.5; margin: 0; }
+        #letterModal .modal-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: flex-end; }
+        #letterModal .modal-actions button {
+            border: none; padding: 0.5rem 0.85rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.875rem;
+        }
+        #letterModal .modal-actions button:disabled { opacity: 0.6; cursor: not-allowed; }
+        #letterModal #letterModalCopy { background: #2563eb; color: #fff; }
+        #letterModal #letterModalPdf { background: #e2e8f0; color: #0f172a; }
+        #letterModal #letterModalDocx { background: #e2e8f0; color: #0f172a; }
+        #letterModal #letterModalClose { background: #cbd5e1; color: #0f172a; }
     </style>
 </head>
 <body style="background:#0f172a; color:#ffffff; font-family:'Inter',sans-serif; margin:0; padding:0; line-height:1.5;">
@@ -52,9 +61,14 @@
 
     <dialog id="letterModal" style="border:none; padding:0; background:transparent; max-width:100vw;">
         <div class="inner">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; gap:1rem; flex-wrap:wrap;">
                 <h2 id="letterModalTitle" style="margin:0; font-size:1.15rem; color:#0f172a;">Letter</h2>
-                <button type="button" id="letterModalClose" style="background:#e2e8f0; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-weight:600;">Close</button>
+                <div class="modal-actions">
+                    <button type="button" id="letterModalCopy" aria-label="Copy letter and summary to clipboard">Copy</button>
+                    <button type="button" id="letterModalPdf" aria-label="Download as PDF">PDF</button>
+                    <button type="button" id="letterModalDocx" aria-label="Download as Word document">Word</button>
+                    <button type="button" id="letterModalClose">Close</button>
+                </div>
             </div>
             <div id="letterModalMeta" class="modal-meta-wrap" hidden></div>
             <pre id="letterModalBody"></pre>
@@ -69,7 +83,127 @@
         const letterModalBody = document.getElementById('letterModalBody');
         const letterModalTitle = document.getElementById('letterModalTitle');
         const letterModalMeta = document.getElementById('letterModalMeta');
+        const letterModalCopyBtn = document.getElementById('letterModalCopy');
+        const letterModalPdfBtn = document.getElementById('letterModalPdf');
+        const letterModalDocxBtn = document.getElementById('letterModalDocx');
+        let modalJobId = null;
+
         document.getElementById('letterModalClose').addEventListener('click', () => letterModal.close());
+        letterModal.addEventListener('close', () => {
+            modalJobId = null;
+        });
+
+        function getLetterModalDeliverablePlainText() {
+            const parts = [];
+            if (letterModalMeta && !letterModalMeta.hidden) {
+                const t = letterModalMeta.innerText.replace(/\u00a0/g, ' ').trim();
+                if (t) parts.push(t);
+            }
+            const body = (letterModalBody?.textContent || '').trim();
+            if (body) parts.push(body);
+            return parts.join('\n\n----------\n\n');
+        }
+
+        function safeExportBasename(titleText) {
+            const s = String(titleText || 'notice').trim() || 'notice';
+            const cleaned = s.replace(/[^a-zA-Z0-9._-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+            return (cleaned || 'notice').slice(0, 80);
+        }
+
+        async function downloadDashboardBinary(url, body, filename, supabase) {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            if (!token) throw new Error('Sign in required to download.');
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'Download failed.');
+            }
+            const blob = await res.blob();
+            const a = document.createElement('a');
+            const blobUrl = URL.createObjectURL(blob);
+            a.href = blobUrl;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(blobUrl);
+        }
+
+        function wireLetterModalExportHandlers(supabase) {
+            letterModalCopyBtn.addEventListener('click', async () => {
+                const text = getLetterModalDeliverablePlainText();
+                if (!text) return;
+                const prev = letterModalCopyBtn.textContent;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    letterModalCopyBtn.textContent = 'Copied!';
+                    setTimeout(() => { letterModalCopyBtn.textContent = prev; }, 2000);
+                } catch {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.setAttribute('readonly', '');
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try {
+                        document.execCommand('copy');
+                        letterModalCopyBtn.textContent = 'Copied!';
+                        setTimeout(() => { letterModalCopyBtn.textContent = prev; }, 2000);
+                    } catch {
+                        alert('Could not copy to clipboard.');
+                        letterModalCopyBtn.textContent = prev;
+                    }
+                    document.body.removeChild(ta);
+                }
+            });
+
+            letterModalPdfBtn.addEventListener('click', async () => {
+                if (!modalJobId) return;
+                const text = getLetterModalDeliverablePlainText();
+                if (!text) return;
+                const base = safeExportBasename(letterModalTitle.textContent);
+                const filename = `${base}-irs-response.pdf`;
+                letterModalPdfBtn.disabled = true;
+                try {
+                    await downloadDashboardBinary('/.netlify/functions/generate-pdf', {
+                        text,
+                        job_id: modalJobId,
+                        fileName: filename,
+                    }, filename, supabase);
+                } catch (e) {
+                    alert(e.message || 'PDF download failed.');
+                } finally {
+                    letterModalPdfBtn.disabled = false;
+                }
+            });
+
+            letterModalDocxBtn.addEventListener('click', async () => {
+                if (!modalJobId) return;
+                const text = getLetterModalDeliverablePlainText();
+                if (!text) return;
+                const base = safeExportBasename(letterModalTitle.textContent);
+                const filename = `${base}-irs-response.docx`;
+                letterModalDocxBtn.disabled = true;
+                try {
+                    await downloadDashboardBinary('/.netlify/functions/generate-docx', {
+                        text,
+                        job_id: modalJobId,
+                        fileName: filename,
+                    }, filename, supabase);
+                } catch (e) {
+                    alert(e.message || 'Word download failed.');
+                } finally {
+                    letterModalDocxBtn.disabled = false;
+                }
+            });
+        }
 
         function escapeHtml(s) {
             if (s == null) return '';
@@ -187,6 +321,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             const supabase = getSupabase();
+            wireLetterModalExportHandlers(supabase);
             const { data: { session } } = await supabase.auth.getSession();
             const urlParams = new URLSearchParams(window.location.search || '');
             if (urlParams.get('purchase_reconnect') === '1') {
@@ -337,6 +472,7 @@
                     const id = btn.getAttribute('data-id');
                     const doc = byId[id];
                     if (!doc || !doc.letter_html || !String(doc.letter_html).trim()) return;
+                    modalJobId = doc.id;
                     letterModalTitle.textContent = noticeTypeFromJob(doc);
                     const metaHtml = buildLetterModalMetaHtml(doc);
                     if (metaHtml) {
