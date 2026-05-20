@@ -814,7 +814,8 @@ Contact: 1-800-829-8310`;
       const h = { 'Content-Type': 'application/json' };
       if (state.accessToken) {
         h.Authorization = `Bearer ${state.accessToken}`;
-      } else if (state.stripeSessionId) {
+      }
+      if (state.stripeSessionId) {
         h['X-Stripe-Session'] = state.stripeSessionId;
       }
       return h;

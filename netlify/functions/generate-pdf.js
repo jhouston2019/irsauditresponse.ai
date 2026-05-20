@@ -1,10 +1,8 @@
-// Hardening: JWT via authorizeWizardRequest + enforcePaidAuditJob before export; no public.users queries in this function.
+// Hardening: JWT via authorizeWizardRequest + enforcePaidExportAccess before export; no public.users queries in this function.
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 const { authorizeWizardRequest, json, sanitizeString, corsHeaders } = require("./_wizardAuth.js");
 const { getSupabaseAdmin } = require("./_supabase.js");
-const { enforcePaidAuditJob } = require("./_auditJobs.js");
-const { authorizeExportViaStripeSession } = require("./_stripeSessionExportAuth.js");
-
+const { enforcePaidExportAccess } = require("./_auditJobs.js");
 const PAGE_WIDTH = 612;
 const PAGE_HEIGHT = 792;
 const MARGIN = 72;
@@ -75,18 +73,8 @@ exports.handler = async (event) => {
 
   const admin = getSupabaseAdmin();
 
-  if (userId) {
-    const payDenied = await enforcePaidAuditJob(admin, json, event, userId, jobIdTrim);
-    if (payDenied) return payDenied;
-  } else {
-    const stripeAuth = await authorizeExportViaStripeSession(event, jobIdTrim, json);
-    if (!stripeAuth.ok) {
-      return (
-        stripeAuth.response ||
-        json(401, event, { error: "Authentication required" })
-      );
-    }
-  }
+  const payDenied = await enforcePaidExportAccess(admin, json, event, userId, jobIdTrim);
+  if (payDenied) return payDenied;
 
   const text = sanitizeString(body.text || "", 200000);
   const fileName = sanitizeString(body.fileName || "irs-response-letter.pdf", 120) || "irs-response-letter.pdf";
