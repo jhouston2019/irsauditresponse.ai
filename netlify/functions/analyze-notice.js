@@ -206,9 +206,31 @@ async function resolveCanonicalJobId(admin, event, wizardPreview, userId, jobIdT
       log("reject_unknown_job");
       return { errorResponse: json(400, event, { error: "Invalid job_id", code: "invalid_job" }) };
     }
-    if (job.user_id !== userId) {
+    if (job.user_id && job.user_id !== userId) {
       log("reject_user_mismatch");
       return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
+    }
+    if (!job.user_id && userId) {
+      const { data: claimed, error: claimErr } = await admin
+        .from("audit_jobs")
+        .update({ user_id: userId })
+        .eq("id", jobIdTrim)
+        .is("user_id", null)
+        .select("id")
+        .maybeSingle();
+      if (claimErr) {
+        log("claim_orphan_failed", { message: claimErr.message });
+        return { errorResponse: json(500, event, { error: "Could not link job to account", code: "job_claim_failed" }) };
+      }
+      if (!claimed?.id) {
+        const { data: again } = await admin.from("audit_jobs").select("id,user_id").eq("id", jobIdTrim).maybeSingle();
+        if (!again?.id || again.user_id !== userId) {
+          log("reject_user_mismatch_after_claim_race");
+          return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
+        }
+      } else {
+        log("claimed_orphan_job", { resolvedJobId: jobIdTrim });
+      }
     }
     log("resolved", { resolvedJobId: jobIdTrim });
     return { jobId: jobIdTrim };
@@ -237,6 +259,9 @@ async function resolveCanonicalJobId(admin, event, wizardPreview, userId, jobIdT
       if (userId && byStripe.user_id && byStripe.user_id !== userId) {
         return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
       }
+      if (userId && !byStripe.user_id) {
+        await admin.from("audit_jobs").update({ user_id: userId }).eq("id", byStripe.id).is("user_id", null);
+      }
       log("resolved_by_stripe", { resolvedJobId: byStripe.id });
       return { jobId: byStripe.id };
     }
@@ -260,8 +285,26 @@ async function resolveCanonicalJobId(admin, event, wizardPreview, userId, jobIdT
       log("reject_stripe_mismatch");
       return { errorResponse: json(403, event, { error: "Stripe session does not match this job", code: "stripe_mismatch" }) };
     }
-    if (userId && job.user_id && job.user_id !== userId) {
+    if (job.user_id && userId && job.user_id !== userId) {
       return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
+    }
+    if (!job.user_id && userId) {
+      const { data: claimed, error: claimErr } = await admin
+        .from("audit_jobs")
+        .update({ user_id: userId })
+        .eq("id", jobIdTrim)
+        .is("user_id", null)
+        .select("id")
+        .maybeSingle();
+      if (claimErr) {
+        return { errorResponse: json(500, event, { error: "Could not link job to account", code: "job_claim_failed" }) };
+      }
+      if (!claimed?.id) {
+        const { data: again } = await admin.from("audit_jobs").select("id,user_id").eq("id", jobIdTrim).maybeSingle();
+        if (again?.user_id && again.user_id !== userId) {
+          return { errorResponse: json(403, event, { error: "Forbidden", code: "job_forbidden" }) };
+        }
+      }
     }
     log("resolved", { resolvedJobId: jobIdTrim });
     return { jobId: jobIdTrim };

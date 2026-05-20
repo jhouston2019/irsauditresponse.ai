@@ -159,7 +159,6 @@
 
   <div class="shell">
     <div class="progress-wrap">
-      <p id="wizardPreviewBanner" style="font-size:0.875rem;color:var(--muted);margin:0 0 0.75rem;">Walk all four steps in a free preview. On Analysis, the lower half of that screen is blurred until checkout; on Letter, the bottom 60% of the letter text is blurred (not counting the title row or placeholders below). Strategy stays clear. Use step 4 to unlock the full deliverable.</p>
       <div class="progress-steps" id="progressSteps">
         <div class="step-pill active" data-step="1">1. Input</div>
         <div class="step-pill" data-step="2">2. Analysis</div>
@@ -966,7 +965,8 @@ Contact: 1-800-829-8310`;
       const h = { 'Content-Type': 'application/json' };
       if (!useWizardPreview() && state.accessToken) {
         h.Authorization = `Bearer ${state.accessToken}`;
-      } else if (state.stripeSessionId) {
+      }
+      if (state.stripeSessionId) {
         h['X-Stripe-Session'] = state.stripeSessionId;
       }
       return h;
@@ -1468,9 +1468,13 @@ Contact: 1-800-829-8310`;
         btn.textContent = 'Redirecting to checkout…';
         const meta = document.querySelector('meta[name="stripe-price-id"]');
         const priceId = (meta?.getAttribute('content') || '').trim();
+        const headers = { 'Content-Type': 'application/json' };
+        if (state.accessToken) {
+          headers.Authorization = `Bearer ${state.accessToken}`;
+        }
         const res = await fetch('/.netlify/functions/create-checkout-session', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ priceId }),
         });
         const data = await res.json().catch(() => ({}));
