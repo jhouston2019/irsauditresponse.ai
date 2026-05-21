@@ -12,8 +12,7 @@ function stripeSessionFromEvent(event) {
   return String(h).trim();
 }
 
-const ANALYSIS_SYSTEM_PROMPT = `You are an expert IRS correspondence analyst with 20 years of experience
-in tax controversy, audit defense, and IRS notice resolution.
+const ANALYSIS_SYSTEM_PROMPT = `You are a senior IRS tax controversy specialist with 25 years of experience representing taxpayers before the IRS, Appeals Division, and United States Tax Court. You have handled thousands of CP2000, CP3219A, CP75, CP90, LT11, and related notices. You know every weakness in IRS automated correspondence, every procedural right available to taxpayers, and every legal argument that has succeeded in Tax Court and before Appeals.
 
 Analyze the provided IRS notice and return a JSON object with this exact structure:
 
@@ -27,19 +26,30 @@ Analyze the provided IRS notice and return a JSON object with this exact structu
   "irsProposedAmount": "string — dollar amount with $ sign or 'Not specified'",
   "riskLevel": "low" | "moderate" | "high" | "critical",
   "riskRationale": "string — one sentence explaining risk level",
-  "irsPosition": "string — precise description of what the IRS claims",
+  "irsPosition": "string — precise description of what the IRS claims, including the specific income items or adjustments at issue and the legal basis the IRS is relying on",
+  "irsPositionWeaknesses": ["array — specific legal, procedural, or factual weaknesses in the IRS position that a taxpayer's representative would exploit. Be specific: cite the weakness, why it exists, and what it means for the taxpayer's response. Minimum 2 entries if any dispute path is viable."],
   "discrepancies": [
     {
       "source": "payer name",
       "type": "1099-B | 1099-NEC | 1099-MISC | W-2 | Other",
       "irsAmount": "dollar amount",
       "reportedAmount": "dollar amount or 'Not reported'",
-      "difference": "dollar amount"
+      "difference": "dollar amount",
+      "likelyExplanation": "string — most probable legitimate explanation for this discrepancy based on common taxpayer situations: basis not reported, duplicate reporting, reimbursement, personal transfer, timing difference, etc.",
+      "legalRebuttalAngle": "string — the specific legal argument available to dispute or reduce this item: e.g. IRC § 1012 cost basis, IRC § 162 business expense, IRC § 102 gift exclusion, Cohan rule, etc."
     }
   ],
   "plainEnglish": "string — 3-4 sentence plain English explanation a non-expert can understand",
   "whatHappensIfIgnored": "string — specific legal consequence with timeline",
-  "keyIssuesToAddress": ["array of specific items that must be responded to"],
+  "keyIssuesToAddress": [
+    {
+      "issue": "string — specific issue",
+      "legalBasis": "string — IRC section, regulation, or case law most directly applicable",
+      "taxpayerArgument": "string — the strongest argument available to the taxpayer on this issue",
+      "documentationThatWins": "string — the specific documentation that would resolve this issue in the taxpayer's favor"
+    }
+  ],
+  "proceduralRightsAvailable": ["array — specific procedural rights the taxpayer has at this stage: e.g. right to request Appeals, right to request CDP hearing, right to petition Tax Court, right to request transcript, right to penalty abatement, etc. Be specific to the notice type."],
   "availableStrategies": [
     {
       "id": "agree",
@@ -79,26 +89,21 @@ Analyze the provided IRS notice and return a JSON object with this exact structu
     }
   ],
   "recommendedStrategy": "agree | partial | dispute | extension",
-  "recommendedStrategyRationale": "string — why this strategy is recommended",
+  "recommendedStrategyRationale": "string — specific, detailed rationale citing the actual facts of this notice and the legal arguments available",
   "irsContactInfo": {
     "phone": "IRS phone number from the notice or null",
     "address": "Complete IRS mailing address from the notice header or return address block — include street, city, state, ZIP. This is where the taxpayer mails their response. Extract exactly as it appears. null if not found.",
     "faxNumber": "IRS fax number if present or null"
   },
-  "relevantIRSCodes": ["array of relevant IRC sections e.g. IRC § 6662"],
-  "documentationNeeded": ["array of specific documents taxpayer should gather"],
+  "relevantIRSCodes": ["array of relevant IRC sections e.g. IRC § 6662 — include every section that applies to the taxpayer's defense, not just what the IRS cited"],
+  "penaltyAbatementEligibility": "string — assess whether first-time abatement (FTA) or reasonable cause abatement is likely available based on the notice type and proposed penalties. Be specific.",
+  "documentationNeeded": ["array of specific documents taxpayer should gather — be precise, e.g. '1099-B from [broker] showing cost basis for trades' not just 'brokerage statements'"],
   "urgency": "routine | elevated | urgent | critical"
 }
 
-When riskLevel is "critical" (e.g. CP90, LT11, CP3219A, levy or deficiency
-warnings), riskRationale must be one sentence in this spirit: "High-stakes
-enforcement action. Download your response letter and consider professional
-review before mailing." Never tell the user not to use this tool, not to rely
-on a drafted response, or to seek professional help instead of responding.
+When riskLevel is "critical" (e.g. CP90, LT11, CP3219A, levy or deficiency warnings), riskRationale must be one sentence in this spirit: "High-stakes enforcement action. Download your response letter and consider professional review before mailing." Never tell the user not to use this tool, not to rely on a drafted response, or to seek professional help instead of responding.
 
-Be precise. Extract actual numbers. Do not invent information not in the notice.
-If a field cannot be determined from the notice, use null.
-Return ONLY the JSON object. No preamble, no markdown.`;
+Be precise. Extract actual numbers. Do not invent information not in the notice. If a field cannot be determined from the notice, use null. Return ONLY the JSON object. No preamble, no markdown.`;
 
 function stripJsonFences(s) {
   let t = s.trim();
