@@ -256,8 +256,6 @@
       </div>
       <h3 style="margin-top:1.25rem;">What must be addressed in your response</h3>
       <ul class="checklist" id="keyIssues"></ul>
-      <h3 style="margin-top:1.25rem;">Gather these before responding</h3>
-      <ul class="doc-list" id="docNeeded"></ul>
       <div id="criticalNote" style="display:none;margin-top:1rem;padding:0.75rem;border:2px solid #dc2626;border-radius:8px;background:#fef2f2;color:#991b1b;font-weight:600;"></div>
       </div>
       <div class="toolbar">
@@ -307,6 +305,8 @@
         <textarea id="letterEdit" class="letter-edit" style="display:none;"></textarea>
       </div>
       </div>
+      <h3 style="margin-top:1.25rem;">Gather these before mailing</h3>
+      <ul class="doc-list" id="docNeeded"></ul>
       <div>
       <h3 style="margin-top:1.25rem;">Fill placeholders</h3>
       <p style="font-size:0.9rem;color:var(--muted);">Complete your details. [DATE] defaults to today.</p>
@@ -766,6 +766,9 @@ Contact: 1-800-829-8310`;
       });
       syncWizardPreviewBanner();
       applyWizardBlur();
+      if (n === 4) {
+        renderDocumentationGatherList();
+      }
     }
 
     document.querySelectorAll('.step-pill').forEach((pill) => {
@@ -1198,14 +1201,6 @@ Contact: 1-800-829-8310`;
         ki.appendChild(li);
       });
 
-      const dn = $('docNeeded');
-      dn.innerHTML = '';
-      (a.documentationNeeded || []).forEach((x) => {
-        const li = document.createElement('li');
-        li.textContent = x;
-        dn.appendChild(li);
-      });
-
       const cn = $('criticalNote');
       if (risk === 'critical') {
         cn.style.display = 'block';
@@ -1215,6 +1210,19 @@ Contact: 1-800-829-8310`;
         cn.style.display = 'none';
       }
       applyWizardBlur();
+    }
+
+    function renderDocumentationGatherList() {
+      const dn = $('docNeeded');
+      if (!dn) return;
+      dn.innerHTML = '';
+      const a = state.analysis;
+      if (!a) return;
+      (a.documentationNeeded || []).forEach((x) => {
+        const li = document.createElement('li');
+        li.textContent = x;
+        dn.appendChild(li);
+      });
     }
 
     function escapeHtml(s) {
@@ -1355,6 +1363,7 @@ Contact: 1-800-829-8310`;
         el.style.display = 'block';
         el.innerHTML = highlightPlaceholders(state.letterRaw);
       }
+      renderDocumentationGatherList();
       applyWizardBlur();
     }
 
