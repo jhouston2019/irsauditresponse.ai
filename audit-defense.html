@@ -1181,7 +1181,20 @@ Contact: 1-800-829-8310`;
       ki.innerHTML = '';
       (a.keyIssuesToAddress || []).forEach((x) => {
         const li = document.createElement('li');
-        li.textContent = x;
+        if (typeof x === 'string') {
+          li.textContent = x;
+          ki.appendChild(li);
+          return;
+        }
+        if (!x || typeof x !== 'object') return;
+        const issue = typeof x.issue === 'string' ? x.issue.trim() : '';
+        const legalBasis = typeof x.legalBasis === 'string' ? x.legalBasis.trim() : '';
+        if (!issue && !legalBasis) return;
+        if (issue && legalBasis) {
+          li.innerHTML = `<div>${escapeHtml(issue)}</div><div style="font-size:0.85rem;color:var(--muted);margin-top:0.25rem;line-height:1.45;">${escapeHtml(legalBasis)}</div>`;
+        } else {
+          li.textContent = issue || legalBasis;
+        }
         ki.appendChild(li);
       });
 
